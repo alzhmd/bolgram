@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webhook API | SyncPay BD</title>
+  <meta name="description" content="SyncPay BD Webhook API — Stream real-time payment SMS events directly to your endpoint.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f8fafc;--bg-card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#64748b;--primary:#0284c7;--primary-h:#0369a1;--primary-s:#f0f9ff;--primary-b:#bae6fd;--success:#10b981;--danger:#ef4444;--radius:16px;--radius-sm:8px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+    header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+    .nav-wrap{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:800;font-size:18px;}
+    .brand-logo{width:34px;height:34px;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+    .nav-right{display:flex;align-items:center;gap:20px;}
+    .nav-right a{text-decoration:none;color:var(--muted);font-size:13px;font-weight:600;transition:color .15s;}
+    .nav-right a:hover{color:var(--primary);}
+    .btn-back{background:var(--primary-s);border:1px solid var(--primary-b);color:var(--primary)!important;padding:7px 14px;border-radius:var(--radius-sm);}
+    .page-wrap{max-width:1200px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:40px;align-items:start;}
+    @media(max-width:768px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
+    .sidebar{position:sticky;top:80px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+    .sidebar h4{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:12px;padding-left:8px;}
+    .sidebar ul{list-style:none;display:flex;flex-direction:column;gap:2px;}
+    .sidebar ul li a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;}
+    .sidebar ul li a:hover,.sidebar ul li a.active{background:var(--primary-s);color:var(--primary);}
+    .sidebar-divider{height:1px;background:var(--border);margin:10px 0;}
+    .content h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin-bottom:12px;}
+    .content .lead{font-size:16px;color:var(--muted);margin-bottom:36px;line-height:1.7;}
+    .content h2{font-size:20px;font-weight:800;margin:40px 0 14px;padding-top:40px;border-top:1px solid var(--border);}
+    .content h2:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+    .content h3{font-size:15px;font-weight:700;margin:24px 0 10px;}
+    .content p{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.7;}
+    .page-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);background:var(--primary-s);border:1px solid var(--primary-b);padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+    .alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:20px;font-size:13px;}
+    .alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;}
+    .alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#b45309;}
+    .alert-info{background:var(--primary-s);border:1px solid var(--primary-b);color:#0369a1;}
+    .setup-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0;}
+    .setup-step{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;}
+    .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:12px;}
+    .setup-step h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+    .setup-step p{font-size:12px;color:var(--light);margin:0;line-height:1.5;}
+    .param-table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px;}
+    .param-table th{text-align:left;padding:10px 14px;background:#f8fafc;border:1px solid var(--border);color:var(--light);font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
+    .param-table td{padding:11px 14px;border:1px solid var(--border);color:var(--muted);vertical-align:top;}
+    .param-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--text);font-size:12px;}
+    .code-block{background:#0f172a;border-radius:var(--radius-sm);padding:20px 24px;margin:12px 0 20px;overflow-x:auto;}
+    .code-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#e2e8f0;margin:0;}
+    .c-kw{color:#f472b6;}.c-fn{color:#60a5fa;}.c-str{color:#86efac;}.c-cmt{color:#475569;font-style:italic;}.c-num{color:#fb923c;}.c-var{color:#a78bfa;}.c-key{color:#38bdf8;}
+    .event-badge{display:inline-block;background:#0f172a;color:#38bdf8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:6px;margin-bottom:8px;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>SyncPay BD</span></a>
+      <div class="nav-right">
+        <a href="/docs/api">API Docs</a>
+        <a href="/docs/trx-verification">Verification</a>
+        <a href="/docs/webhook" style="color:var(--primary)">Webhook</a>
+        <a href="/" class="btn-back">← Home</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <aside class="sidebar">
+      <h4>Webhook API</h4>
+      <ul>
+        <li><a href="#overview" class="active">Overview</a></li>
+        <li><a href="#setup">Setup</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#payload">Payload Structure</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#retry">Retry Policy</a></li>
+        <div class="sidebar-divider"></div>
+        <li><a href="/docs/api">← API Documentation</a></li>
+        <li><a href="/docs/trx-verification">Transaction Verification</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <div class="page-chip">Webhook API</div>
+      <h1>Webhook API</h1>
+      <p class="lead">Stream real-time payment events directly to your server. No manual polling needed — as soon as an SMS is received, an HTTP POST request is dispatched to your URL.</p>
+
+      <div class="alert alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Using webhooks, your system is notified within <strong>2-5 seconds</strong> of payment detection.</span>
+      </div>
+
+      <h2 id="overview">How Webhooks Work</h2>
+      <p>When our Android agent receives a payment SMS, it notifies the SyncPay server. The server then dispatches an HTTP POST payload to your registered webhook URL. When your server responds with <code>200 OK</code>, delivery is confirmed.</p>
+
+      <h2 id="setup">Webhook Setup</h2>
+      <div class="setup-steps">
+        <div class="setup-step">
+          <div class="setup-step-num">1</div>
+          <div class="setup-step-body">
+            <h4>Register Webhook URL in Dashboard</h4>
+            <p>Navigate to Settings → Webhooks → Add Endpoint and enter your server URL.</p>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="setup-step-num">2</div>
+          <div class="setup-step-body">
+            <h4>Save Secret Key</h4>
+            <p>Obtain your secret key used to verify HMAC signatures on incoming requests.</p>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="setup-step-num">3</div>
+          <div class="setup-step-body">
+            <h4>Create HTTPS Endpoint</h4>
+            <p>Set up an HTTP POST endpoint on your server. Webhooks are dispatched only via HTTPS.</p>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="setup-step-num">4</div>
+          <div class="setup-step-body">
+            <h4>Verify Signature and Return 200</h4>
+            <p>Validate the signature and reply with a <code>200 OK</code> status. Otherwise, retries occur.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="events">Events</h2>
+      <p>Webhooks are triggered for the following events:</p>
+      <table class="param-table">
+        <thead><tr><th>Event</th><th>Trigger Condition</th></tr></thead>
+        <tbody>
+          <tr><td>payment.received</td><td>When a new payment SMS is detected</td></tr>
+          <tr><td>payment.verified</td><td>When a transaction is successfully verified</td></tr>
+          <tr><td>payment.failed</td><td>When transaction verification fails</td></tr>
+          <tr><td>payment.expired</td><td>When an invoice expires</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="payload">Payload Structure</h2>
+      <div class="event-badge">payment.received</div>
+      <div class="code-block"><pre>{
+  <span class="c-key">"event"</span>:      <span class="c-str">"payment.received"</span>,
+  <span class="c-key">"timestamp"</span>:  <span class="c-str">"2024-01-15T12:01:43Z"</span>,
+  <span class="c-key">"data"</span>: {
+    <span class="c-key">"trx_id"</span>:    <span class="c-str">"8J1B2C3K4L"</span>,
+    <span class="c-key">"amount"</span>:    <span class="c-num">500</span>,
+    <span class="c-key">"provider"</span>:  <span class="c-str">"bKash"</span>,
+    <span class="c-key">"sender"</span>:    <span class="c-str">"01XXXXXXXXX"</span>,
+    <span class="c-key">"invoice_id"</span>: <span class="c-str">"inv_9xKj2mPq"</span>
+  },
+  <span class="c-key">"signature"</span>: <span class="c-str">"sha256=abc123..."</span>
+}</pre></div>
+
+      <h2 id="security">Signature Verification</h2>
+      <p>Every webhook request includes an <code>X-SyncPay-Signature</code> header. Verify the HMAC-SHA256 hash of the request body.</p>
+      <div class="code-block"><pre><span class="c-cmt">// PHP — Signature verify</span>
+<span class="c-var">$payload</span>   = <span class="c-fn">file_get_contents</span>(<span class="c-str">'php://input'</span>);
+<span class="c-var">$signature</span> = <span class="c-var">$_SERVER</span>[<span class="c-str">'HTTP_X_SYNCPAY_SIGNATURE'</span>];
+<span class="c-var">$expected</span>  = <span class="c-str">'sha256='</span> . <span class="c-fn">hash_hmac</span>(<span class="c-str">'sha256'</span>, <span class="c-var">$payload</span>, <span class="c-var">$webhookSecret</span>);
+
+<span class="c-kw">if</span> (!<span class="c-fn">hash_equals</span>(<span class="c-var">$expected</span>, <span class="c-var">$signature</span>)) {
+  <span class="c-fn">http_response_code</span>(<span class="c-num">401</span>);
+  <span class="c-kw">exit</span>(<span class="c-str">'Invalid signature'</span>);
+}
+
+<span class="c-cmt">// Valid — process order</span>
+<span class="c-var">$data</span> = <span class="c-fn">json_decode</span>(<span class="c-var">$payload</span>, <span class="c-kw">true</span>);
+<span class="c-fn">http_response_code</span>(<span class="c-num">200</span>);</pre></div>
+
+      <div class="alert alert-warn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Without signature verification, unauthorized parties could send fraudulent webhook requests. Always verify signatures.</span>
+      </div>
+
+      <h2 id="retry">Retry Policy</h2>
+      <p>If your server returns a non-200 code or times out, automated retries are triggered:</p>
+      <table class="param-table">
+        <thead><tr><th>Attempt</th><th>Delay</th></tr></thead>
+        <tbody>
+          <tr><td>1st retry</td><td>30 seconds</td></tr>
+          <tr><td>2nd retry</td><td>5 minutes</td></tr>
+          <tr><td>3rd retry</td><td>30 minutes</td></tr>
+          <tr><td>4th retry</td><td>2 hours</td></tr>
+          <tr><td>Final</td><td>24 hours — then marked abandoned</td></tr>
+        </tbody>
+      </table>
+
+      <div class="alert alert-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Keep your webhook handler idempotent — ensure that processing the same event multiple times will not duplicate customer orders.</span>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

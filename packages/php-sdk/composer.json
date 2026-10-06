@@ -1,0 +1,22 @@
+{
+    "name": "syncpay/mfs-sdk",
+    "description": "Official PHP SDK for SyncPay BD Automated MFS Gateway",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "SyncPay BD Team",
+            "email": "support@syncpaybd.site"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SyncPay\\": ""
+        }
+    }
+}

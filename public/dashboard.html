@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Dashboard | SyncPay BD</title>
+  <meta name="description" content="Production Merchant Dashboard for SyncPay BD Payment Gateway (syncpaybd.site). Real-time MFS telephony stream, transactions ledger, invoices, forwarder devices and API keys.">
+  <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dashboard/css/style.css">
+  <link rel="canonical" href="https://syncpaybd.site/dashboard">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    if (window.location.pathname.endsWith('.html')) {
+      const clean = window.location.pathname.replace(/\.html$/, '') || '/';
+      window.history.replaceState(null, '', (clean === '/index' ? '/' : clean) + window.location.search + window.location.hash);
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="main-sidebar">
+    <div>
+      <!-- Brand -->
+      <div class="sidebar-brand-wrap">
+        <a href="#home" class="sidebar-logo" style="display:flex; align-items:center; padding: 4px 0;">
+          <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height: 42px; width: auto; max-width: 165px; object-fit: contain;">
+        </a>
+      </div>
+
+      <!-- Nav Links Menu -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title" data-i18n="nav.dashboard">Dashboard</div>
+        <a href="#home" class="nav-item active">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          </span>
+          <span data-i18n="nav.dashboard">Dashboard</span>
+        </a>
+
+        <div class="nav-section-title" data-i18n="nav.payments">Payments & Finance</div>
+        <a href="#transactions" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </span>
+          <span data-i18n="nav.transactions">Transactions</span>
+        </a>
+        <a href="#invoices" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+          <span data-i18n="nav.invoices">Invoices</span>
+        </a>
+        <a href="#payment-methods" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1.5"/><circle cx="12" cy="15" r="1.5"/></svg>
+          </span>
+          <span data-i18n="nav.paymentMethods">Payment Channels</span>
+        </a>
+        <a href="#quick-verify" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="m9 11 2 2 4-4"/></svg>
+          </span>
+          <span data-i18n="nav.quickVerify">Quick TrxID Match</span>
+        </a>
+
+        <div class="nav-section-title" data-i18n="nav.devices">Devices & SIM</div>
+        <a href="#devices" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </span>
+          <span data-i18n="nav.devices">Devices</span>
+          <span class="nav-badge" id="sidebar-device-badge" style="display:none;"></span>
+        </a>
+        <a href="#sms-logs" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></svg>
+          </span>
+          <span data-i18n="nav.smsLogs">Live SMS Logs</span>
+        </a>
+
+        <div class="nav-section-title" data-i18n="nav.apiDevelopers">API & Developers</div>
+        <a href="#api-keys" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3"/></svg>
+          </span>
+          <span data-i18n="nav.apiKeys">API Keys</span>
+        </a>
+        <a href="#webhooks" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M18 16.98h4v5h-4z"/><path d="M2 16.98h4v5H2z"/><path d="M10 2h4v5h-4z"/><path d="M12 7v5"/><path d="M5 12v5"/><path d="M19 12v5"/><path d="M5 12h14"/></svg>
+          </span>
+          <span data-i18n="nav.webhooks">Webhooks</span>
+        </a>
+        <a href="#docs" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </span>
+          <span data-i18n="nav.apiDocs">API Docs</span>
+        </a>
+        <a href="#plugins" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </span>
+          <span data-i18n="nav.plugins">Plugins & SDKs</span>
+        </a>
+
+        <div class="nav-section-title" data-i18n="nav.reports">Reports & Audit</div>
+        <a href="#reports" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span data-i18n="nav.reports">Reports</span>
+        </a>
+        <a href="#settings" class="nav-item">
+          <span class="nav-item-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1z"/></svg>
+          </span>
+          <span data-i18n="nav.settings">Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom User Profile & Logout -->
+    <div class="sidebar-footer">
+      <div class="user-snippet" style="cursor:pointer;" onclick="window.payflowApp.openMerchantAuthModal()" title="Merchant Account Info">
+        <div class="user-avatar" id="sidebar-user-avatar">--</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebar-user-name">Merchant Account</div>
+          <div class="user-role mono" id="sidebar-user-role" style="font-size:10px;">--</div>
+        </div>
+      </div>
+      <button class="btn-icon-sm" title="Logout" onclick="window.payflowApp.doLogout()" style="background:none; border:none; cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+    <!-- Live Demo Mode Notification Banner -->
+    <div id="demo-mode-strip" style="display:none; background:linear-gradient(90deg, #015fb2 0%, #0284c7 100%); color:#ffffff; padding:8px 18px; font-size:12.5px; font-weight:600; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.15); z-index:100;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="background:rgba(255,255,255,0.22); color:#fff; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:4px; letter-spacing:0.04em;">DEMO MERCHANT</span>
+        <span>You are exploring the full merchant portal with simulated transactions, live telephony logs, API keys, and device pairings.</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="/login" style="background:#ffffff; color:#015fb2; padding:4px 12px; border-radius:4px; text-decoration:none; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+          <span>Get Started</span>
+          <span>→</span>
+        </a>
+        <button type="button" onclick="document.getElementById('demo-mode-strip').style.display='none'" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px; line-height:1; opacity:0.8;" title="Dismiss">✕</button>
+      </div>
+    </div>
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-mobile-toggle" id="btn-mobile-sidebar" aria-label="Toggle navigation drawer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="search-container">
+          <span class="search-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input type="text" id="global-search-input" class="search-input" placeholder="Search TrxID, Invoice, Customer... (Cmd + K)" data-i18n-placeholder="topbar.searchPlaceholder">
+          <span class="search-shortcut mono">⌘K</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Language Switcher -->
+        <button class="btn-topbar-tool" id="btn-lang-toggle" title="Switch Language">
+          English (EN)
+        </button>
+
+        <!-- Theme Switcher -->
+        <button class="btn-topbar-tool btn-icon-tool" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
+          <span id="theme-toggle-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </span>
+        </button>
+
+        <!-- Notification Bell -->
+        <button class="btn-topbar-tool btn-icon-tool" onclick="window.payflowApp.showToast('System operational. All Android daemons online.', 'info')" title="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notification-badge-dot"></span>
+        </button>
+
+        <!-- Landing Page Quick Link -->
+        <a href="/" class="btn-topbar-tool" style="text-decoration: none;" title="Go to Public Landing Page">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span style="font-size: 12px;">Website</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Content Workspace -->
+    <main class="content-body">
+      
+      <!-- =====================================
+           VIEW 1: DASHBOARD HOME
+           ===================================== -->
+      <section id="view-home" class="view-panel active">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">
+              <span data-i18n="home.greeting">Good morning</span>, <span id="home-greeting-name">Merchant</span>
+            </h1>
+            <p class="view-subtitle" data-i18n="home.subtitle">
+              Here's what's happening with your payments today.
+            </p>
+          </div>
+
+          <!-- Date Filters -->
+          <div class="date-filters-group">
+            <button class="btn-date-filter active" onclick="window.payflowApp.showToast('Today filter applied', 'info')" data-i18n="home.filter.today">Today</button>
+            <button class="btn-date-filter" onclick="window.payflowApp.showToast('7 Days filter applied', 'info')" data-i18n="home.filter.7d">7 Days</button>
+            <button class="btn-date-filter" onclick="window.payflowApp.showToast('30 Days filter applied', 'info')" data-i18n="home.filter.30d">30 Days</button>
+            <button class="btn-date-filter" onclick="window.payflowApp.showToast('90 Days filter applied', 'info')" data-i18n="home.filter.90d">90 Days</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="kpi-cards-grid" id="home-kpi-cards">
+          <!-- Injected dynamically via components.renderStatCard -->
+        </div>
+
+        <!-- Charts Grid (Revenue Overview + Donut) -->
+        <div class="charts-grid">
+          <!-- Left: Revenue Overview Line Chart -->
+          <div class="card-panel">
+            <div class="card-panel-header">
+              <h3 class="card-panel-title" data-i18n="home.chart.revenueOverview">Revenue Overview</h3>
+              <div class="chart-filters">
+                <button class="chart-pill-btn active" data-metric="revenue" onclick="window.payflowApp.setChartMetric('revenue')" data-i18n="home.chart.filterRevenue">Revenue</button>
+                <button class="chart-pill-btn" data-metric="transactions" onclick="window.payflowApp.setChartMetric('transactions')" data-i18n="home.chart.filterTransactions">Transactions</button>
+                <button class="chart-pill-btn" data-metric="successful" onclick="window.payflowApp.setChartMetric('successful')" data-i18n="home.chart.filterSuccessful">Successful</button>
+                <button class="chart-pill-btn" data-metric="failed" onclick="window.payflowApp.setChartMetric('failed')" data-i18n="home.chart.filterFailed">Failed</button>
+              </div>
+            </div>
+            <div id="revenue-chart-slot">
+              <!-- SVG Line chart rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Right: Payment Methods Breakdown Donut -->
+          <div class="card-panel">
+            <div class="card-panel-header">
+              <h3 class="card-panel-title" data-i18n="home.paymentMethods">Payment Methods</h3>
+            </div>
+            <div id="payment-methods-slot">
+              <!-- Donut rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions Panel -->
+        <div class="table-card">
+          <div class="table-toolbar">
+            <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary);" data-i18n="home.recentTransactions">
+              Recent Transactions
+            </h3>
+            <a href="#transactions" class="btn btn-secondary-action" style="font-size: 12px; text-decoration: none;" data-i18n="home.viewAll">
+              View All →
+            </a>
+          </div>
+          <div id="recent-transactions-slot">
+            <!-- Transactions table rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================
+           VIEW 2: ALL TRANSACTIONS
+           ===================================== -->
+      <section id="view-transactions" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="nav.transactions">Transactions</h1>
+            <p class="view-subtitle">Real-time parsed SMS events from connected telephony forwarders.</p>
+          </div>
+          <button class="btn btn-secondary-action" onclick="window.payflowApp.exportTransactionsCSV()" style="display:inline-flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export CSV</span>
+          </button>
+        </div>
+
+        <div class="table-card">
+          <div id="transactions-view-slot"></div>
+        </div>
+      </section>
+
+      <!-- =====================================
+           VIEW 3: INVOICES
+           ===================================== -->
+      <section id="view-invoices" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="invoices.title">Payment Invoices</h1>
+            <p class="view-subtitle" data-i18n="invoices.subtitle">Manage hosted checkout links and tracked customer orders.</p>
+          </div>
+          <button class="btn btn-primary-action" onclick="window.payflowApp.openCreateInvoiceModal()" data-i18n="invoices.createBtn">
+            + Create Invoice
+          </button>
+        </div>
+
+        <div class="table-card">
+          <div id="invoices-view-slot"></div>
+        </div>
+      </section>
+
+      <!-- =====================================
+           VIEW 4: DEVICES
+           ===================================== -->
+      <section id="view-devices" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="devices.title">Connected Devices</h1>
+            <p class="view-subtitle" data-i18n="devices.subtitle">Android telephony forwarders listening for incoming bKash & Nagad SMS.</p>
+          </div>
+          <button class="btn btn-primary-action" onclick="window.payflowApp.openAddDeviceModal()" style="display:inline-flex; align-items:center; gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>📱 Connect Device / QR Code</span>
+          </button>
+        </div>
+
+        <div id="devices-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW 5: API KEYS
+           ===================================== -->
+      <section id="view-api-keys" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="apiKeys.title">API Authentication Keys</h1>
+            <p class="view-subtitle" data-i18n="apiKeys.subtitle">Manage cryptographic keys used to sign backend REST API requests.</p>
+          </div>
+        </div>
+
+        <div id="apikeys-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW 6: WEBHOOKS
+           ===================================== -->
+      <section id="view-webhooks" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="webhooks.title">Webhooks & Endpoints</h1>
+            <p class="view-subtitle" data-i18n="webhooks.subtitle">Real-time HTTP push notifications sent to your server on payment events.</p>
+          </div>
+        </div>
+
+        <div id="webhooks-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW 7: API DOCUMENTATION
+           ===================================== -->
+      <section id="view-docs" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="docs.title">Developer API Reference</h1>
+            <p class="view-subtitle" data-i18n="docs.subtitle">Integration guides and cURL samples for invoice creation and payment verification.</p>
+          </div>
+        </div>
+
+        <div id="docs-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW 8: REPORTS
+           ===================================== -->
+      <section id="view-reports" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="reports.title">Financial & Operational Reports</h1>
+            <p class="view-subtitle" data-i18n="reports.subtitle">Export audit-ready ledgers and device metrics.</p>
+          </div>
+        </div>
+
+        <div id="reports-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW: PAYMENT CHANNELS & INSTRUCTIONS
+           ===================================== -->
+      <section id="view-payment-methods" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Payment Channels</h1>
+            <p class="view-subtitle">Active payment channels will be available on the checkout page.</p>
+          </div>
+          <div class="view-actions" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="/checkout" target="_blank" class="btn btn-secondary-action" style="display:inline-flex; align-items:center; gap:5px; text-decoration:none;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span>Preview</span>
+            </a>
+            <button class="btn btn-primary-action" onclick="window.payflowApp.openAddPaymentMethodModal()" style="display:inline-flex; align-items:center; gap:5px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ Add Channel</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="payment-methods-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW 9: SETTINGS
+           ===================================== -->
+      <section id="view-settings" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title" data-i18n="settings.title">Merchant Settings</h1>
+            <p class="view-subtitle" data-i18n="settings.subtitle">Configure business profile, payment rules, and security preferences.</p>
+          </div>
+        </div>
+
+        <div id="settings-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW: QUICK TRXID VERIFY
+           ===================================== -->
+      <section id="view-quick-verify" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Quick TrxID Match & Verify</h1>
+            <p class="view-subtitle">Instant SMS verification and 1-click manual reconciliation by TrxID or invoice.</p>
+          </div>
+        </div>
+        <div id="quick-verify-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW: LIVE SMS LOGS
+           ===================================== -->
+      <section id="view-sms-logs" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Live SMS Logs & Forwarder Stream</h1>
+            <p class="view-subtitle">Real-time incoming telephony SMS logs captured by your forwarder devices.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn btn-secondary-action" onclick="window.payflowApp.renderSmsLogsView()" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+        <div id="sms-logs-view-slot"></div>
+      </section>
+
+      <!-- =====================================
+           VIEW: PLUGINS & SDKS
+           ===================================== -->
+      <section id="view-plugins" class="view-panel">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">Plugins & Developer SDKs</h1>
+            <p class="view-subtitle">Ready-made integration packages for WordPress/WooCommerce, WHMCS, PHP, and Node.js.</p>
+          </div>
+        </div>
+        <div id="plugins-view-slot"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =====================================
+       DRAWER: TRANSACTION DETAILS
+       ===================================== -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="window.payflowApp.closeDrawer()"></div>
+  <aside class="drawer" id="details-drawer">
+    <div class="drawer-header">
+      <h3 style="font-size: 16px; font-weight: 800;" data-i18n="drawer.trxDetails">Transaction Details</h3>
+      <button class="modal-close-btn" onclick="window.payflowApp.closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body-content">
+      <!-- Injected dynamically via viewTransaction -->
+    </div>
+  </aside>
+
+  <!-- =====================================
+       MODAL 1: CREATE INVOICE
+       ===================================== -->
+  <div class="modal-overlay" id="modal-create-invoice">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="invoices.modal.title">Create Payment Invoice</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" data-i18n="invoices.modal.cusName">Customer Name</label>
+          <input type="text" id="inv-cus-name" class="form-control" placeholder="e.g. Rahim Ahmed" value="Rahim Ahmed">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="invoices.modal.amount">Amount (BDT)</label>
+          <input type="number" id="inv-amount" class="form-control mono" placeholder="1500" value="1500">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="invoices.modal.redirect">Success Redirect URL</label>
+          <input type="text" id="inv-redirect" class="form-control mono" value="https://merchant.example.com/success">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
+        <button class="btn btn-primary-action" onclick="window.payflowApp.submitCreateInvoice()" data-i18n="invoices.modal.submit">
+          Generate Invoice Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 2: CREATE API KEY
+       ===================================== -->
+  <div class="modal-overlay" id="modal-create-apikey">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="apiKeys.modal.title">Generate New API Key</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" data-i18n="apiKeys.modal.name">Key Identifier Name</label>
+          <input type="text" id="key-name-input" class="form-control" placeholder="e.g. Production Web Backend">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="apiKeys.modal.env">Target Environment</label>
+          <select id="key-env-select" class="form-control">
+            <option value="sandbox">Sandbox (Testing)</option>
+            <option value="production">Production (Live)</option>
+          </select>
+        </div>
+        <div style="background:var(--warning-bg); border:1px solid var(--warning-border); border-radius:8px; padding:12px; font-size:12px; color:var(--warning); margin-top:14px;" data-i18n="apiKeys.modal.warning">
+          Save this secret key immediately after creation. For security, you will not be able to view it again.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
+        <button class="btn btn-primary-action" onclick="window.payflowApp.submitCreateApiKey()" data-i18n="apiKeys.modal.submit">
+          Generate Key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 2B: API KEY GENERATED SUCCESS
+       ===================================== -->
+  <div class="modal-overlay" id="modal-key-success">
+    <div class="modal-dialog" style="max-width:520px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(16,185,129,0.15); color:#10b981;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <h3 class="modal-title" style="margin:0;">API Key Generated Successfully</h3>
+        </div>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--text-secondary); margin-top:0;">
+          Your unique API Secret Key has been generated. Use this key to authenticate checkout requests from your website or WooCommerce store.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted);">Key Identifier</label>
+          <div id="modal-success-key-name" style="font-weight:700; color:var(--text-primary); font-size:13px;">Production Web Backend</div>
+        </div>
+
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label" style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted);">Secret API Key (Save Now)</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="modal-success-key-input" class="form-control mono" readonly style="font-size:13px; font-weight:600; background:var(--bg-subtle); color:var(--primary); cursor:pointer;" onclick="this.select()">
+            <button class="btn btn-primary-action" id="btn-copy-generated-key" onclick="window.payflowApp.copyGeneratedKey()" style="white-space:nowrap; display:inline-flex; align-items:center; gap:5px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy Key</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:12px; font-size:12px; color:var(--text-primary); margin-top:14px; line-height:1.5;">
+          <strong>Website Connection Note:</strong> Send this key in the <code>syncpay-api-key</code> HTTP header or as <code>Authorization: Bearer &lt;key&gt;</code> when calling <code>/v1/payment/create</code>.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary-action" style="width:100%; justify-content:center;" onclick="window.payflowApp.closeAllModals()">
+          I Have Copied & Saved My Key
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 3: ADD DEVICE
+       ===================================== -->
+  <!-- =====================================
+       MODAL 3: ADD / CONNECT DEVICE (WITH INSTANT QR)
+       ===================================== -->
+  <div class="modal-overlay" id="modal-add-device">
+    <div class="modal-dialog" style="max-width:500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Connect & Pair Forwarder (QR Code)</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Modal Tabs -->
+        <div class="modal-tabs">
+          <button class="modal-tab-btn active" id="tab-btn-qr" onclick="window.payflowApp.switchDeviceModalTab('qr')">
+            📱 Instant QR Code
+          </button>
+          <button class="modal-tab-btn" id="tab-btn-form" onclick="window.payflowApp.switchDeviceModalTab('form')">
+            ➕ Register New Device
+          </button>
+        </div>
+
+        <!-- TAB 1: INSTANT QR PAIRING -->
+        <div id="device-tab-qr-content" style="text-align:center;">
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:10px;">
+            Open <strong>SyncPay Forwarder</strong> on your Android device and scan the QR code below.
+          </p>
+
+          <div class="qr-code-box" id="add-device-qr-image-slot">
+            <div style="padding:40px; color:var(--text-muted);">Loading QR Code...</div>
+          </div>
+
+          <div style="text-align:left; margin-top:14px;">
+            <div class="pairing-info-row">
+              <div>
+                <div class="pairing-info-label">Server URL</div>
+                <div class="pairing-info-val" id="add-qr-server-url">https://syncpaybd.site</div>
+              </div>
+              <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-server-url').innerText)">
+                Copy
+              </button>
+            </div>
+
+            <div class="pairing-info-row">
+              <div>
+                <div class="pairing-info-label">Pairing Token</div>
+                <div class="pairing-info-val" id="add-qr-device-token">--</div>
+              </div>
+              <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-device-token').innerText)">
+                Copy
+              </button>
+            </div>
+
+            <div class="pairing-info-row">
+              <div>
+                <div class="pairing-info-label">Merchant ID</div>
+                <div class="pairing-info-val" id="add-qr-merchant-id">--</div>
+              </div>
+              <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('add-qr-merchant-id').innerText)">
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div style="background:var(--primary-subtle); border:1px solid var(--primary-border); border-radius:8px; padding:10px; font-size:12px; color:var(--primary); text-align:left; margin-top:12px;">
+            ⚡ Need the Android app? Click <strong>"1-Click APK Download"</strong> at the top to install it on your device.
+          </div>
+        </div>
+
+        <!-- TAB 2: REGISTER NEW DEVICE -->
+        <div id="device-tab-form-content" style="display:none;">
+          <div class="form-group">
+            <label class="form-label">Device Label / Model</label>
+            <input type="text" id="dev-name-input" class="form-control" placeholder="e.g. Samsung Galaxy S23 (bKash)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">SIM Phone Number</label>
+            <input type="text" id="dev-sim-input" class="form-control mono" placeholder="01712345678">
+          </div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
+            Registering generates a unique pairing token and persistent QR code for this phone.
+          </p>
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary-action" style="width:100%;" onclick="window.payflowApp.submitAddDevice()">
+              Register Device & Show QR →
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 4: DEVICE QR & PAIRING
+       ===================================== -->
+  <div class="modal-overlay" id="modal-device-qr">
+    <div class="modal-dialog" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="device-qr-title">Connect Android Forwarder</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+          Open <strong>SyncPay Forwarder</strong> on your phone and scan the QR code below, or paste the pairing token manually.
+        </p>
+
+        <!-- QR Image Slot -->
+        <div class="qr-code-box" id="device-qr-image-slot">
+          <div style="padding:40px; color:var(--text-muted);">Loading QR Code...</div>
+        </div>
+
+        <div style="text-align:left; margin-top:16px;">
+          <div class="pairing-info-row">
+            <div>
+              <div class="pairing-info-label">Server URL</div>
+              <div class="pairing-info-val" id="qr-server-url">http://localhost:4000</div>
+            </div>
+            <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-server-url').innerText)">
+              Copy
+            </button>
+          </div>
+
+          <div class="pairing-info-row">
+            <div>
+              <div class="pairing-info-label">Pairing Token</div>
+              <div class="pairing-info-val" id="qr-device-token">--</div>
+            </div>
+            <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-device-token').innerText)">
+              Copy
+            </button>
+          </div>
+
+          <div class="pairing-info-row">
+            <div>
+              <div class="pairing-info-label">Merchant ID</div>
+              <div class="pairing-info-val" id="qr-merchant-id">--</div>
+            </div>
+            <button class="btn btn-secondary-action" style="padding:4px 8px; font-size:11px;" onclick="window.payflowApp.copyText(document.getElementById('qr-merchant-id').innerText)">
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <div style="background:var(--primary-subtle); border:1px solid var(--primary-border); border-radius:8px; padding:12px; font-size:12px; color:var(--primary); text-align:left; margin-top:14px;">
+          💡 <strong>Tip:</strong> After connecting, grant SMS Read permissions and select Battery Optimization 'Don't Optimize' to guarantee uninterrupted background forwarding.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary-action" onclick="window.payflowApp.closeAllModals()">
+          Done / Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 5: CONNECT WEBSITE
+       ===================================== -->
+  <div class="modal-overlay" id="modal-connect-website">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Connect New Website</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Store / Website Name</label>
+          <input type="text" id="site-name-input" class="form-control" placeholder="e.g. My Gadget Shop">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website Domain URL</label>
+          <input type="text" id="site-domain-input" class="form-control mono" placeholder="https://gadgetshop.com.bd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Platform Engine</label>
+          <select id="site-platform-select" class="form-control">
+            <option value="WooCommerce">WooCommerce (WordPress Plugin)</option>
+            <option value="WordPress">WordPress</option>
+            <option value="Next.js / React">Next.js / React Web App</option>
+            <option value="Laravel">Laravel PHP</option>
+            <option value="Custom API">Custom Backend API</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Webhook Callback URL (Optional)</label>
+          <input type="text" id="site-webhook-input" class="form-control mono" placeholder="https://gadgetshop.com.bd/api/webhook">
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
+          Your current plan allows connecting up to 5 production websites.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
+        <button class="btn btn-primary-action" onclick="window.payflowApp.submitConnectWebsite()">
+          Connect Website
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 6: MERCHANT AUTH & CREDENTIALS
+       ===================================== -->
+  <div class="modal-overlay" id="modal-merchant-auth">
+    <div class="modal-dialog" style="max-width:520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Merchant Credentials & Registration</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--bg-subtle); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:20px;">
+          <h4 style="font-size:13px; font-weight:800; color:var(--text-primary); margin-bottom:10px;">Active Merchant Credentials</h4>
+          <div class="detail-item" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="detail-key">Merchant ID:</span>
+            <span class="mono" id="modal-active-merchant-id" style="font-weight:700; color:var(--primary);">--</span>
+          </div>
+          <div class="detail-item" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="detail-key">Business Name:</span>
+            <span id="modal-active-business-name" style="font-weight:600;">--</span>
+          </div>
+          <div class="detail-item" style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span class="detail-key">Merchant Email:</span>
+            <span class="mono" id="modal-active-email">--</span>
+          </div>
+          <div class="detail-item" style="display:flex; justify-content:space-between;">
+            <span class="detail-key">Live API Key:</span>
+            <span class="mono" id="modal-active-api-key" style="font-size:11px; color:var(--text-secondary);">--</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border-subtle); padding-top:16px;">
+          <h4 style="font-size:14px; font-weight:800; color:var(--text-primary); margin-bottom:8px;">New Merchant Registration</h4>
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+            Create a new merchant account for your business.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Business Name</label>
+            <input type="text" id="reg-biz-name" class="form-control" placeholder="e.g. Dhaka Electronics">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner Name</label>
+            <input type="text" id="reg-owner-name" class="form-control" placeholder="e.g. Jahidul Islam">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="reg-email" class="form-control" placeholder="merchant@dhakaelectronics.com">
+          </div>
+          <button class="btn btn-primary-action" style="width:100%; margin-top:10px;" onclick="window.payflowApp.submitRegisterMerchant()">
+            + Register Merchant Account
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================
+       MODAL 7: ADD / EDIT PAYMENT CHANNEL
+       ===================================== -->
+  <div class="modal-overlay" id="modal-payment-method">
+    <div class="modal-dialog" style="max-width:540px; max-height:90vh; overflow-y:auto;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="pm-modal-title">Payment Channel</h3>
+        <button class="modal-close-btn" onclick="window.payflowApp.closeAllModals()">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 20px;">
+        <input type="hidden" id="pm-id">
+
+        <!-- Primary Essential Fields -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Channel Type *</label>
+            <select id="pm-provider-type" class="form-control" onchange="window.payflowApp.onPaymentTypeChange()">
+              <optgroup label="Supported MFS">
+                <option value="bkash">bKash</option>
+                <option value="nagad">Nagad</option>
+                <option value="rocket">Rocket</option>
+                <option value="upay">Upay</option>
+                <option value="tap">TAP</option>
+                <option value="islamic_wallet">Islamic Wallet</option>
+                <option value="mcash">mCash</option>
+                <option value="mycash">MYCash</option>
+                <option value="ok_wallet">OK Wallet</option>
+                <option value="meghna_pay">Meghna Pay</option>
+                <option value="telecash">TeleCash</option>
+                <option value="surecash">SureCash</option>
+                <option value="rupali_surecash">Rupali SureCash</option>
+              </optgroup>
+              <optgroup label="Other Channels">
+                <option value="bank">Bank Transfer</option>
+                <option value="binance">Binance Pay (Crypto)</option>
+                <option value="custom">Custom Channel</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" id="pm-label-number">Account / Number *</label>
+            <input type="text" id="pm-account-number" class="form-control mono" placeholder="01580397069">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 100px; gap:12px; margin-bottom:12px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Display Title *</label>
+            <input type="text" id="pm-title" class="form-control" placeholder="e.g. bKash">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Account Name</label>
+            <input type="text" id="pm-account-name" class="form-control" placeholder="bdshop24">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Status</label>
+            <select id="pm-is-active" class="form-control">
+              <option value="1">Active</option>
+              <option value="0">Off</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Bank Specific Fields (Conditional) -->
+        <div id="pm-bank-fields" style="display:none; background:var(--bg-subtle, #f8fafc); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:12px;">
+          <div style="font-weight:700; font-size:12px; color:var(--text-primary); margin-bottom:8px;">Bank Information</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Bank Name *</label>
+              <input type="text" id="pm-bank-name" class="form-control" placeholder="City Bank PLC">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Branch Name</label>
+              <input type="text" id="pm-branch-name" class="form-control" placeholder="Gulshan Branch">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Routing Number</label>
+            <input type="text" id="pm-routing-number" class="form-control mono" placeholder="225271983">
+          </div>
+        </div>
+
+        <!-- Collapsible Advanced Settings -->
+        <details id="pm-advanced-details" style="border:1px solid var(--border); border-radius:10px; background:var(--bg-subtle, #f8fafc); overflow:hidden; margin-top:4px;">
+          <summary style="padding:10px 14px; font-size:12.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:space-between; list-style:none; user-select:none;">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              Advanced Customization (Instructions, QR, Labels)
+            </span>
+            <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">Customize ▾</span>
+          </summary>
+          <div style="padding:12px 14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:12px; background:var(--bg-surface, #ffffff);">
+            
+            <!-- Instructions -->
+            <div>
+              <label class="form-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span>Payment Instructions</span>
+                <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">1 step per line</span>
+              </label>
+              <textarea id="pm-instructions" class="form-control" rows="3" style="font-family:inherit; font-size:12px; line-height:1.4;" placeholder="1. Open App&#10;2. Pay: {ACCOUNT_NUMBER}&#10;3. Amount: ৳{AMOUNT}"></textarea>
+              <div style="display:flex; align-items:center; gap:5px; margin-top:5px; flex-wrap:wrap;">
+                <span style="font-size:10.5px; color:var(--text-muted);">Insert:</span>
+                <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:10.5px;" onclick="window.payflowApp.insertInstructionVar('{ACCOUNT_NUMBER}')">{ACCOUNT_NUMBER}</button>
+                <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:10.5px;" onclick="window.payflowApp.insertInstructionVar('{AMOUNT}')">{AMOUNT}</button>
+                <button type="button" class="btn btn-secondary-action" style="padding:1px 6px; font-size:10.5px;" onclick="window.payflowApp.insertInstructionVar('{REF}')">{REF}</button>
+              </div>
+            </div>
+
+            <!-- Custom QR Upload -->
+            <div style="border:1px dashed var(--border); border-radius:8px; padding:10px; background:var(--bg-subtle, #f8fafc);">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:12px; font-weight:600; color:var(--text-primary);">Custom QR Code</span>
+                <button type="button" id="pm-remove-qr-btn" class="btn btn-secondary-action" style="padding:1px 6px; font-size:10.5px; display:none; color:var(--danger, #ef4444);" onclick="window.payflowApp.clearQrUpload()">
+                  ✕ Remove
+                </button>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <div id="pm-qr-preview-box" style="width:52px; height:52px; border-radius:6px; border:1px solid var(--border); background:#ffffff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                  <img id="pm-qr-preview-img" src="" alt="QR Preview" style="width:100%; height:100%; object-fit:contain; display:none;">
+                  <div id="pm-qr-placeholder" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--text-muted);"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span style="font-size:8.5px; color:var(--text-muted);">No QR</span>
+                  </div>
+                </div>
+                <div style="flex:1;">
+                  <input type="file" id="pm-qr-file-input" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="window.payflowApp.handleQrFileUpload(event)">
+                  <input type="hidden" id="pm-qr-url">
+                  <button type="button" class="btn btn-secondary-action" style="font-size:11.5px; padding:4px 10px;" onclick="document.getElementById('pm-qr-file-input').click()">
+                    Upload Custom QR
+                  </button>
+                  <div id="pm-qr-status-text" style="font-size:10.5px; color:var(--text-muted); margin-top:3px;">
+                    Auto-generates dynamic QR if none uploaded.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual Badge & Brand Color -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>
+                <label class="form-label" style="font-size:11px;">Badge</label>
+                <input type="text" id="pm-badge" class="form-control" style="font-size:12px; padding:6px 10px;" placeholder="MFS">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:11px;">Brand Color</label>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <input type="color" id="pm-theme-color" value="#E2136E" style="width:32px; height:32px; border:none; border-radius:6px; cursor:pointer; background:none;">
+                  <input type="text" id="pm-theme-color-text" class="form-control mono" value="#E2136E" style="flex:1; font-size:12px; padding:6px 8px;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Form Labels -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div>
+                <label class="form-label" style="font-size:11px;">Sender Input Label</label>
+                <input type="text" id="pm-sender-label" class="form-control" style="font-size:12px; padding:6px 10px;" placeholder="Your Number *">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:11px;">TrxID Input Label</label>
+                <input type="text" id="pm-trx-label" class="form-control" style="font-size:12px; padding:6px 10px;" placeholder="TrxID *">
+              </div>
+            </div>
+
+          </div>
+        </details>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; padding:12px 20px;">
+        <button class="btn btn-secondary-action" onclick="window.payflowApp.closeAllModals()">Cancel</button>
+        <button class="btn btn-primary-action" onclick="window.payflowApp.savePaymentMethod()">
+          Save Channel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Stack -->
+  <div class="toast-container" id="toast-stack"></div>
+
+  <!-- Scripts: Native ES Modules -->
+  <script type="module" src="/dashboard/js/app.js?v=1.2.4"></script>
+</body>
+</html>
