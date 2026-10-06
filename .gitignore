@@ -59,3 +59,4 @@ coverage/
 # Temp
 *.tmp
 *.bak
+.card-key

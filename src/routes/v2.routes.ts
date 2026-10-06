@@ -6,6 +6,8 @@ import { CryptoUtil } from '../utils/crypto.js';
 import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, passwordProblem, toLatinDigits } from '../utils/validate.js';
 import { OtpError, sendOtp, verifyOtp } from '../services/otp.service.js';
 import { startOfTehranDay, startOfTehranMonth, tehranParts } from '../parsers/ir/jalali.js';
+import { BANKS, bankByBin } from '../parsers/ir/registry.js';
+import { encryptCard, decryptCard } from '../utils/card-crypto.js';
 
 /**
  * Panel API v2 (used by /panel). Auth: store handle + mobile + password, SMS.IR codes,
@@ -26,6 +28,8 @@ export function ensurePanelSchema() {
   d.exec(`CREATE TABLE IF NOT EXISTS auth_failures (key TEXT PRIMARY KEY, count INTEGER NOT NULL, locked_until INTEGER, updated_at INTEGER NOT NULL)`);
   const icols = new Set((d.prepare('PRAGMA table_info(invoices)').all() as any[]).map((c) => c.name));
   for (const [n, t] of [['channel', 'TEXT'], ['note', 'TEXT']]) if (!icols.has(n)) d.exec(`ALTER TABLE invoices ADD COLUMN ${n} ${t}`);
+  const pcols = new Set((d.prepare('PRAGMA table_info(payment_methods)').all() as any[]).map((c) => c.name));
+  for (const [n, t] of [['last4', 'TEXT'], ['card_hash', 'TEXT']]) if (!pcols.has(n)) d.exec(`ALTER TABLE payment_methods ADD COLUMN ${n} ${t}`);
 }
 
 // ------------------------------------------------------------- lockout
@@ -89,6 +93,17 @@ const HANDLE_MSG: Record<string, string> = {
   underscore: '«__» پشت‌سرهم و _ در انتها مجاز نیست',
   reserved: 'این نام رزرو شده است',
 };
+
+function luhnOk(num: string) {
+  if (!/^\d{16}$/.test(num)) return false;
+  let sum = 0;
+  for (let i = 0; i < 16; i++) {
+    let n = Number(num[15 - i]);
+    if (i % 2) { n *= 2; if (n > 9) n -= 9; }
+    sum += n;
+  }
+  return sum % 10 === 0;
+}
 
 function utcSql(d: Date) {
   return d.toISOString().slice(0, 19).replace('T', ' ');
@@ -278,10 +293,50 @@ export async function v2Routes(app: FastifyInstance) {
         bank: r.provider_type,
         title: r.title,
         holder: r.account_name,
-        last4: String(r.account_number || '').replace(/\D/g, '').slice(-4),
+        last4: r.last4 || String(decryptCard(r.account_number) || '').replace(/\D/g, '').slice(-4),
         active: !!r.is_active,
       })),
     };
+  });
+
+  app.get('/api/v2/banks', async () => ({ success: true, data: BANKS.map((b) => ({ id: b.id, name: b.nameFa, short: b.shortFa, color: b.color, bins: b.bins })) }));
+
+  app.post('/api/v2/cards', async (req, reply) => {
+    const m = (req as any).merchant;
+    const b = (req.body || {}) as any;
+    const num = toLatinDigits(String(b.number ?? '')).replace(/\D/g, '');
+    const errors: Record<string, string> = {};
+    if (!luhnOk(num)) errors.number = 'شماره کارت معتبر نیست (۱۶ رقم)';
+    const holder = typeof b.holder === 'string' ? b.holder.trim().replace(/ي/g, 'ی').replace(/ك/g, 'ک').slice(0, 80) : '';
+    if (holder.length < 3) errors.holder = 'نام صاحب کارت را وارد کنید';
+    if (Object.keys(errors).length) return reply.status(422).send({ success: false, error: 'validation', errors });
+    const bank = bankByBin(num);
+    if (!bank) return reply.status(422).send({ success: false, error: 'validation', errors: { number: 'بانک این کارت شناخته نشد' } });
+    const hash = crypto.createHmac('sha256', 'card-index').update(num).digest('hex');
+    if (db().prepare('SELECT 1 FROM payment_methods WHERE merchant_id = ? AND card_hash = ?').get(m.id, hash)) {
+      return reply.status(409).send({ success: false, error: 'validation', errors: { number: 'این کارت قبلاً ثبت شده است' } });
+    }
+    const info = BANKS.find((x) => x.id === bank)!;
+    const id = 'pm_' + crypto.randomBytes(8).toString('hex');
+    const label = typeof b.label === 'string' && b.label.trim() ? b.label.trim().slice(0, 40) : info.nameFa;
+    db()
+      .prepare(`INSERT INTO payment_methods (id, merchant_id, provider_type, title, account_number, account_name, bank_name, theme_color, is_active, last4, card_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`)
+      .run(id, m.id, bank, label, encryptCard(num), holder, info.nameFa, info.color, num.slice(-4), hash);
+    return reply.status(201).send({ success: true, data: { id, bank, title: label, holder, last4: num.slice(-4), active: true } });
+  });
+
+  app.patch('/api/v2/cards/:id', async (req, reply) => {
+    const m = (req as any).merchant;
+    const active = (req.body as any)?.active === true ? 1 : 0;
+    const r = db().prepare('UPDATE payment_methods SET is_active = ? WHERE id = ? AND merchant_id = ?').run(active, (req.params as any).id, m.id);
+    return Number(r.changes) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' });
+  });
+
+  app.delete('/api/v2/cards/:id', async (req, reply) => {
+    const m = (req as any).merchant;
+    const r = db().prepare('DELETE FROM payment_methods WHERE id = ? AND merchant_id = ?').run((req.params as any).id, m.id);
+    return Number(r.changes) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' });
   });
 
   app.post('/api/v2/invoices', async (req, reply) => {
@@ -324,6 +379,9 @@ export async function v2Routes(app: FastifyInstance) {
     const recent = d
       .prepare(`SELECT id, provider, amount, is_verified, order_id, created_at FROM transactions WHERE merchant_id = ? ORDER BY created_at DESC LIMIT 8`)
       .all(m.id) as any[];
+    const recentInvoices = d
+      .prepare(`SELECT id, expected_amount, status, channel, note, created_at, expires_at FROM invoices WHERE merchant_id = ? ORDER BY created_at DESC LIMIT 6`)
+      .all(m.id) as any[];
     const hourly = new Array(24).fill(0);
     for (const r of d.prepare(`SELECT amount, created_at FROM transactions WHERE merchant_id = ? AND is_verified = 1 AND created_at >= ?`).all(m.id, dayStart) as any[]) {
       hourly[tehranParts(new Date(String(r.created_at).replace(' ', 'T') + 'Z')).hour] += Number(r.amount);
@@ -347,6 +405,15 @@ export async function v2Routes(app: FastifyInstance) {
       },
       hourly_rial: hourly,
       recent: recent.map((r) => ({ id: r.id, bank: r.provider, amount_rial: Number(r.amount), matched: !!r.is_verified, invoice_id: r.order_id, at: iso(r.created_at) })),
+      recent_invoices: recentInvoices.map((r) => ({
+        id: r.id,
+        amount_rial: Number(r.expected_amount),
+        status: r.status === 'PENDING' && r.expires_at < nowIso ? 'EXPIRED' : r.status,
+        channel: r.channel,
+        note: r.note,
+        at: iso(r.created_at),
+      })),
+      webhook_configured: !!m.webhook_url,
       onboarding: {
         card: Number(cards.n) > 0,
         device: Number(dev.n || 0) > 0,

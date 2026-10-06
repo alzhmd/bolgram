@@ -24,13 +24,14 @@ export class OtpError extends Error {
   }
 }
 
-async function sendViaSmsIr(mobile: string, code: string): Promise<void> {
+/** Returns true when the SMS was only simulated (no SMS.IR template configured, development). */
+async function sendViaSmsIr(mobile: string, code: string): Promise<boolean> {
   const apiKey = process.env.SMSIR_API_KEY;
   const templateId = process.env.SMSIR_TEMPLATE_ID;
   if (!apiKey || !templateId) {
     if (process.env.NODE_ENV === 'production') throw new OtpError('sms_unavailable', 'ارسال پیامک در حال حاضر ممکن نیست');
     console.log(`[otp:dev] ${mobile} → ${code}`);
-    return;
+    return true;
   }
   const res = await fetch('https://api.sms.ir/v1/send/verify', {
     method: 'POST',
@@ -47,6 +48,7 @@ async function sendViaSmsIr(mobile: string, code: string): Promise<void> {
     console.warn('[otp] SMS.IR error', res?.status, json?.message);
     throw new OtpError('sms_failed', 'ارسال پیامک ناموفق بود. چند لحظه بعد دوباره تلاش کنید');
   }
+  return false;
 }
 
 /** Sends a code unless one was sent in the last 2 minutes. `deliver=false` keeps timing identical without sending (unknown numbers). */
@@ -63,8 +65,8 @@ export async function sendOtp(mobile: string, purpose: string, deliver = true): 
   db()
     .prepare(`INSERT INTO otp_codes (id, mobile, purpose, code_hash, attempts, expires_at, created_at) VALUES (?, ?, ?, ?, 0, ?, ?)`)
     .run(crypto.randomUUID(), mobile, purpose, hash(mobile, purpose, code), Date.now() + OTP_TTL_SECONDS * 1000, Date.now());
-  if (deliver) await sendViaSmsIr(mobile, code);
-  const devCode = process.env.NODE_ENV !== 'production' && !process.env.SMSIR_API_KEY && deliver ? code : undefined;
+  const simulated = deliver ? await sendViaSmsIr(mobile, code) : false;
+  const devCode = simulated && process.env.NODE_ENV !== 'production' ? code : undefined;
   return { resendIn: OTP_RESEND_SECONDS, devCode };
 }
 

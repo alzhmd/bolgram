@@ -173,6 +173,10 @@ const sendIndex = async (_req: any, reply: any) => {
   return reply.type('text/html; charset=utf-8').send(content);
 };
 
+// Merchant panel (single page app with hash routes)
+server.get('/panel', async (_req, reply) => reply.redirect('/panel/'));
+server.get('/panel/', async (_req, reply) => reply.type('text/html; charset=utf-8').header('Cache-Control', 'no-cache').sendFile('panel/index.html'));
+
 server.get('/', sendIndex);
 server.get('/index', sendIndex);
 server.get('/index.html', sendIndex);

@@ -1,3 +1,4 @@
+import { decryptCard } from '../utils/card-crypto.js';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import QRCode from 'qrcode';
 import { z } from 'zod';
@@ -427,7 +428,8 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     try {
       const { dbService } = await import('../db/database.js');
       // Never fall back to demo cards: a customer must only ever see the merchant's own cards.
-      const methods = dbService.getPaymentMethods(merchantId, true);
+      // Card numbers are stored encrypted; the paying customer needs the real number.
+      const methods = dbService.getPaymentMethods(merchantId, true).map((m: any) => ({ ...m, account_number: decryptCard(m.account_number) || '' }));
       return reply.send({ success: true, methods });
     } catch (e: any) {
       return reply.status(500).send({ success: false, error: e.message });

@@ -4,7 +4,8 @@
  * All prices are SAMPLE values until confirmed (shown with a «نمونه» label on the site).
  */
 window.SITE = {
-  BRAND: 'بلگرام',
+  SERVICE_NAME: 'بولگرام',
+  BRAND: 'بولگرام', // alias of SERVICE_NAME
   BRAND_EN: 'Bolgram',
   DOMAIN: 'bolgram.ir',
   API_BASE: 'https://api.bolgram.ir',          // used in code samples
