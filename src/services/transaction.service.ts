@@ -3,6 +3,7 @@ import { InvoiceRepository, InvoiceEntity } from '../db/repositories/invoice.rep
 import { MfsParser, ParsedMfsResult } from '../parsers/mfs.parser.js';
 import { WebhookService } from './webhook.service.js';
 import { TelegramService } from './telegram.service.js';
+import { notifyHeldDeposit, notifyPayment } from '../bot/bot.service.js';
 
 export interface IngestSmsParams {
   merchantId: string;
@@ -100,6 +101,7 @@ export class TransactionService {
           invoiceId: invoice.invoice_id,
           customerName: invoice.customer_name,
         }).catch(() => {});
+        notifyPayment(params.merchantId, { amount: parsed.amount, provider: parsed.provider, invoiceId: invoice.invoice_id, trxId: parsed.trxId, customerName: invoice.customer_name }).catch(() => {});
 
         // Dispatch HMAC Webhook if URL configured
         if (invoice.webhook_url) {
@@ -124,7 +126,7 @@ export class TransactionService {
     if (!matchedInvoice) {
       // Unknown deposit (no open invoice with this amount) or untrusted sender: hold for manual review.
       const { dbService } = await import('../db/database.js');
-      dbService.insertUnmatchedSms({
+      const held = dbService.insertUnmatchedSms({
         deviceId: params.deviceId,
         provider: parsed.provider,
         sender: params.sender,
@@ -133,6 +135,7 @@ export class TransactionService {
         rawSms: params.sms,
         status: parsed.trusted === false ? 'SUSPICIOUS' : 'UNMATCHED',
       });
+      if (held) notifyHeldDeposit(params.merchantId, { amount: parsed.amount, provider: parsed.provider, suspicious: parsed.trusted === false }).catch(() => {});
     }
 
     return {

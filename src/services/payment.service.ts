@@ -2,6 +2,7 @@ import { InvoiceRepository, InvoiceEntity } from '../db/repositories/invoice.rep
 import { TransactionRepository } from '../db/repositories/transaction.repository.js';
 import { WebhookService } from './webhook.service.js';
 import { TelegramService } from './telegram.service.js';
+import { notifyPayment } from '../bot/bot.service.js';
 
 export interface CreateInvoiceParams {
   merchantId: string;
@@ -120,12 +121,15 @@ export class PaymentService {
       // Asynchronous Telegram payment alert notification
       TelegramService.sendPaymentAlert({
         amount: params.amount,
-        provider: lockResult.transaction?.provider || 'bKash',
+        provider: lockResult.transaction?.provider || 'card',
         trxId: params.trxId,
         invoiceId: invoice?.invoice_id || params.invoiceId || 'N/A',
         customerName: invoice?.customer_name,
         merchantName: invoice?.merchant_id,
       }).catch((err) => console.warn('[TelegramAlert] Skipped:', err.message));
+      if (invoice?.merchant_id) {
+        notifyPayment(invoice.merchant_id, { amount: params.amount, provider: lockResult.transaction?.provider || 'card', invoiceId: invoice.invoice_id, trxId: params.trxId, customerName: invoice.customer_name }).catch(() => {});
+      }
     }
 
     return {

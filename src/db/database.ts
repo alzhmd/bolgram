@@ -1530,10 +1530,11 @@ export class DatabaseService {
 
   public insertUnmatchedSms(p: { deviceId: string; provider: string; sender?: string; amount: number; trxId: string; rawSms: string; status: 'UNMATCHED' | 'SUSPICIOUS' }) {
     const exists = this.db.prepare('SELECT 1 FROM unmatched_sms WHERE trx_id = ? AND device_id = ?').get(p.trxId, p.deviceId);
-    if (exists) return;
+    if (exists) return false;
     this.db
       .prepare('INSERT INTO unmatched_sms (id, device_id, provider, sender, amount, trx_id, raw_sms, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .run('sms_' + crypto.randomUUID(), p.deviceId, p.provider, p.sender || null, p.amount, p.trxId, p.rawSms, p.status);
+    return true;
   }
 
   public getUnmatchedSmsForMerchant(merchantId: string, limit = 100) {

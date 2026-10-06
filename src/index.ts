@@ -1,4 +1,7 @@
 import { v2Routes } from './routes/v2.routes.js';
+import { botRoutes } from './bot/bot.routes.js';
+import { startBots } from './bot/bot.service.js';
+import { botsFromEnv } from './bot/api.js';
 import { jwtSecret } from './utils/crypto.js';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -133,6 +136,7 @@ await server.register(paymentRoutes);
 await server.register(merchantRoutes);
 await server.register(adminRoutes);
 await server.register(v2Routes);
+await server.register(botRoutes);
 
 // Health check
 server.get('/health', async (req) => {
@@ -233,6 +237,8 @@ const HOST = '0.0.0.0';
 if (!process.env.VERCEL) {
   try {
     await server.listen({ port: PORT, host: HOST });
+    // Merchant bot (Telegram rich messages / Bale text). Never blocks startup if the Bot API is unreachable.
+    void startBots(botsFromEnv()).catch((e) => console.warn('[bot] start failed:', e.message));
     console.log(`\n======================================================`);
     console.log(`🚀 Bolgram Engine running at: http://localhost:${PORT}`);
     console.log(`📊 Dashboard & Checkout UI:       http://localhost:${PORT}/`);
