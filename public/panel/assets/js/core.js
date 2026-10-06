@@ -198,3 +198,48 @@ export const ICON = {
   chev: I('<path d="M15 6l-6 6 6 6"/>'), inbox: I('<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v7a1 1 0 01-1 1H3a1 1 0 01-1-1v-7z"/>'), bolt: I('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'), clock: I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
   alert: I('<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>'), check: I('<path d="M5 12l5 5 9-10"/>'), lock: I('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>'),
 };
+
+// ---------- session context & permissions (filled by app.js from /api/v2/me)
+export const CTX = { me: null, actor: null, roles: {}, permNames: {} };
+/** True when the signed-in person (owner or team member) has the permission. */
+export const can = (perm) => !!CTX.actor?.perms?.includes(perm);
+
+/** Page-scoped CSS, injected once: useStyle('invoices', `.inv-x{...}`). */
+export function useStyle(id, css) {
+  if (document.getElementById(`css-${id}`)) return;
+  const s = document.createElement('style');
+  s.id = `css-${id}`;
+  s.textContent = css;
+  document.head.appendChild(s);
+}
+
+/** Reads a File as a data URL (uploads go to the API as JSON). */
+export const fileToDataUrl = (file) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); });
+
+/** Authenticated file download (CSV exports etc.). */
+export async function download(path, filename) {
+  const res = await fetch(path, { headers: session.get() ? { Authorization: `Bearer ${session.get()}` } : {} });
+  if (!res.ok) throw new ApiError(res.status, await res.json().catch(() => ({})));
+  const url = URL.createObjectURL(await res.blob());
+  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/** <table> markup inside a horizontal scroller; cols: [{ key, title, render?(row), cls? }]. */
+export function table(cols, rows, { empty = 'موردی پیدا نشد', rowAttr } = {}) {
+  if (!rows.length) return `<div class="empty" style="padding:24px">${esc(empty)}</div>`;
+  return `<div class="table-wrap"><table class="table"><thead><tr>${cols.map((c) => `<th scope="col" class="${c.cls || ''}">${c.title}</th>`).join('')}</tr></thead><tbody>${rows
+    .map((r) => `<tr ${rowAttr ? rowAttr(r) : ''}>${cols.map((c) => `<td class="${c.cls || ''}" data-label="${esc(c.title)}">${c.render ? c.render(r) : esc(r[c.key] ?? '')}</td>`).join('')}</tr>`)
+    .join('')}</tbody></table></div>`;
+}
+
+/** Pager for { page, per_page, total } responses. */
+export function pager(p, onGo) {
+  const pages = Math.max(1, Math.ceil((p.total || 0) / (p.per_page || 20)));
+  const wrap = document.createElement('div');
+  wrap.className = 'pager';
+  wrap.innerHTML = `<button class="btn btn-sm" type="button" data-p="${p.page - 1}" ${p.page <= 1 ? 'disabled' : ''}>قبلی</button><span class="muted">صفحهٔ ${toFa(p.page)} از ${toFa(pages)} · ${faNum(p.total || 0)} مورد</span><button class="btn btn-sm" type="button" data-p="${p.page + 1}" ${p.page >= pages ? 'disabled' : ''}>بعدی</button>`;
+  wrap.addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b && !b.disabled) onGo(Number(b.dataset.p)); });
+  return wrap;
+}

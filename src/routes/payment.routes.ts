@@ -1,4 +1,5 @@
 import { decryptCard } from '../utils/card-crypto.js';
+import { GuardError } from '../services/events.js';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import QRCode from 'qrcode';
 import { z } from 'zod';
@@ -115,7 +116,9 @@ export async function paymentRoutes(fastify: FastifyInstance) {
 
     const { cus_name, cus_email, amount, metadata, redirect_url, cancel_url, webhook_url } = parseResult.data;
 
-    const { invoice } = await PaymentService.createInvoice({
+    let created;
+    try {
+      created = await PaymentService.createInvoice({
       merchantId: authResult.merchant.id,
       customerName: cus_name,
       customerEmail: cus_email || undefined,
@@ -125,6 +128,11 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       cancelUrl: cancel_url || undefined,
       webhookUrl: webhook_url || undefined,
     });
+    } catch (e) {
+      if (e instanceof GuardError) return reply.status(e.status).send({ status: false, code: e.code, message: e.message });
+      throw e;
+    }
+    const { invoice } = created;
 
     const payment_url = await resolvePaymentUrl(request, authResult.merchant.id, invoice.invoice_id);
 
@@ -284,12 +292,19 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
 
     const { customer_name, expected_amount, provider } = parseResult.data;
-    const { invoice } = await PaymentService.createInvoice({
+    let created;
+    try {
+      created = await PaymentService.createInvoice({
       merchantId: auth.merchant.id,
       customerName: customer_name,
       amount: expected_amount,
       redirectUrl: 'http://localhost:4000/success',
     });
+    } catch (e) {
+      if (e instanceof GuardError) return reply.status(e.status).send({ success: false, error: e.code, message: e.message });
+      throw e;
+    }
+    const { invoice } = created;
 
     const checkout_url = await resolvePaymentUrl(request, auth.merchant.id, invoice.invoice_id);
 
@@ -297,7 +312,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       success: true,
       invoice_id: invoice.invoice_id,
       expected_amount: invoice.amount,
-      provider: provider || 'bKash',
+      provider: provider || 'card',
       expires_at: invoice.expires_at,
       checkout_url,
     });

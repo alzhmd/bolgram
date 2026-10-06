@@ -6,6 +6,9 @@ import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, pass
 import { OtpError, sendOtp, verifyOtp } from '../services/otp.service.js';
 import { startOfTehranDay, startOfTehranMonth, tehranParts } from '../parsers/ir/jalali.js';
 import { BANKS } from '../parsers/ir/registry.js';
+import { ensureAccessSchema, resolveActor, requirePerm, ROLES, PERMS, type Actor } from '../services/access.js';
+import { V2_FEATURES } from './v2/index.js';
+import { checkAdminCredentials } from '../middleware/auth.js';
 import { createLinkCode, ensureBotSchema, listLinks, setLinkNotify, unlink, botConfigured, botUsername } from '../bot/bot.service.js';
 import { StoreError, addCard, createInvoice, deleteCard, listCards, setCardActive } from '../services/store.service.js';
 
@@ -18,7 +21,7 @@ const db = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 export function ensurePanelSchema() {
   const d = db();
   const cols = new Set((d.prepare('PRAGMA table_info(merchants)').all() as any[]).map((c) => c.name));
-  for (const [n, t] of [['handle', 'TEXT'], ['mobile_verified', 'INTEGER DEFAULT 0'], ['token_version', 'INTEGER DEFAULT 0']]) {
+  for (const [n, t] of [['handle', 'TEXT'], ['mobile_verified', 'INTEGER DEFAULT 0'], ['token_version', 'INTEGER DEFAULT 0'], ['referred_by', 'TEXT']]) {
     if (!cols.has(n)) d.exec(`ALTER TABLE merchants ADD COLUMN ${n} ${t}`);
   }
   d.exec(`CREATE UNIQUE INDEX IF NOT EXISTS ux_merchants_handle ON merchants(handle) WHERE handle IS NOT NULL`);
@@ -61,10 +64,19 @@ const PUBLIC = new Set([
   '/api/v2/auth/otp/send',
   '/api/v2/auth/otp/verify',
   '/api/v2/auth/reset',
+  '/api/v2/team/invite/check',
+  '/api/v2/team/invite/accept',
 ]);
 
-function issueToken(m: any, remember: boolean) {
-  return CryptoUtil.signJwt({ id: m.id, role: 'merchant', tv: Number(m.token_version || 0) }, undefined, remember ? 24 * 30 : 12);
+function issueToken(m: any, remember: boolean, staff?: any) {
+  const claims: any = { id: m.id, role: 'merchant', tv: Number(m.token_version || 0) };
+  if (staff) Object.assign(claims, { staff: staff.id, stv: Number(staff.token_version || 0) });
+  return CryptoUtil.signJwt(claims, undefined, remember ? 24 * 30 : 12);
+}
+export { issueToken };
+
+function publicActor(a: Actor) {
+  return { kind: a.kind, id: a.id, name: a.name, role: a.role, role_name: ROLES[a.role], perms: a.perms };
 }
 
 function handleTaken(h: string) {
@@ -101,6 +113,30 @@ function utcSql(d: Date) {
 export async function v2Routes(app: FastifyInstance) {
   ensurePanelSchema();
   ensureBotSchema();
+  ensureAccessSchema();
+
+  // Owner (platform admin) API: same admin JWT as /api/v1/admin.
+  app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
+    const path = req.url.split('?')[0];
+    if (!path.startsWith('/api/owner/') || path === '/api/owner/auth/login') return;
+    const h = req.headers.authorization;
+    const v = typeof h === 'string' && h.startsWith('Bearer ') ? CryptoUtil.verifyJwt(h.slice(7)) : { valid: false as const };
+    if (!v.valid || (v as any).payload?.role !== 'admin') return reply.status(401).send({ success: false, error: 'session_expired' });
+    (req as any).admin = (v as any).payload;
+  });
+  app.post('/api/owner/auth/login', async (req, reply) => {
+    const b = (req.body || {}) as any;
+    const key = `owner-login:${req.ip}`;
+    const wait = lockedFor(key);
+    if (wait) return reply.status(429).send({ success: false, error: 'locked', retry_after: wait });
+    const email = normalizeEmail(b.email) || '';
+    if (!checkAdminCredentials(email, String(b.password ?? ''))) {
+      const lock = fail(key, 5);
+      return reply.status(lock ? 429 : 401).send({ success: false, error: lock ? 'locked' : 'invalid_credentials', retry_after: lock || undefined });
+    }
+    clearFail(key);
+    return { success: true, token: CryptoUtil.signJwt({ id: 'admin', email, role: 'admin' }, undefined, 12) };
+  });
 
   app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
     const path = req.url.split('?')[0];
@@ -110,8 +146,11 @@ export async function v2Routes(app: FastifyInstance) {
     const p: any = (v as any).payload;
     if (!v.valid || p?.role !== 'merchant') return reply.status(401).send({ success: false, error: 'session_expired' });
     const m = db().prepare('SELECT * FROM merchants WHERE id = ?').get(p.id) as any;
-    if (!m || Number(m.token_version || 0) !== Number(p.tv || 0)) return reply.status(401).send({ success: false, error: 'session_expired' });
+    if (!m || Number(m.token_version || 0) !== Number(p.tv || 0) || m.status === 'SUSPENDED') return reply.status(401).send({ success: false, error: 'session_expired' });
+    const actor = resolveActor(m, p);
+    if (!actor) return reply.status(401).send({ success: false, error: 'session_expired' });
     (req as any).merchant = m;
+    (req as any).actor = actor;
   });
 
   // ---------------------------------------------------------- auth
@@ -170,6 +209,9 @@ export async function v2Routes(app: FastifyInstance) {
       password_hash: CryptoUtil.hashPassword(b.password),
     });
     db().prepare('UPDATE merchants SET handle = ?, mobile_verified = 0, token_version = 0 WHERE id = ?').run(handle, id);
+    const ref = typeof b.ref === 'string' ? b.ref.trim().toLowerCase().slice(0, 40) : '';
+    const referrer = ref ? (db().prepare('SELECT id FROM merchants WHERE handle = ? AND id != ?').get(ref, id) as any) : null;
+    if (referrer) db().prepare('UPDATE merchants SET referred_by = ? WHERE id = ?').run(referrer.id, id);
     const m = db().prepare('SELECT * FROM merchants WHERE id = ?').get(id) as any;
     return reply.status(201).send({
       success: true,
@@ -192,6 +234,17 @@ export async function v2Routes(app: FastifyInstance) {
       ? db().prepare('SELECT * FROM merchants WHERE phone = ? ORDER BY created_at LIMIT 1').get(mobile)
       : db().prepare('SELECT * FROM merchants WHERE lower(email) = ? ORDER BY created_at LIMIT 1').get(email)) as any;
     const ok = !!m?.password_hash && typeof b.password === 'string' && CryptoUtil.verifyPassword(b.password, m.password_hash);
+    if (!ok && mobile && typeof b.password === 'string') {
+      // Team members sign in with their own mobile + password and act on the store that invited them.
+      const staff = (db().prepare(`SELECT * FROM team_members WHERE mobile = ? AND status = 'active' AND password_hash IS NOT NULL ORDER BY last_login_at DESC`).all(mobile) as any[])
+        .find((t) => CryptoUtil.verifyPassword(b.password, t.password_hash));
+      const store = staff ? (db().prepare('SELECT * FROM merchants WHERE id = ?').get(staff.merchant_id) as any) : null;
+      if (staff && store && store.status !== 'SUSPENDED') {
+        clearFail(key);
+        db().prepare('UPDATE team_members SET last_login_at = ? WHERE id = ?').run(Date.now(), staff.id);
+        return { success: true, token: issueToken(store, b.remember === true, staff), merchant: publicMe(store) };
+      }
+    }
     if (!ok || m.status === 'SUSPENDED') {
       if (!m?.password_hash) CryptoUtil.hashPassword('timing-equaliser');
       const lock = Math.max(fail(key, 5), fail(ipKey, 20));
@@ -271,18 +324,18 @@ export async function v2Routes(app: FastifyInstance) {
 
   // ---------------------------------------------------------- panel
 
-  app.get('/api/v2/me', async (req) => ({ success: true, merchant: publicMe((req as any).merchant) }));
+  app.get('/api/v2/me', async (req) => ({ success: true, merchant: publicMe((req as any).merchant), actor: publicActor((req as any).actor), roles: ROLES, perm_names: PERMS }));
 
   const storeReply = (reply: FastifyReply, e: unknown) => {
     if (e instanceof StoreError) return reply.status(e.status).send({ success: false, error: e.code, message: e.message, ...(e.errors ? { errors: e.errors } : {}) });
     throw e;
   };
 
-  app.get('/api/v2/cards', async (req) => ({ success: true, data: listCards((req as any).merchant.id) }));
+  app.get('/api/v2/cards', { preHandler: requirePerm('cards:read') }, async (req) => ({ success: true, data: listCards((req as any).merchant.id) }));
 
   app.get('/api/v2/banks', async () => ({ success: true, data: BANKS.map((b) => ({ id: b.id, name: b.nameFa, short: b.shortFa, color: b.color, bins: b.bins })) }));
 
-  app.post('/api/v2/cards', async (req, reply) => {
+  app.post('/api/v2/cards', { preHandler: requirePerm('cards:manage') }, async (req, reply) => {
     try {
       return reply.status(201).send({ success: true, data: addCard((req as any).merchant.id, (req.body || {}) as any) });
     } catch (e) {
@@ -290,13 +343,13 @@ export async function v2Routes(app: FastifyInstance) {
     }
   });
 
-  app.patch('/api/v2/cards/:id', async (req, reply) =>
+  app.patch('/api/v2/cards/:id', { preHandler: requirePerm('cards:manage') }, async (req, reply) =>
     setCardActive((req as any).merchant.id, (req.params as any).id, (req.body as any)?.active === true) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
-  app.delete('/api/v2/cards/:id', async (req, reply) =>
+  app.delete('/api/v2/cards/:id', { preHandler: requirePerm('cards:manage') }, async (req, reply) =>
     deleteCard((req as any).merchant.id, (req.params as any).id) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
-  app.post('/api/v2/invoices', async (req, reply) => {
+  app.post('/api/v2/invoices', { preHandler: requirePerm('invoices:create') }, async (req, reply) => {
     try {
       return reply.status(201).send({ success: true, invoice: await createInvoice((req as any).merchant.id, (req.body || {}) as any) });
     } catch (e) {
@@ -310,10 +363,10 @@ export async function v2Routes(app: FastifyInstance) {
     platforms: (['telegram', 'bale'] as const).map((p) => ({ platform: p, configured: botConfigured(p), username: botUsername(p) })),
     links: listLinks((req as any).merchant.id),
   }));
-  app.post('/api/v2/bots/link-code', async (req) => ({ success: true, ...createLinkCode((req as any).merchant.id) }));
-  app.patch('/api/v2/bots/:id', async (req, reply) =>
+  app.post('/api/v2/bots/link-code', { preHandler: requirePerm('bots:manage') }, async (req) => ({ success: true, ...createLinkCode((req as any).merchant.id) }));
+  app.patch('/api/v2/bots/:id', { preHandler: requirePerm('bots:manage') }, async (req, reply) =>
     setLinkNotify((req as any).merchant.id, (req.params as any).id, (req.body as any)?.notify === true) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
-  app.delete('/api/v2/bots/:id', async (req, reply) =>
+  app.delete('/api/v2/bots/:id', { preHandler: requirePerm('bots:manage') }, async (req, reply) =>
     unlink((req as any).merchant.id, (req.params as any).id) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
   app.get('/api/v2/dashboard', async (req) => {
@@ -378,4 +431,6 @@ export async function v2Routes(app: FastifyInstance) {
       },
     };
   });
+
+  for (const feature of V2_FEATURES) await app.register(feature);
 }

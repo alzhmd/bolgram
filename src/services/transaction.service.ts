@@ -4,6 +4,7 @@ import { MfsParser, ParsedMfsResult } from '../parsers/mfs.parser.js';
 import { WebhookService } from './webhook.service.js';
 import { TelegramService } from './telegram.service.js';
 import { notifyHeldDeposit, notifyPayment } from '../bot/bot.service.js';
+import { events } from './events.js';
 
 export interface IngestSmsParams {
   merchantId: string;
@@ -101,6 +102,7 @@ export class TransactionService {
           invoiceId: invoice.invoice_id,
           customerName: invoice.customer_name,
         }).catch(() => {});
+        events.emit('invoice.paid', { merchantId: params.merchantId, invoiceId: invoice.invoice_id, amount: parsed.amount, provider: parsed.provider, trxId: parsed.trxId, source: 'auto' });
         notifyPayment(params.merchantId, { amount: parsed.amount, provider: parsed.provider, invoiceId: invoice.invoice_id, trxId: parsed.trxId, customerName: invoice.customer_name }).catch(() => {});
 
         // Dispatch HMAC Webhook if URL configured
@@ -135,6 +137,7 @@ export class TransactionService {
         rawSms: params.sms,
         status: parsed.trusted === false ? 'SUSPICIOUS' : 'UNMATCHED',
       });
+      if (held) events.emit('deposit.held', { merchantId: params.merchantId, amount: parsed.amount, provider: parsed.provider, suspicious: parsed.trusted === false });
       if (held) notifyHeldDeposit(params.merchantId, { amount: parsed.amount, provider: parsed.provider, suspicious: parsed.trusted === false }).catch(() => {});
     }
 

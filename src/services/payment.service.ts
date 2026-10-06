@@ -3,6 +3,7 @@ import { TransactionRepository } from '../db/repositories/transaction.repository
 import { WebhookService } from './webhook.service.js';
 import { TelegramService } from './telegram.service.js';
 import { notifyPayment } from '../bot/bot.service.js';
+import { events } from './events.js';
 
 export interface CreateInvoiceParams {
   merchantId: string;
@@ -128,6 +129,7 @@ export class PaymentService {
         merchantName: invoice?.merchant_id,
       }).catch((err) => console.warn('[TelegramAlert] Skipped:', err.message));
       if (invoice?.merchant_id) {
+        events.emit('invoice.paid', { merchantId: invoice.merchant_id, invoiceId: invoice.invoice_id, amount: params.amount, provider: lockResult.transaction?.provider || 'card', trxId: params.trxId, source: 'customer' });
         notifyPayment(invoice.merchant_id, { amount: params.amount, provider: lockResult.transaction?.provider || 'card', invoiceId: invoice.invoice_id, trxId: params.trxId, customerName: invoice.customer_name }).catch(() => {});
       }
     }

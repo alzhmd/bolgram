@@ -1,5 +1,5 @@
 import { CONFIG, api, toFa, faNum, toman, rialToToman, jDate, jTime, ago, esc, emptyState, ICON, $, $$, tehranHour } from '../core.js';
-import { quickInvoice, quickStart, setNotifications } from '../shell.js';
+import { quickInvoice, quickStart } from '../shell.js';
 
 const BANK = { mellat: 'ملت', melli: 'ملی', saderat: 'صادرات', tejarat: 'تجارت', sepah: 'سپه', saman: 'سامان', blu: 'بلو', pasargad: 'پاسارگاد', parsian: 'پارسیان', ayandeh: 'آینده', keshavarzi: 'کشاورزی', maskan: 'مسکن', refah: 'رفاه', shahr: 'شهر', resalat: 'رسالت', 'mehr-iran': 'مهر ایران', khavarmianeh: 'خاورمیانه' };
 const STATUS = { PAID: ['تسویه‌شده', 'ok'], PENDING: ['در انتظار', 'warn'], EXPIRED: ['منقضی', 'bad'], CANCELLED: ['لغوشده', 'bad'], FAILED: ['ناموفق', 'bad'] };
@@ -151,6 +151,5 @@ export async function renderDashboard(page) {
   $('#new-link', page).addEventListener('click', quickInvoice);
   $$('[data-qi]', page).forEach((b) => b.addEventListener('click', quickInvoice));
   $('#first-x', page)?.addEventListener('click', () => { localStorage.setItem('bg_first_step_closed', '1'); $('#first-step', page).remove(); });
-  setNotifications(d.recent.map((r) => ({ at: r.at, ok: r.matched, title: r.matched ? `پرداخت ${toman(r.amount_rial)} تأیید شد` : `واریز بی‌صاحب ${toman(r.amount_rial)}`, sub: `${BANK[r.bank] || r.bank} · ${r.at ? ago(r.at) : ''}` })));
   if (localStorage.getItem('bg_quickstart') === '1') quickStart(d.onboarding);
 }

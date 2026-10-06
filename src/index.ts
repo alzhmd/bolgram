@@ -1,5 +1,6 @@
 import { v2Routes } from './routes/v2.routes.js';
 import { botRoutes } from './bot/bot.routes.js';
+import { readUpload } from './utils/uploads.js';
 import { startBots } from './bot/bot.service.js';
 import { botsFromEnv } from './bot/api.js';
 import { jwtSecret } from './utils/crypto.js';
@@ -179,6 +180,11 @@ const sendIndex = async (_req: any, reply: any) => {
 
 // Merchant panel (single page app with hash routes)
 server.get('/panel', async (_req, reply) => reply.redirect('/panel/'));
+server.get('/uploads/:file', async (req, reply) => {
+  const f = readUpload((req.params as any).file, 'public');
+  if (!f) return reply.status(404).send({ success: false, error: 'not_found' });
+  return reply.type(f.mime).header('Cache-Control', 'public, max-age=31536000, immutable').header('X-Content-Type-Options', 'nosniff').send(f.buf);
+});
 server.get('/panel/', async (_req, reply) => reply.type('text/html; charset=utf-8').header('Cache-Control', 'no-cache').sendFile('panel/index.html'));
 
 server.get('/', sendIndex);
