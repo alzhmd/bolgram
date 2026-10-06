@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { assertCanInvoice, events, type EventMap } from '../../services/events.js';
 import { getSupabaseClient, isSupabaseConfigured } from '../supabase.js';
 import { dbService, InvoiceRecord } from '../database.js';
 
@@ -20,7 +21,26 @@ export interface InvoiceEntity {
 }
 
 export class InvoiceRepository {
+  /** Every invoice goes through here: plan/wallet guards first, then `invoice.created`. */
   public static async create(params: {
+    id?: string;
+    merchantId: string;
+    invoiceId: string;
+    customerName: string;
+    customerEmail?: string;
+    amount: number;
+    redirectUrl?: string;
+    webhookUrl?: string;
+    expiresInMinutes?: number;
+    source?: EventMap['invoice.created']['source'];
+  }): Promise<InvoiceEntity> {
+    assertCanInvoice(params.merchantId, params.amount);
+    const inv = await InvoiceRepository.insert(params);
+    events.emit('invoice.created', { merchantId: params.merchantId, invoiceId: inv.invoice_id, amount: inv.amount, source: params.source || 'api' });
+    return inv;
+  }
+
+  private static async insert(params: {
     id?: string;
     merchantId: string;
     invoiceId: string;

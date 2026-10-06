@@ -1,34 +1,38 @@
-// Panel entry: hash router with auth guard, error boundary, 404 and forbidden pages.
-import { api, session, esc, emptyState, $ } from './core.js';
+// Panel entry: hash router with auth + role guard, lazy pages, error boundary, 404 and forbidden pages.
+import { api, session, esc, emptyState, $, CTX } from './core.js';
 import { renderLogin, renderRegister, renderForgot, renderVerify } from './auth.js';
-import { renderShell, setActiveNav, setTheme, PAGE_TITLES } from './shell.js';
-import { renderDashboard } from './pages/dashboard.js';
-import { renderCards } from './pages/cards.js';
-import { renderBots } from './pages/bots.js';
+import { renderShell, setActiveNav, setTheme, PAGE_TITLES, allowed } from './shell.js';
 
 const root = $('#app');
 setTheme(localStorage.getItem('bg_theme') || 'dark');
 
 const PUBLIC = { login: renderLogin, register: renderRegister, forgot: renderForgot };
-const PAGES = { dashboard: renderDashboard, cards: renderCards, bots: renderBots };
-const SOON = {
-  invoices: 'لیست فاکتورها با فیلتر کانال و وضعیت، جستجو، خروجی اکسل و جزئیات هر فاکتور.',
-  reports: 'گزارش فروش بر اساس روز، ساعت، کارت و کانال با انتخاب بازهٔ شمسی.',
-  links: 'لینک پرداخت چندبار مصرف با مبلغ ثابت یا آزاد، QR و آمار؛ و لینک ارزی.',
-  wallet: 'موجودی کیف پول کارمزد، شارژ با هدیه، گردش حساب و درخواست برداشت.',
-  plans: 'پلن‌های شخصی و مارکت‌پلیس، خرید و تمدید اشتراک.',
-  devices: 'گوشی‌های متصل، آخرین پیامک، وضعیت اتصال و بانک‌هایی که سیستم می‌خواند.',
-  app: 'دانلود اپ اندروید با اثر انگشت SHA-256 و راهنمای شورتکات آیفون.',
-  plugins: 'افزونهٔ ووکامرس و اتصال مستقیم API.',
-  webhooks: 'گزارش ارسال وب‌هوک‌ها با کد پاسخ و ارسال مجدد.',
-  trust: 'درخواست نماد اعتماد با احراز هویت.',
-  team: 'دعوت همکار و صندوق‌دار و دفتر رویدادها.',
-  referral: 'لینک دعوت اختصاصی و پاداش اشتراک.',
-  support: 'ثبت و پیگیری تیکت پشتیبانی.',
-  learn: 'آموزش‌ها از صفر تا اولین پرداخت.',
-  review: 'ثبت نظر و امتیاز شما دربارهٔ سرویس.',
-  notifications: 'مرکز اعلان‌ها با دسته‌بندی و فیلتر.',
-  settings: 'پروفایل، لوگو، وب‌هوک، کلید API و امنیت حساب.',
+const PUBLIC_TITLES = { login: 'ورود', register: 'ساخت حساب', forgot: 'فراموشی رمز', verify: 'تأیید شماره', invite: 'پیوستن به فروشگاه' };
+
+// Every page module exports render(page, { me, actor, query, go }).
+const pick = (name) => (m) => m[name] || m.render;
+const PAGES = {
+  dashboard: () => import('./pages/dashboard.js').then(pick('renderDashboard')),
+  invoices: () => import('./pages/invoices.js').then(pick('render')),
+  deposits: () => import('./pages/deposits.js').then(pick('render')),
+  reports: () => import('./pages/reports.js').then(pick('render')),
+  links: () => import('./pages/links.js').then(pick('render')),
+  wallet: () => import('./pages/wallet.js').then(pick('render')),
+  cards: () => import('./pages/cards.js').then(pick('renderCards')),
+  plans: () => import('./pages/plans.js').then(pick('render')),
+  devices: () => import('./pages/devices.js').then(pick('render')),
+  app: () => import('./pages/app-page.js').then(pick('render')),
+  bots: () => import('./pages/bots.js').then(pick('renderBots')),
+  plugins: () => import('./pages/plugins.js').then(pick('render')),
+  webhooks: () => import('./pages/webhooks.js').then(pick('render')),
+  trust: () => import('./pages/trust.js').then(pick('render')),
+  team: () => import('./pages/team.js').then(pick('render')),
+  referral: () => import('./pages/referral.js').then(pick('render')),
+  support: () => import('./pages/support.js').then(pick('render')),
+  learn: () => import('./pages/learn.js').then(pick('render')),
+  review: () => import('./pages/review.js').then(pick('render')),
+  notifications: () => import('./pages/notifications.js').then(pick('render')),
+  settings: () => import('./pages/settings.js').then(pick('render')),
 };
 
 let me = null;
@@ -37,7 +41,7 @@ let shellReady = false;
 function parse() {
   const raw = location.hash.replace(/^#/, '') || '/dashboard';
   const [path, qs] = raw.split('?');
-  return { id: path.replace(/^\/+/, '').split('/')[0] || 'dashboard', path, query: new URLSearchParams(qs || '') };
+  return { id: path.replace(/^\/+/, '').split('/')[0] || 'dashboard', sub: path.replace(/^\/+/, '').split('/').slice(1), path, query: new URLSearchParams(qs || '') };
 }
 const go = (path) => { location.hash = '#' + path; };
 
@@ -48,35 +52,47 @@ window.addEventListener('session-expired', () => {
 });
 
 async function route() {
-  const { id, path, query } = parse();
+  const { id, sub, path, query } = parse();
   window.scrollTo(0, 0);
-  if (PUBLIC[id] || id === 'verify') {
-    if (session.get() && id !== 'verify') return go('/dashboard');
+  if (PUBLIC[id] || id === 'verify' || id === 'invite') {
+    if (session.get() && PUBLIC[id]) return go('/dashboard');
     shellReady = false;
-    document.title = `${{ login: 'ورود', register: 'ساخت حساب', forgot: 'فراموشی رمز', verify: 'تأیید شماره' }[id]} | بولگرام`;
+    document.title = `${PUBLIC_TITLES[id]} | بولگرام`;
+    if (id === 'invite') return (await import('./pages/invite.js')).render(root, { go, query });
     return (id === 'verify' ? renderVerify : PUBLIC[id])(root, { go, query });
   }
   if (!session.get()) return go(`/login?next=${encodeURIComponent(path)}`);
   try {
-    if (!me) me = (await api('/api/v2/me')).merchant;
+    if (!me) {
+      const r = await api('/api/v2/me');
+      me = r.merchant;
+      Object.assign(CTX, { me: r.merchant, actor: r.actor, roles: r.roles || {}, permNames: r.perm_names || {} });
+    }
   } catch (e) {
     if (e.status === 401) return;
     root.innerHTML = `<main class="auth"><div class="auth-card">${emptyState('alert', 'اتصال به سرور ممکن نشد', esc(e.message), '<button class="btn btn-primary" onclick="location.reload()">تلاش دوباره</button>')}</div></main>`;
     return;
   }
-  if (!shellReady) { renderShell(root, me); shellReady = true; }
+  if (!shellReady) {
+    renderShell(root, me);
+    shellReady = true;
+    import('./pages/notifications.js').then((m) => m.initBell?.()).catch(() => {});
+  }
   setActiveNav(id);
   const page = $('#page');
   const title = PAGE_TITLES[id];
   document.title = `${title || 'صفحه پیدا نشد'} | بولگرام`;
   try {
-    if (PAGES[id]) await PAGES[id](page, { me, query, go });
-    else if (SOON[id]) page.innerHTML = `<div class="page-head"><h1>${title}</h1></div><section class="card">${emptyState('bolt', 'این بخش در مرحلهٔ بعد ساخته می‌شود', SOON[id], '<a class="btn btn-primary" href="#/dashboard">بازگشت به داشبورد</a>')}</section>`;
-    else if (id === 'forbidden') page.innerHTML = `<section class="card">${emptyState('lock', 'دسترسی ندارید', 'نقش شما اجازهٔ دیدن این بخش را نمی‌دهد. از مالک فروشگاه بخواهید دسترسی بدهد.', '<a class="btn" href="#/dashboard">داشبورد</a>')}</section>`;
+    if (PAGES[id] && !allowed(id)) throw Object.assign(new Error('forbidden'), { status: 403 });
+    if (PAGES[id]) {
+      page.innerHTML = '<div class="card"><span class="spinner"></span> در حال بارگذاری…</div>';
+      const render = await PAGES[id]();
+      await render(page, { me, actor: CTX.actor, query, sub, go });
+    } else if (id === 'forbidden') page.innerHTML = `<section class="card">${emptyState('lock', 'دسترسی ندارید', 'نقش شما اجازهٔ دیدن این بخش را نمی‌دهد. از مالک فروشگاه بخواهید دسترسی بدهد.', '<a class="btn" href="#/dashboard">داشبورد</a>')}</section>`;
     else page.innerHTML = `<section class="card">${emptyState('search', 'صفحه پیدا نشد', 'آدرسی که باز کردید وجود ندارد.', '<a class="btn btn-primary" href="#/dashboard">بازگشت به داشبورد</a>')}</section>`;
   } catch (e) {
     if (e.status === 401) return;
-    if (e.status === 403) return go('/forbidden');
+    if (e.status === 403) return id === 'forbidden' ? null : go('/forbidden');
     // Error boundary: one broken page never takes down the panel.
     console.error(e);
     page.innerHTML = `<section class="card">${emptyState('alert', 'نمایش این صفحه با خطا روبه‌رو شد', esc(e.message || ''), '<button class="btn btn-primary" type="button" id="retry">تلاش دوباره</button>')}</section>`;

@@ -5,6 +5,7 @@ import { toLatinDigits } from '../utils/validate.js';
 import { BANKS, bankByBin } from '../parsers/ir/registry.js';
 import { encryptCard, decryptCard } from '../utils/card-crypto.js';
 import { startOfTehranDay } from '../parsers/ir/jalali.js';
+import { GuardError, checkLimit, events } from './events.js';
 
 /**
  * Store operations shared by the panel API (/api/v2) and the Telegram/Bale bot:
@@ -81,6 +82,12 @@ export function addCard(merchantId: string, input: { number: unknown; holder: un
   if (holder.length < 3) errors.holder = 'نام صاحب کارت را وارد کنید';
   if (Object.keys(errors).length) throw new StoreError(422, 'validation', Object.values(errors)[0], errors);
   if (cardExists(merchantId, num)) throw new StoreError(409, 'validation', 'این کارت قبلاً ثبت شده است', { number: 'این کارت قبلاً ثبت شده است' });
+  try {
+    checkLimit(merchantId, 'cards', (db().prepare('SELECT count(*) AS n FROM payment_methods WHERE merchant_id = ?').get(merchantId) as any).n);
+  } catch (e) {
+    if (e instanceof GuardError) throw new StoreError(e.status, e.code, e.message);
+    throw e;
+  }
   const info = BANKS.find((x) => x.id === bank)!;
   const id = 'pm_' + crypto.randomBytes(8).toString('hex');
   const label = typeof input.label === 'string' && input.label.trim() ? input.label.trim().slice(0, 40) : info.nameFa;
@@ -115,7 +122,7 @@ export function parseToman(raw: unknown): number {
   return Number(toLatinDigits(String(raw ?? '')).replace(/[^\d]/g, '') || NaN);
 }
 
-export async function createInvoice(merchantId: string, input: { amount: unknown; channel?: unknown; note?: unknown }): Promise<InvoiceView> {
+export async function createInvoice(merchantId: string, input: { amount: unknown; channel?: unknown; note?: unknown; source?: 'panel' | 'bot' }): Promise<InvoiceView> {
   const toman = typeof input.amount === 'number' ? input.amount : parseToman(input.amount);
   if (!Number.isSafeInteger(toman) || toman < 1000 || toman > 1_000_000_000) {
     const msg = 'مبلغ باید بین ۱٬۰۰۰ تا ۱٬۰۰۰٬۰۰۰٬۰۰۰ تومان باشد';
@@ -126,7 +133,13 @@ export async function createInvoice(merchantId: string, input: { amount: unknown
   const channel = (CHANNELS as readonly string[]).includes(input.channel as string) ? (input.channel as string) : 'other';
   const note = typeof input.note === 'string' ? input.note.trim().slice(0, 200) : '';
   const invoiceId = 'INV' + crypto.randomBytes(5).toString('hex').toUpperCase();
-  const inv = await InvoiceRepository.create({ merchantId, invoiceId, customerName: note || 'فاکتور', amount: toman * 10, expiresInMinutes: 30 });
+  let inv;
+  try {
+    inv = await InvoiceRepository.create({ merchantId, invoiceId, customerName: note || 'فاکتور', amount: toman * 10, expiresInMinutes: 30, source: input.source || 'panel' });
+  } catch (e) {
+    if (e instanceof GuardError) throw new StoreError(e.status, e.code, e.message);
+    throw e;
+  }
   db().prepare('UPDATE invoices SET channel = ?, note = ? WHERE id = ?').run(channel, note || null, inv.invoice_id);
   return {
     id: inv.invoice_id,
@@ -202,6 +215,7 @@ export async function approveDeposit(merchantId: string, smsId: string, invoiceI
   let inv;
   try {
     inv = dbService.assignUnmatchedSmsForMerchant(merchantId, smsId, invoiceId);
+    events.emit('invoice.paid', { merchantId, invoiceId, amount: inv.amount, provider: inv.provider, trxId: inv.trx_id, source: 'manual' });
   } catch (e: any) {
     throw new StoreError(409, 'conflict', e.message === 'Invoice is already paid' ? 'این فاکتور قبلاً پرداخت شده است' : 'این واریزی یا فاکتور پیدا نشد یا قبلاً رسیدگی شده است');
   }

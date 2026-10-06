@@ -469,7 +469,7 @@ async function onMessage(api: BotApi, msg: any) {
 
 async function makeInvoice(api: BotApi, chatId: string, m: any, amount: number, note = '', editId?: number) {
   try {
-    const inv = await store.createInvoice(m.id, { amount, note: note.trim(), channel: api.platform === 'bale' ? 'other' : 'telegram' });
+    const inv = await store.createInvoice(m.id, { amount, note: note.trim(), channel: api.platform === 'bale' ? 'other' : 'telegram', source: 'bot' });
     setState(api.platform, chatId, null);
     return show(api, chatId, invoiceView(inv), editId);
   } catch (e) {

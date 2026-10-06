@@ -1,14 +1,18 @@
-import { CONFIG, payBase, api, session, toFa, toLatin, faNum, toman, jDate, jTime, esc, modal, toast, copy, setBusy, ICON, $, $$ } from './core.js';
+import { CONFIG, CTX, can, payBase, api, session, toFa, toLatin, faNum, toman, jDate, jTime, esc, modal, toast, copy, setBusy, ICON, $, $$ } from './core.js';
 
+// [id, title, icon, permission needed to see it]
 export const NAV = [
-  { group: 'عملیات', items: [['dashboard', 'داشبورد', 'home'], ['invoices', 'فاکتورها', 'receipt'], ['reports', 'گزارش‌ها', 'chart'], ['links', 'لینک‌های پرداخت', 'link']] },
-  { group: 'مالی', items: [['wallet', 'کیف پول', 'wallet'], ['cards', 'کارت‌ها', 'card'], ['plans', 'اشتراک و پلن‌ها', 'crown']] },
-  { group: 'اتصال', items: [['devices', 'دستگاه‌ها', 'phone'], ['app', 'اپلیکیشن', 'app'], ['bots', 'ربات تلگرام و بله', 'bot'], ['plugins', 'افزونه‌ها', 'plug'], ['webhooks', 'اعلان‌های وب‌هوک', 'hook']] },
-  { group: 'کسب‌وکار', items: [['trust', 'نماد اعتماد', 'shield'], ['team', 'همکاران', 'users'], ['referral', 'دعوت دوستان', 'gift']] },
-  { group: 'کمک', items: [['support', 'پشتیبانی', 'help'], ['learn', 'آموزش', 'book'], ['review', 'نظر من', 'star'], ['notifications', 'اعلان‌ها', 'bell']] },
+  { group: 'عملیات', items: [['dashboard', 'داشبورد', 'home'], ['invoices', 'فاکتورها', 'receipt', 'invoices:read'], ['deposits', 'واریزی‌های بی‌صاحب', 'inbox', 'deposits:review'], ['reports', 'گزارش‌ها', 'chart', 'reports:read'], ['links', 'لینک‌های پرداخت', 'link', 'links:read']] },
+  { group: 'مالی', items: [['wallet', 'کیف پول', 'wallet', 'wallet:read'], ['cards', 'کارت‌ها', 'card', 'cards:read'], ['plans', 'اشتراک و پلن‌ها', 'crown', 'wallet:read']] },
+  { group: 'اتصال', items: [['devices', 'دستگاه‌ها', 'phone', 'devices:read'], ['app', 'اپلیکیشن', 'app', 'devices:read'], ['bots', 'ربات تلگرام و بله', 'bot', 'bots:manage'], ['plugins', 'افزونه‌ها و API', 'plug', 'api:manage'], ['webhooks', 'وب‌هوک', 'hook', 'webhooks:manage']] },
+  { group: 'کسب‌وکار', items: [['trust', 'نماد اعتماد', 'shield', 'trust:manage'], ['team', 'همکاران', 'users', 'team:manage'], ['referral', 'دعوت دوستان', 'gift', 'referral:read']] },
+  { group: 'کمک', items: [['support', 'پشتیبانی', 'help', 'support:use'], ['learn', 'آموزش', 'book'], ['review', 'نظر من', 'star', 'review:write'], ['notifications', 'اعلان‌ها', 'bell']] },
   { group: 'حساب', items: [['settings', 'تنظیمات و پروفایل', 'cog']] },
 ];
 export const PAGE_TITLES = Object.fromEntries(NAV.flatMap((g) => g.items.map(([id, t]) => [id, t])));
+const PAGE_PERM = Object.fromEntries(NAV.flatMap((g) => g.items.map(([id, , , p]) => [id, p])));
+/** Whether the signed-in person may open a page (team roles hide parts of the panel). */
+export const allowed = (id) => !PAGE_PERM[id] || can(PAGE_PERM[id]);
 const SITE_LINKS = [['تعرفه‌ها', '/pricing.html'], ['بلاگ', '/blog/'], ['سؤالات متداول', '/faq.html'], ['مستندات فنی', '/docs.html'], ['درباره ما', '/about.html'], ['تماس با ما', '/contact.html']];
 
 let me = null;
@@ -32,7 +36,7 @@ export function renderShell(root, merchant) {
       <button class="side-toggle" type="button" id="side-toggle" aria-label="جمع و باز کردن منو" aria-expanded="${!mini}">${ICON.chev}</button>
       <a class="logo" href="#/dashboard"><img src="/favicon.svg" alt="" width="32" height="32" onerror="this.remove()"><span>${CONFIG.SERVICE_NAME}</span></a>
       <nav class="side-scroll">
-        ${NAV.map((g) => `<div class="side-group"><span>${g.group}</span>${g.items.map(([id, t, ic]) => `<a class="nav-item" href="#/${id}" data-nav="${id}" data-tip="${t}">${ICON[ic]}<span>${t}</span></a>`).join('')}</div>`).join('')}
+        ${NAV.map((g) => ({ ...g, items: g.items.filter(([id]) => allowed(id)) })).filter((g) => g.items.length).map((g) => `<div class="side-group"><span>${g.group}</span>${g.items.map(([id, t, ic]) => `<a class="nav-item" href="#/${id}" data-nav="${id}" data-tip="${t}">${ICON[ic]}<span>${t}</span></a>`).join('')}</div>`).join('')}
         <div class="side-group drawer-links"><span>سایت</span>${SITE_LINKS.map(([t, u]) => `<a class="nav-item" href="${CONFIG.SITE_URL}${u}" target="_blank" rel="noopener"><span>${t}</span></a>`).join('')}</div>
       </nav>
       <div class="side-foot">
@@ -61,7 +65,7 @@ export function renderShell(root, merchant) {
       ${bannerClosed ? '' : `<div class="banner" id="gift-banner" role="note">${ICON.gift}<span>شارژ هدیه: با شارژ کیف پول کارمزد تا ۲۰٪ اعتبار هدیه بگیرید.</span><button class="icon-btn x" type="button" aria-label="بستن اطلاعیه" id="banner-x">${ICON.x}</button></div>`}
       <div id="page" class="page" tabindex="-1"></div>
     </div>
-    <button class="btn btn-primary fab" type="button" id="fab" data-tour="fab">${ICON.plus} فاکتور</button>
+    ${can('invoices:create') ? `<button class="btn btn-primary fab" type="button" id="fab" data-tour="fab">${ICON.plus} فاکتور</button>` : ''}
   </div>`;
   setTheme(document.documentElement.dataset.theme || 'dark');
 
@@ -99,7 +103,7 @@ export function renderShell(root, merchant) {
 
   $('#search-btn').addEventListener('click', openSearch);
   document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); } });
-  $('#fab').addEventListener('click', quickInvoice);
+  $('#fab')?.addEventListener('click', quickInvoice);
 }
 
 function closeMenus() {
@@ -133,7 +137,7 @@ function markSeen() {
 
 // ---------- global search (Ctrl/Cmd+K)
 function openSearch() {
-  const pages = Object.entries(PAGE_TITLES);
+  const pages = Object.entries(PAGE_TITLES).filter(([id]) => allowed(id));
   const m = modal({ title: 'جستجو', body: `<input class="input" id="q" placeholder="نام صفحه، مثلاً «کارت‌ها»" autocomplete="off"><ul class="list" id="q-res" style="margin-top:10px" role="listbox"></ul>` });
   const input = $('#q', m.el), res = $('#q-res', m.el);
   const render = () => {
