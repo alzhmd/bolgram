@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<!--LINK_META--><title>لینک پرداخت | بولگرام</title><!--/LINK_META-->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/panel/assets/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:Vazirmatn;src:url(/panel/assets/fonts/Vazirmatn-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url(/panel/assets/fonts/Vazirmatn-SemiBold.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url(/panel/assets/fonts/Vazirmatn-ExtraBold.woff2) format("woff2");font-weight:800;font-display:swap}
+:root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--muted:#6b7280;--brand:#2563eb;--ok:#059669;--warn:#d97706;--bad:#dc2626;--line:#e5e7eb;--field:#f9fafb}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#121a2b;--ink:#e5e7eb;--muted:#9ca3af;--line:#1f2a3d;--field:#0e1626;--bad:#f87171;--brand:#3b82f6}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif;line-height:1.75;-webkit-text-size-adjust:100%}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
+.sr-only{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:460px;margin:0 auto;padding:16px 16px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
+.muted{color:var(--muted);font-size:13px}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.store{display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:14px;object-fit:cover;flex:none;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:20px;overflow:hidden}
+.store b{display:block;font-size:15px}
+.secure{display:inline-flex;align-items:center;gap:4px;color:var(--ok);font-size:12px}
+.secure svg{width:14px;height:14px}
+h1{font-size:19px;font-weight:800;margin:14px 0 4px;line-height:1.5}
+.desc{white-space:pre-line;color:var(--muted);font-size:14px;margin:0;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--brand) 10%,transparent);color:var(--brand);border-radius:8px;padding:2px 8px;font-size:12px}
+.tag.warn{background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)}
+.lbl{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
+.lbl .opt{color:var(--muted);font-weight:400;font-size:12px}
+.lbl .req{color:var(--bad)}
+.amount{font-size:28px;font-weight:800;margin:2px 0;font-variant-numeric:tabular-nums}
+.amount small{font-size:15px;font-weight:600;color:var(--muted)}
+.sub{font-size:13px;color:var(--muted)}
+.choices{display:grid;gap:8px}
+.choice{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;background:var(--field)}
+.choice input{width:18px;height:18px;accent-color:var(--brand);margin:0;flex:none}
+.choice .c-l{flex:1;min-width:0;overflow-wrap:anywhere}
+.choice .c-a{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.choice .c-s{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.choice:has(input:checked){border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.field{margin-bottom:14px}
+.input{width:100%;min-height:48px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--field);font-size:16px}
+.input:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.input[aria-invalid="true"]{border-color:var(--bad)}
+textarea.input{min-height:84px;resize:vertical;line-height:1.8}
+.money{position:relative}
+.money .input{font-size:20px;font-weight:800;text-align:right;padding-left:84px;font-variant-numeric:tabular-nums}
+.money .unit{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.words{font-size:12px;color:var(--muted);min-height:20px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips button{border:1px solid var(--line);background:transparent;border-radius:99px;padding:4px 12px;font-size:13px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.err{color:var(--bad);font-size:12.5px;margin-top:4px}
+.err:empty{display:none}
+.alert{border-radius:12px;padding:10px 12px;font-size:13px;background:color-mix(in srgb,var(--warn) 14%,transparent);margin-bottom:12px}
+.alert.bad{background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
+.alert:empty{display:none}
+.btn{width:100%;min-height:52px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:disabled{opacity:.6;cursor:progress}
+.spin{width:18px;height:18px;border:2px solid currentColor;border-inline-end-color:transparent;border-radius:50%;animation:s .7s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13px;color:var(--muted)}
+.how li{display:flex;gap:8px;align-items:flex-start}
+.how i{font-style:normal;flex:none;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand);display:grid;place-items:center;font-size:11px;font-weight:800;margin-top:2px}
+.status{text-align:center;padding:28px 12px}
+.status .big{width:60px;height:60px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)}
+.status .big svg{width:30px;height:30px}
+.status b{display:block;font-size:16px;margin-bottom:4px}
+.sk{border-radius:10px;background:linear-gradient(90deg,var(--line),color-mix(in srgb,var(--line) 40%,transparent),var(--line));background-size:200% 100%;animation:sh 1.2s infinite;height:14px;margin:8px 0}
+@keyframes sh{to{background-position:-200% 0}}
+footer{text-align:center;padding:14px 0 calc(24px + env(safe-area-inset-bottom))}
+footer a{color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:.3px}
+.pv{position:sticky;top:0;z-index:2;background:var(--warn);color:#fff;text-align:center;font-size:12px;padding:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="pv" class="pv" hidden>پیش‌نمایش صفحهٔ پرداخت</div>
+<main class="wrap" id="app" aria-busy="true" aria-live="polite">
+  <div class="box"><div class="store"><span class="logo" aria-hidden="true"></span><div style="flex:1"><div class="sk" style="width:40%"></div><div class="sk" style="width:60%"></div></div></div>
+    <div class="sk" style="width:70%;height:20px;margin-top:18px"></div><div class="sk"></div><div class="sk" style="width:80%"></div></div>
+  <div class="box"><div class="sk" style="width:30%"></div><div class="sk" style="height:44px"></div></div>
+  <span class="sr-only">در حال بارگذاری…</span>
+</main>
+<footer><a href="https://bolgram.ir" target="_blank" rel="noopener">by <b>Bolgram</b></a></footer>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const FA = '۰۱۲۳۴۵۶۷۸۹', AR = '٠١٢٣٤٥٦٧٨٩';
+  const latin = (s) => String(s ?? '').replace(/[۰-۹٠-٩]/g, (d) => String(FA.indexOf(d) >= 0 ? FA.indexOf(d) : AR.indexOf(d)));
+  const faDigits = (s) => String(s).replace(/\d/g, (d) => FA[d]);
+  const fa = (n, frac = 0) => new Intl.NumberFormat('fa-IR', { maximumFractionDigits: frac }).format(n);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const jDate = (d) => new Intl.DateTimeFormat('fa-IR-u-ca-persian', { timeZone: 'Asia/Tehran', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
+  const ICON = {
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  };
+
+  // Persian number words (helps the payer catch an extra zero before paying).
+  const ONES = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+  const TEENS = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+  const TENS = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+  const HUNDS = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+  const SCALES = ['', 'هزار', 'میلیون', 'میلیارد', 'هزار میلیارد'];
+  function three(n) {
+    const h = Math.floor(n / 100), t = Math.floor((n % 100) / 10), o = n % 10, out = [];
+    if (h) out.push(HUNDS[h]);
+    if (t === 1) out.push(TEENS[o]); else { if (t) out.push(TENS[t]); if (o) out.push(ONES[o]); }
+    return out.join(' و ');
+  }
+  function words(n) {
+    n = Math.floor(n);
+    if (!n) return '';
+    const parts = [];
+    for (let i = 0; n > 0 && i < SCALES.length; i++, n = Math.floor(n / 1000)) {
+      const c = n % 1000;
+      if (c) parts.unshift(three(c) + (SCALES[i] ? ' ' + SCALES[i] : ''));
+    }
+    return parts.join(' و ');
+  }
+
+  const qs = new URLSearchParams(location.search);
+  const preview = qs.get('preview') === '1';
+  const slug = (location.pathname.match(/^\/l\/([A-Za-z0-9-]{3,40})\/?$/) || [])[1] || qs.get('slug') || '';
+  let L = null;
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem('bg_payer') || '{}') || {}; } catch { saved = {}; }
+
+  const FIELDS = [
+    ['name', 'نام و نام خانوادگی', 'input', 'text', 'name', '', 80],
+    ['mobile', 'شمارهٔ موبایل', 'input', 'tel', 'tel', '۰۹۱۲۱۲۳۴۵۶۷', 20],
+    ['email', 'ایمیل', 'input', 'email', 'email', 'name@example.com', 120],
+    ['address', 'آدرس', 'textarea', '', 'street-address', 'استان، شهر، خیابان، پلاک، کد پستی', 300],
+    ['note', 'توضیحات برای فروشنده', 'textarea', '', 'off', '', 300],
+  ];
+  const fx = () => L && L.currency !== 'IRT';
+  const unitName = () => (fx() ? L.currency_name : 'تومان');
+  const price = (p) => `${fa(p, 2)} ${esc(L.currency_name)}`;
+
+  function status(icon, title, text) {
+    $('app').innerHTML = `<div class="box">${storeHead()}</div><div class="box status" role="status"><div class="big">${ICON[icon]}</div><b>${esc(title)}</b><p class="muted" style="margin:0">${esc(text)}</p></div>`;
+    $('app').setAttribute('aria-busy', 'false');
+  }
+  function storeHead() {
+    if (!L) return '';
+    const s = L.store || {};
+    const logo = s.logo ? `<img class="logo" src="${esc(s.logo)}" alt="" width="46" height="46">` : `<span class="logo" aria-hidden="true">${esc((s.name || '؟').trim().charAt(0))}</span>`;
+    return `<div class="store">${logo}<div style="min-width:0"><b>${esc(s.name)}</b><span class="secure">${ICON.shield} پرداخت امن · تأیید خودکار</span></div></div>`;
+  }
+
+  function amountBlock() {
+    if (L.amount_mode === 'fixed') {
+      const sub = fx() && L.fx?.rate_toman ? `<div class="sub">معادل ${price(L.price)} · هر ${esc(L.currency_name)} ${fa(L.fx.rate_toman, 2)} تومان</div>` : '';
+      return `<span class="lbl">مبلغ قابل پرداخت</span><div class="amount">${fa(L.amount_toman)} <small>تومان</small></div>${sub}`;
+    }
+    if (L.amount_mode === 'choice') {
+      return `<fieldset style="border:0;margin:0;padding:0"><legend class="lbl">یک گزینه را انتخاب کنید <span class="req" aria-hidden="true">*</span></legend><div class="choices">${L.choices
+        .map((c, i) => `<label class="choice"><input type="radio" name="choice" value="${c.index}"><span class="c-l">${esc(c.label || `گزینهٔ ${fa(i + 1)}`)}${fx() ? `<span class="c-s">${price(c.price)}</span>` : ''}</span><span class="c-a">${fa(c.amount_toman)} تومان</span></label>`)
+        .join('')}</div></fieldset><div class="err" id="e-choice"></div>`;
+    }
+    const range = amountRange();
+    const chips = L.choices.length ? `<div class="chips" role="group" aria-label="مبلغ‌های پیشنهادی">${L.choices.map((c) => `<button type="button" data-amt="${fx() ? c.price : c.amount_toman}" aria-pressed="false">${c.label ? esc(c.label) + ' · ' : ''}${fa(fx() ? c.price : c.amount_toman, 2)}</button>`).join('')}</div>` : '';
+    return `<label class="lbl" for="f-amount">مبلغ دلخواه <span class="req" aria-hidden="true">*</span></label>
+      <div class="money"><input class="input ltr" id="f-amount" name="amount" inputmode="${fx() ? 'decimal' : 'numeric'}" autocomplete="off" required aria-describedby="w-amount e-amount" placeholder="${fx() ? '۰٫۰۰' : '۰'}"><span class="unit">${esc(unitName())}</span></div>
+      <div class="words" id="w-amount" aria-live="polite">${range ? esc(range) : ''}</div>${chips}<div class="err" id="e-amount"></div>`;
+  }
+
+  function fieldBlock([key, label, tag, type, ac, ph, max]) {
+    const st = L.fields?.[key];
+    if (!st || st === 'off') return '';
+    const req = st === 'required';
+    const lbl = `<label class="lbl" for="f-${key}">${label} ${req ? '<span class="req" aria-hidden="true">*</span>' : '<span class="opt">(اختیاری)</span>'}</label>`;
+    const ltr = key === 'mobile' || key === 'email' ? ' ltr' : '';
+    const val = esc(saved[key] && (key === 'name' || key === 'mobile' || key === 'email') ? saved[key] : '');
+    const common = `class="input${ltr}" id="f-${key}" name="${key}" maxlength="${max}" autocomplete="${ac}" ${req ? 'required aria-required="true"' : ''} aria-describedby="e-${key}" ${ph ? `placeholder="${ph}"` : ''}`;
+    const input = tag === 'textarea' ? `<textarea ${common}></textarea>` : `<input ${common} type="${type}" ${key === 'mobile' ? 'inputmode="tel" dir="ltr"' : ''} value="${val}">`;
+    return `<div class="field">${lbl}${input}<div class="err" id="e-${key}"></div></div>`;
+  }
+
+  function render() {
+    document.title = `${L.title} | ${L.store?.name || 'بولگرام'}`;
+    if (!L.available && !preview) {
+      const icon = L.reason === 'expired' ? 'clock' : L.reason === 'sold_out' || L.reason === 'reserved' ? 'box' : 'lock';
+      const title = { expired: 'مهلت این لینک تمام شده', sold_out: 'ظرفیت تکمیل شد', reserved: 'ظرفیت موقتاً پر است', inactive: 'این لینک فعال نیست' }[L.reason] || 'پرداخت در دسترس نیست';
+      return status(icon, title, L.message || '');
+    }
+    const meta = [];
+    if (L.expires_at) meta.push(`<span class="tag">${ICON.clock.replace('<svg', '<svg width="13" height="13"')} مهلت تا ${esc(jDate(L.expires_at))}</span>`);
+    if (L.remaining !== null && L.remaining !== undefined && L.remaining <= 20) meta.push(`<span class="tag warn">فقط ${fa(L.remaining)} ظرفیت باقی مانده</span>`);
+    const fieldsHtml = FIELDS.map(fieldBlock).join('');
+    $('app').innerHTML = `
+      <div class="box">${storeHead()}<h1>${esc(L.title)}</h1>${L.description ? `<p class="desc">${esc(L.description)}</p>` : ''}${meta.length ? `<div class="meta">${meta.join('')}</div>` : ''}</div>
+      <form class="box" id="pay" novalidate>
+        <div class="field">${amountBlock()}</div>
+        ${fieldsHtml ? `<div style="border-top:1px dashed var(--line);margin:4px 0 14px"></div>${fieldsHtml}` : ''}
+        <div class="alert bad" id="e-form" role="alert"></div>
+        <button class="btn" type="submit" id="go">ادامه و پرداخت</button>
+        <p class="muted" style="margin:10px 0 0;text-align:center">مبلغ نهایی ممکن است چند تومان بیشتر باشد تا واریز شما خودکار شناسایی شود.</p>
+      </form>
+      <div class="box"><ol class="how"><li><i>۱</i>روی «ادامه و پرداخت» بزنید تا شمارهٔ کارت فروشنده نمایش داده شود.</li><li><i>۲</i>دقیقاً همان مبلغ را با هر کارت بانکی کارت‌به‌کارت کنید.</li><li><i>۳</i>پرداخت شما بدون ارسال رسید و خودکار تأیید می‌شود.</li></ol></div>`;
+    $('app').setAttribute('aria-busy', 'false');
+    wire();
+  }
+
+  function parseInput(v) {
+    let s = latin(v).replace(/[\s٬,،']/g, '').replace(/[٫/]/g, '.');
+    if (!fx()) return s.replace(/\D/g, '');
+    s = s.replace(/[^\d.]/g, '');
+    const i = s.indexOf('.');
+    if (i >= 0) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, '').slice(0, 2);
+    return s;
+  }
+  function formatInput(raw) {
+    if (!raw) return '';
+    const [int, dec] = raw.split('.');
+    const g = int ? fa(Number(int)) : '۰';
+    return dec !== undefined ? `${g}٫${faDigits(dec)}` : g;
+  }
+  function amountHint(raw) {
+    const w = $('w-amount');
+    if (!w) return;
+    const n = Number(raw || 0);
+    if (!n) { w.textContent = amountRange(); return; }
+    if (fx()) {
+      const t = L.fx?.rate_toman ? Math.ceil(Math.round(n * L.fx.rate_toman * 100) / 100) : null;
+      w.textContent = t ? `≈ ${fa(t)} تومان (هر ${L.currency_name} ${fa(L.fx.rate_toman, 2)} تومان)` : '';
+    } else w.textContent = `${words(n)} تومان`;
+  }
+  // Display bounds: the platform-wide limits (1,000 … 1,000,000,000 Toman) are not worth showing.
+  function bounds() {
+    let lo = fx() ? L.min_price : L.min_toman, hi = fx() ? L.max_price : L.max_toman;
+    if (!fx() && lo <= 1000) lo = null;
+    if (!fx() && hi >= 1e9) hi = null;
+    return [lo, hi];
+  }
+  function amountRange() {
+    const [lo, hi] = bounds();
+    return lo && hi ? `از ${fa(lo, 2)} تا ${fa(hi, 2)} ${unitName()}` : lo ? `حداقل ${fa(lo, 2)} ${unitName()}` : hi ? `حداکثر ${fa(hi, 2)} ${unitName()}` : '';
+  }
+
+  function setErr(key, msg) {
+    const e = $(`e-${key}`);
+    if (e) e.textContent = msg || '';
+    const f = $(`f-${key}`);
+    if (f) f.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  }
+
+  function wire() {
+    const form = $('pay');
+    const amt = $('f-amount');
+    if (amt) {
+      amt.addEventListener('input', () => {
+        const raw = parseInput(amt.value);
+        amt.value = formatInput(raw);
+        amt.dataset.raw = raw;
+        amountHint(raw);
+        setErr('amount', '');
+        form.querySelectorAll('[data-amt]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.amt) === Number(raw))));
+      });
+      form.querySelectorAll('[data-amt]').forEach((b) => b.addEventListener('click', () => {
+        amt.value = formatInput(String(b.dataset.amt));
+        amt.dataset.raw = String(b.dataset.amt);
+        amountHint(amt.dataset.raw);
+        setErr('amount', '');
+        form.querySelectorAll('[data-amt]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      }));
+    }
+    form.querySelectorAll('input[name="choice"]').forEach((r) => r.addEventListener('change', () => setErr('choice', '')));
+    form.querySelectorAll('.input').forEach((i) => i.addEventListener('input', () => { if (i.id !== 'f-amount') setErr(i.name, ''); }));
+    form.addEventListener('submit', submit);
+  }
+
+  function validate(body) {
+    const errs = {};
+    if (L.amount_mode === 'open') {
+      const n = Number(body.amount || 0);
+      const [lo, hi] = bounds();
+      if (!n) errs.amount = 'مبلغ را وارد کنید';
+      else if (lo && n < lo) errs.amount = `حداقل مبلغ ${fa(lo, 2)} ${unitName()} است`;
+      else if (hi && n > hi) errs.amount = `حداکثر مبلغ ${fa(hi, 2)} ${unitName()} است`;
+    }
+    if (L.amount_mode === 'choice' && body.choice === undefined) errs.choice = 'یکی از گزینه‌ها را انتخاب کنید';
+    for (const [key, label] of FIELDS) {
+      const st = L.fields?.[key];
+      if (st === 'required' && !body[key]) errs[key] = `${label} را وارد کنید`;
+    }
+    if (body.mobile) {
+      let d = latin(body.mobile).replace(/[\s\-()+.]/g, '');
+      if (d.startsWith('0098')) d = d.slice(4); else if (d.startsWith('98') && d.length === 12) d = d.slice(2);
+      if (d.length === 10 && d.startsWith('9')) d = '0' + d;
+      if (!/^09\d{9}$/.test(d)) errs.mobile = 'شمارهٔ موبایل معتبر نیست (مثل ۰۹۱۲۱۲۳۴۵۶۷)';
+    }
+    if (body.email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(body.email.trim())) errs.email = 'ایمیل معتبر نیست';
+    return errs;
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+    const form = $('pay');
+    const btn = $('go');
+    $('e-form').textContent = '';
+    const body = {};
+    if (L.amount_mode === 'open') body.amount = $('f-amount').dataset.raw || parseInput($('f-amount').value);
+    if (L.amount_mode === 'choice') { const c = form.querySelector('input[name="choice"]:checked'); if (c) body.choice = Number(c.value); }
+    for (const [key] of FIELDS) { const f = $(`f-${key}`); if (f && f.value.trim()) body[key] = f.value.trim(); }
+    const errs = validate(body);
+    ['amount', 'choice', ...FIELDS.map((f) => f[0])].forEach((k) => setErr(k, errs[k]));
+    if (Object.keys(errs).length) {
+      const first = form.querySelector('[aria-invalid="true"]') || form.querySelector('input[name="choice"]');
+      first?.focus();
+      return;
+    }
+    if (preview) { $('e-form').textContent = 'این فقط پیش‌نمایش است؛ مشتری با این دکمه به صفحهٔ پرداخت می‌رود.'; return; }
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin" aria-hidden="true"></span> در حال آماده‌سازی پرداخت…';
+    try {
+      const res = await fetch(`/api/pub/links/${encodeURIComponent(slug)}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.pay_url) {
+        try { localStorage.setItem('bg_payer', JSON.stringify({ name: body.name || saved.name || '', mobile: body.mobile || saved.mobile || '', email: body.email || saved.email || '' })); } catch {}
+        location.href = data.pay_url;
+        return;
+      }
+      if (res.status === 409) { await load(); return; }
+      if (res.status === 422 && data.errors) {
+        for (const [k, v] of Object.entries(data.errors)) setErr(k, v);
+        (form.querySelector('[aria-invalid="true"]') || btn).focus();
+        if (!Object.keys(data.errors).some((k) => $(`e-${k}`))) $('e-form').textContent = data.message || 'اطلاعات واردشده را بررسی کنید';
+      } else if (res.status === 429 && data.error !== 'too_many_open') $('e-form').textContent = 'تعداد تلاش‌ها زیاد بود؛ یک دقیقهٔ دیگر دوباره امتحان کنید.';
+      else $('e-form').textContent = data.message || 'ساخت پرداخت ممکن نشد؛ دوباره تلاش کنید.';
+    } catch {
+      $('e-form').textContent = 'اتصال اینترنت برقرار نیست؛ دوباره تلاش کنید.';
+    }
+    btn.disabled = false;
+    btn.textContent = 'ادامه و پرداخت';
+  }
+
+  async function load() {
+    if (!slug) { L = null; return status('search', 'لینک پرداخت نامعتبر است', 'آدرس را دوباره از فروشنده بگیرید.'); }
+    try {
+      const res = await fetch(`/api/pub/links/${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 404) { L = null; return status('search', 'لینک پرداخت پیدا نشد', 'این لینک وجود ندارد یا حذف شده است. آدرس را از فروشنده بپرسید.'); }
+      if (!res.ok || !data.success) throw new Error(data.message || '');
+      L = data;
+      render();
+    } catch {
+      L = null;
+      $('app').innerHTML = `<div class="box status" role="alert"><div class="big">${ICON.lock}</div><b>بارگذاری صفحه ممکن نشد</b><p class="muted">اتصال اینترنت را بررسی کنید.</p><button class="btn" type="button" id="retry" style="max-width:220px;margin:6px auto 0">تلاش دوباره</button></div>`;
+      $('retry').addEventListener('click', load);
+      $('app').setAttribute('aria-busy', 'false');
+    }
+  }
+
+  if (preview) {
+    $('pv').hidden = false;
+    saved = {};
+    window.addEventListener('message', (ev) => {
+      if (ev.origin !== location.origin || !ev.data || ev.data.type !== 'bolgram-link-preview') return;
+      L = ev.data.link;
+      render();
+    });
+    window.parent?.postMessage({ type: 'bolgram-link-preview-ready' }, location.origin);
+  } else load();
+})();
+</script>
+</body>
+</html>
