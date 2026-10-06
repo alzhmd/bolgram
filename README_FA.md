@@ -13,13 +13,16 @@
 ## راه‌اندازی سریع (سرور لینوکس با Node.js 22)
 ```bash
 git clone <repo> && cd bolgram
-npm install && cp .env.example .env   # مقادیر را ویرایش کنید
+npm install && cp .env.example .env   # حتماً JWT_SECRET و ADMIN_EMAIL/ADMIN_PASSWORD را پر کنید
 npm run build && npm start             # پورت 4000
 ```
 - پنل: `http://SERVER:4000/dashboard.html`
 - در پنل، بخش **Payment Methods**: برای هر کارت یک مورد بسازید (`provider_type` = شناسهٔ بانک مثل `mellat`، `account_number` = شماره کارت، `account_name` = نام صاحب کارت).
 - در پنل، بخش **Devices**: یک دستگاه بسازید و کد QR آن را با اپ اندروید (`zinipay_forwarder`) روی گوشی‌ای که پیامک بانک را دریافت می‌کند اسکن کنید.
 - ساخت فاکتور از فروشگاه: `POST /api/v1/payment/create` با هدر `x-api-key`. مبلغ به **ریال** است و `amount` پاسخ همان مبلغ یکتای قابل پرداخت است. مشتری را به `checkout_url` بفرستید.
+
+## امنیت (مهم)
+در نسخهٔ اصلی SyncPay ورود به پنل فقط در مرورگر و با حساب‌های نمایشی بود. API ادمین هم کاملاً باز بود و پنل پذیرنده به هدر `x-merchant-id` اعتماد می‌کرد. همهٔ این‌ها اصلاح شد و حالا ورود و دسترسی فقط سمت سرور با JWT یا API Key انجام می‌شود. وب‌هوک‌ها با کلید اختصاصی هر پذیرنده امضا می‌شوند. هدر `X-Bolgram-Signature: t=<unix>,v1=<hmac>` روی `${t}.${body}` محاسبه می‌شود؛ اگر اختلاف زمان بیشتر از ۵ دقیقه بود، درخواست را رد کنید.
 
 ## ساخت اپ اندروید
 Flutter 3.x و Android SDK لازم است: `cd zinipay_forwarder && flutter build apk --release`. برای بازار و مایکت همین APK کافی است. Google Play برای مجوز SMS فرم «Permissions Declaration» می‌خواهد.
