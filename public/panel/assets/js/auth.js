@@ -57,7 +57,10 @@ function networkAlert(form, err, retry) {
 const safeNext = (n) => (n && /^\/[a-z0-9/_-]*$/i.test(n) && !n.startsWith('//') ? n : '/dashboard');
 
 // ------------------------------------------------------------------ register
-export function renderRegister(root, { go }) {
+export function renderRegister(root, { go, query }) {
+  // Referral code from an invite link (#/register?ref=handle) is kept for the whole visit.
+  const ref = query?.get('ref') || sessionStorage.getItem('bg_ref') || '';
+  if (ref) sessionStorage.setItem('bg_ref', ref);
   root.innerHTML = frame(`<h1>ساخت حساب</h1><p class="lead">یک حساب برای وب، اپلیکیشن و ربات‌های تلگرام و بله.</p>
   <form id="reg" novalidate><div class="form-alert"></div>
     ${field('handle', 'نام فروشگاه (انگلیسی)', `<input class="input ltr" id="handle" name="handle" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" placeholder="bolgram_shop" aria-describedby="handle-hint handle-state handle-err">`, 'فقط یک بار و همین‌جا تعیین می‌شود و بعداً قابل تغییر نیست. هم اسم فروشگاه است هم آدرس صفحهٔ پرداخت. حروف کوچک انگلیسی، عدد و _')}
@@ -133,7 +136,7 @@ export function renderRegister(root, { go }) {
     try {
       const r = await api('/api/v2/auth/register', {
         auth: false, method: 'POST',
-        body: { handle: $('#handle', f).value.trim().toLowerCase(), mobile: normMobile($('#mobile', f).value), email: normEmail($('#email', f).value) || undefined, password: pw.value, terms: true },
+        body: { handle: $('#handle', f).value.trim().toLowerCase(), mobile: normMobile($('#mobile', f).value), email: normEmail($('#email', f).value) || undefined, password: pw.value, terms: true, ...(ref ? { ref } : {}) },
       });
       session.set(r.token, true);
       localStorage.setItem('bg_quickstart', '1');
