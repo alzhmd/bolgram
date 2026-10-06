@@ -1,13 +1,13 @@
 import crypto from 'node:crypto';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { dbService } from '../db/database.js';
-import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { CryptoUtil } from '../utils/crypto.js';
-import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, passwordProblem, toLatinDigits } from '../utils/validate.js';
+import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, passwordProblem } from '../utils/validate.js';
 import { OtpError, sendOtp, verifyOtp } from '../services/otp.service.js';
 import { startOfTehranDay, startOfTehranMonth, tehranParts } from '../parsers/ir/jalali.js';
-import { BANKS, bankByBin } from '../parsers/ir/registry.js';
-import { encryptCard, decryptCard } from '../utils/card-crypto.js';
+import { BANKS } from '../parsers/ir/registry.js';
+import { createLinkCode, ensureBotSchema, listLinks, setLinkNotify, unlink, botConfigured, botUsername } from '../bot/bot.service.js';
+import { StoreError, addCard, createInvoice, deleteCard, listCards, setCardActive } from '../services/store.service.js';
 
 /**
  * Panel API v2 (used by /panel). Auth: store handle + mobile + password, SMS.IR codes,
@@ -94,23 +94,13 @@ const HANDLE_MSG: Record<string, string> = {
   reserved: 'این نام رزرو شده است',
 };
 
-function luhnOk(num: string) {
-  if (!/^\d{16}$/.test(num)) return false;
-  let sum = 0;
-  for (let i = 0; i < 16; i++) {
-    let n = Number(num[15 - i]);
-    if (i % 2) { n *= 2; if (n > 9) n -= 9; }
-    sum += n;
-  }
-  return sum % 10 === 0;
-}
-
 function utcSql(d: Date) {
   return d.toISOString().slice(0, 19).replace('T', ' ');
 }
 
 export async function v2Routes(app: FastifyInstance) {
   ensurePanelSchema();
+  ensureBotSchema();
 
   app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
     const path = req.url.split('?')[0];
@@ -283,82 +273,48 @@ export async function v2Routes(app: FastifyInstance) {
 
   app.get('/api/v2/me', async (req) => ({ success: true, merchant: publicMe((req as any).merchant) }));
 
-  app.get('/api/v2/cards', async (req) => {
-    const m = (req as any).merchant;
-    const rows = db().prepare('SELECT * FROM payment_methods WHERE merchant_id = ? ORDER BY sort_order, created_at').all(m.id) as any[];
-    return {
-      success: true,
-      data: rows.map((r) => ({
-        id: r.id,
-        bank: r.provider_type,
-        title: r.title,
-        holder: r.account_name,
-        last4: r.last4 || String(decryptCard(r.account_number) || '').replace(/\D/g, '').slice(-4),
-        active: !!r.is_active,
-      })),
-    };
-  });
+  const storeReply = (reply: FastifyReply, e: unknown) => {
+    if (e instanceof StoreError) return reply.status(e.status).send({ success: false, error: e.code, message: e.message, ...(e.errors ? { errors: e.errors } : {}) });
+    throw e;
+  };
+
+  app.get('/api/v2/cards', async (req) => ({ success: true, data: listCards((req as any).merchant.id) }));
 
   app.get('/api/v2/banks', async () => ({ success: true, data: BANKS.map((b) => ({ id: b.id, name: b.nameFa, short: b.shortFa, color: b.color, bins: b.bins })) }));
 
   app.post('/api/v2/cards', async (req, reply) => {
-    const m = (req as any).merchant;
-    const b = (req.body || {}) as any;
-    const num = toLatinDigits(String(b.number ?? '')).replace(/\D/g, '');
-    const errors: Record<string, string> = {};
-    if (!luhnOk(num)) errors.number = 'شماره کارت معتبر نیست (۱۶ رقم)';
-    const holder = typeof b.holder === 'string' ? b.holder.trim().replace(/ي/g, 'ی').replace(/ك/g, 'ک').slice(0, 80) : '';
-    if (holder.length < 3) errors.holder = 'نام صاحب کارت را وارد کنید';
-    if (Object.keys(errors).length) return reply.status(422).send({ success: false, error: 'validation', errors });
-    const bank = bankByBin(num);
-    if (!bank) return reply.status(422).send({ success: false, error: 'validation', errors: { number: 'بانک این کارت شناخته نشد' } });
-    const hash = crypto.createHmac('sha256', 'card-index').update(num).digest('hex');
-    if (db().prepare('SELECT 1 FROM payment_methods WHERE merchant_id = ? AND card_hash = ?').get(m.id, hash)) {
-      return reply.status(409).send({ success: false, error: 'validation', errors: { number: 'این کارت قبلاً ثبت شده است' } });
+    try {
+      return reply.status(201).send({ success: true, data: addCard((req as any).merchant.id, (req.body || {}) as any) });
+    } catch (e) {
+      return storeReply(reply, e);
     }
-    const info = BANKS.find((x) => x.id === bank)!;
-    const id = 'pm_' + crypto.randomBytes(8).toString('hex');
-    const label = typeof b.label === 'string' && b.label.trim() ? b.label.trim().slice(0, 40) : info.nameFa;
-    db()
-      .prepare(`INSERT INTO payment_methods (id, merchant_id, provider_type, title, account_number, account_name, bank_name, theme_color, is_active, last4, card_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`)
-      .run(id, m.id, bank, label, encryptCard(num), holder, info.nameFa, info.color, num.slice(-4), hash);
-    return reply.status(201).send({ success: true, data: { id, bank, title: label, holder, last4: num.slice(-4), active: true } });
   });
 
-  app.patch('/api/v2/cards/:id', async (req, reply) => {
-    const m = (req as any).merchant;
-    const active = (req.body as any)?.active === true ? 1 : 0;
-    const r = db().prepare('UPDATE payment_methods SET is_active = ? WHERE id = ? AND merchant_id = ?').run(active, (req.params as any).id, m.id);
-    return Number(r.changes) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' });
-  });
+  app.patch('/api/v2/cards/:id', async (req, reply) =>
+    setCardActive((req as any).merchant.id, (req.params as any).id, (req.body as any)?.active === true) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
-  app.delete('/api/v2/cards/:id', async (req, reply) => {
-    const m = (req as any).merchant;
-    const r = db().prepare('DELETE FROM payment_methods WHERE id = ? AND merchant_id = ?').run((req.params as any).id, m.id);
-    return Number(r.changes) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' });
-  });
+  app.delete('/api/v2/cards/:id', async (req, reply) =>
+    deleteCard((req as any).merchant.id, (req.params as any).id) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
   app.post('/api/v2/invoices', async (req, reply) => {
-    const m = (req as any).merchant;
-    const b = (req.body || {}) as any;
-    const toman = Number(toLatinDigits(String(b.amount ?? '')).replace(/[^\d]/g, ''));
-    if (!Number.isSafeInteger(toman) || toman < 1000 || toman > 1_000_000_000) {
-      return reply.status(422).send({ success: false, error: 'validation', errors: { amount: 'مبلغ باید بین ۱٬۰۰۰ تا ۱٬۰۰۰٬۰۰۰٬۰۰۰ تومان باشد' } });
+    try {
+      return reply.status(201).send({ success: true, invoice: await createInvoice((req as any).merchant.id, (req.body || {}) as any) });
+    } catch (e) {
+      return storeReply(reply, e);
     }
-    const cards = db().prepare('SELECT count(*) AS n FROM payment_methods WHERE merchant_id = ? AND is_active = 1').get(m.id) as any;
-    if (!Number(cards.n)) return reply.status(409).send({ success: false, error: 'no_card', message: 'اول یک کارت بانکی فعال اضافه کنید' });
-    const channels = ['instagram', 'telegram', 'in_person', 'website', 'other'];
-    const channel = channels.includes(b.channel) ? b.channel : 'other';
-    const note = typeof b.note === 'string' ? b.note.trim().slice(0, 200) : '';
-    const invoiceId = 'INV' + crypto.randomBytes(5).toString('hex').toUpperCase();
-    const inv = await InvoiceRepository.create({ merchantId: m.id, invoiceId, customerName: note || 'فاکتور', amount: toman * 10, expiresInMinutes: 30 });
-    db().prepare('UPDATE invoices SET channel = ?, note = ? WHERE id = ?').run(channel, note || null, inv.invoice_id);
-    return reply.status(201).send({
-      success: true,
-      invoice: { id: inv.invoice_id, amount_rial: inv.amount, amount_toman: inv.amount / 10, base_toman: toman, channel, note, expires_at: inv.expires_at, pay_path: `/checkout.html?invoice_id=${encodeURIComponent(inv.invoice_id)}` },
-    });
   });
+
+  // Telegram / Bale bot linking
+  app.get('/api/v2/bots', async (req) => ({
+    success: true,
+    platforms: (['telegram', 'bale'] as const).map((p) => ({ platform: p, configured: botConfigured(p), username: botUsername(p) })),
+    links: listLinks((req as any).merchant.id),
+  }));
+  app.post('/api/v2/bots/link-code', async (req) => ({ success: true, ...createLinkCode((req as any).merchant.id) }));
+  app.patch('/api/v2/bots/:id', async (req, reply) =>
+    setLinkNotify((req as any).merchant.id, (req.params as any).id, (req.body as any)?.notify === true) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
+  app.delete('/api/v2/bots/:id', async (req, reply) =>
+    unlink((req as any).merchant.id, (req.params as any).id) ? { success: true } : reply.status(404).send({ success: false, error: 'not_found' }));
 
   app.get('/api/v2/dashboard', async (req) => {
     const m = (req as any).merchant;

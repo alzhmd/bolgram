@@ -4,12 +4,13 @@ import { renderLogin, renderRegister, renderForgot, renderVerify } from './auth.
 import { renderShell, setActiveNav, setTheme, PAGE_TITLES } from './shell.js';
 import { renderDashboard } from './pages/dashboard.js';
 import { renderCards } from './pages/cards.js';
+import { renderBots } from './pages/bots.js';
 
 const root = $('#app');
 setTheme(localStorage.getItem('bg_theme') || 'dark');
 
 const PUBLIC = { login: renderLogin, register: renderRegister, forgot: renderForgot };
-const PAGES = { dashboard: renderDashboard, cards: renderCards };
+const PAGES = { dashboard: renderDashboard, cards: renderCards, bots: renderBots };
 const SOON = {
   invoices: 'لیست فاکتورها با فیلتر کانال و وضعیت، جستجو، خروجی اکسل و جزئیات هر فاکتور.',
   reports: 'گزارش فروش بر اساس روز، ساعت، کارت و کانال با انتخاب بازهٔ شمسی.',
@@ -18,7 +19,6 @@ const SOON = {
   plans: 'پلن‌های شخصی و مارکت‌پلیس، خرید و تمدید اشتراک.',
   devices: 'گوشی‌های متصل، آخرین پیامک، وضعیت اتصال و بانک‌هایی که سیستم می‌خواند.',
   app: 'دانلود اپ اندروید با اثر انگشت SHA-256 و راهنمای شورتکات آیفون.',
-  bots: 'اتصال حساب به ربات تلگرام و بله با کد یک‌بارمصرف.',
   plugins: 'افزونهٔ ووکامرس و اتصال مستقیم API.',
   webhooks: 'گزارش ارسال وب‌هوک‌ها با کد پاسخ و ارسال مجدد.',
   trust: 'درخواست نماد اعتماد با احراز هویت.',
