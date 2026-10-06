@@ -60,3 +60,6 @@ coverage/
 *.tmp
 *.bak
 .card-key
+
+# Temporary agent worktrees
+.claude/worktrees/
