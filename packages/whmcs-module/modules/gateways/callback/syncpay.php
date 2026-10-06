@@ -1,6 +1,6 @@
 <?php
 /**
- * SyncPay BD - WHMCS Callback IPN Handler
+ * Bolgram - WHMCS Callback IPN Handler
  */
 
 // Require WHMCS initialization

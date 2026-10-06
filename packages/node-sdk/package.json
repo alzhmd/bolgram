@@ -1,7 +1,7 @@
 {
   "name": "@syncpaybd/sdk",
   "version": "2.0.0",
-  "description": "Official Node.js and TypeScript client for SyncPay BD Automated MFS Gateway",
+  "description": "Official Node.js and TypeScript client for Bolgram Automated MFS Gateway",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -17,6 +17,6 @@
     "payment",
     "bangladesh"
   ],
-  "author": "SyncPay BD",
+  "author": "Bolgram",
   "license": "MIT"
 }

@@ -2,9 +2,9 @@ import json
 import urllib.request
 import urllib.error
 
-class SyncPayClient:
+class BolgramClient:
     """
-    Official Python SDK Client for SyncPay BD
+    Official Python SDK Client for Bolgram
     """
     def __init__(self, api_key: str, base_url: str = "http://localhost:4000"):
         self.api_key = api_key

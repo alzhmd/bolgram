@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -258,8 +259,11 @@ export class DatabaseService {
 
     // Safe column migrations for existing SQLite databases
     this.runMigrations();
-    this.seedDemoData();
-    this.seedAdminData();
+    // Demo merchants/devices/keys have publicly known credentials: never seed them in production.
+    if (process.env.NODE_ENV !== 'production' || process.env.SEED_DEMO === 'true') {
+      this.seedDemoData();
+      this.seedAdminData();
+    }
   }
 
   private runMigrations() {
@@ -367,13 +371,13 @@ export class DatabaseService {
       `).run();
     }
 
-    // Seed official SyncPay BD sandbox merchant key
+    // Seed official Bolgram sandbox merchant key
     const checkPayflowMerchant = this.db.prepare('SELECT id FROM merchants WHERE api_key = ?');
     const existing = checkPayflowMerchant.get('sandbox_test_8f4c9a2e7b31') as { id: string } | undefined;
     if (!existing) {
       this.db.prepare(`
         INSERT INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('m_payflow_sandbox', 'SyncPay BD Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/syncpay/webhook')
+        VALUES ('m_payflow_sandbox', 'Bolgram Sandbox Merchant', 'sandbox_test_8f4c9a2e7b31', 'https://merchant.com/api/syncpay/webhook')
       `).run();
     } else if (existing.id !== 'm_payflow_sandbox') {
       this.db.exec(`
@@ -381,7 +385,7 @@ export class DatabaseService {
         UPDATE devices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE transactions SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
         UPDATE invoices SET merchant_id = 'm_payflow_sandbox' WHERE merchant_id = '${existing.id}';
-        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'SyncPay BD Sandbox Merchant', webhook_url = 'https://merchant.com/api/syncpay/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
+        UPDATE merchants SET id = 'm_payflow_sandbox', name = 'Bolgram Sandbox Merchant', webhook_url = 'https://merchant.com/api/syncpay/webhook' WHERE api_key = 'sandbox_test_8f4c9a2e7b31';
         PRAGMA foreign_keys = ON;
       `);
     }
@@ -402,7 +406,7 @@ export class DatabaseService {
     if (!this.db.prepare('SELECT id FROM merchants WHERE id = ?').get('00000000-0000-0000-0000-000000000999')) {
       this.db.prepare(`
         INSERT OR IGNORE INTO merchants (id, name, api_key, webhook_url)
-        VALUES ('00000000-0000-0000-0000-000000000999', 'SyncPay BD Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/syncpay/webhook')
+        VALUES ('00000000-0000-0000-0000-000000000999', 'Bolgram Sandbox (UUID)', 'sandbox_test_8f4c9a2e7b31_uuid', 'https://merchant.com/api/syncpay/webhook')
       `).run();
     }
 
@@ -556,7 +560,7 @@ export class DatabaseService {
         this.db.prepare(`
           INSERT INTO devices (id, merchant_id, device_token, device_name, status, last_seen)
           VALUES (?, '00000000-0000-42d3-a7b6-aa2aa137fd1b', ?, ?, 'ONLINE', datetime('now'))
-        `).run(tokenOrId, tokenOrId, telemetry?.device_name || 'SyncPay Device');
+        `).run(tokenOrId, tokenOrId, telemetry?.device_name || 'Bolgram Device');
       } catch (_) {}
     }
 
@@ -900,22 +904,22 @@ export class DatabaseService {
   private seedAdminData() {
     // Seed default admin users
     const checkAdmin = this.db.prepare('SELECT id FROM admin_users WHERE email = ?');
-    if (!checkAdmin.get('admin@syncpaybd.site')) {
+    if (!checkAdmin.get('admin@bolgram.ir')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_root', 'SyncPay BD Super Admin', 'admin@syncpaybd.site', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
+        VALUES ('admin_root', 'Bolgram Super Admin', 'admin@bolgram.ir', 'Super Admin', 'ACTIVE', 'hashed_superadmin_pwd')
       `).run();
     }
-    if (!checkAdmin.get('ops@syncpaybd.site')) {
+    if (!checkAdmin.get('ops@bolgram.ir')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@syncpaybd.site', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
+        VALUES ('admin_ops', 'Tariqul Islam (Ops Lead)', 'ops@bolgram.ir', 'Operations Admin', 'ACTIVE', 'hashed_ops_pwd')
       `).run();
     }
-    if (!checkAdmin.get('security@syncpaybd.site')) {
+    if (!checkAdmin.get('security@bolgram.ir')) {
       this.db.prepare(`
         INSERT INTO admin_users (id, name, email, role, status, password_hash)
-        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@syncpaybd.site', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
+        VALUES ('admin_sec', 'Nusrat Jahan (SecOps)', 'security@bolgram.ir', 'Security Admin', 'ACTIVE', 'hashed_sec_pwd')
       `).run();
     }
 
@@ -967,10 +971,10 @@ export class DatabaseService {
     const auditCount = (this.db.prepare('SELECT COUNT(id) as c FROM audit_logs').get() as any)?.c || 0;
     if (auditCount === 0) {
       const logs = [
-        { email: 'admin@syncpaybd.site', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
-        { email: 'ops@syncpaybd.site', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
-        { email: 'security@syncpaybd.site', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
-        { email: 'admin@syncpaybd.site', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
+        { email: 'admin@bolgram.ir', action: 'ADMIN_LOGIN', res: 'Auth', id: 'admin_root', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Super Admin login from trusted dashboard IP' },
+        { email: 'ops@bolgram.ir', action: 'DEVICE_STATUS_CHECK', res: 'Device', id: 'dev_phone_4', ip: '192.168.1.24', resu: 'SUCCESS', det: 'Dispatched health ping to Gadget Mart forwarder' },
+        { email: 'security@bolgram.ir', action: 'API_KEY_INSPECTION', res: 'ApiKey', id: 'key_sec_99', ip: '10.0.0.15', resu: 'SUCCESS', det: 'Audited active keys for Chaldal Grocery Express' },
+        { email: 'admin@bolgram.ir', action: 'SYSTEM_SETTINGS_UPDATE', res: 'Settings', id: 'global_conf', ip: '192.168.1.10', resu: 'SUCCESS', det: 'Updated MFS webhook timeout to 6000ms' },
       ];
       for (const l of logs) {
         this.db.prepare(`
@@ -1117,7 +1121,7 @@ export class DatabaseService {
       SELECT 
         m.id, 
         m.name, 
-        COALESCE(m.email, m.id || '@merchant.syncpaybd.site') as email,
+        COALESCE(m.email, m.id || '@merchant.bolgram.ir') as email,
         COALESCE(m.phone, 'N/A') as phone,
         COALESCE(m.status, 'ACTIVE') as status,
         COALESCE(m.plan, 'FREE') as plan,
@@ -1182,7 +1186,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?)
     `).run(id, name, apiKey, webhookUrl || null);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
+    this.insertAuditLog('admin@bolgram.ir', 'MERCHANT_CREATE', 'Merchant', id, '127.0.0.1', 'SUCCESS', `Created merchant ${name}`);
     return this.getMerchantById(id);
   }
 
@@ -1206,7 +1210,7 @@ export class DatabaseService {
 
   public updateDeviceStatusAdmin(deviceId: string, status: 'ONLINE' | 'OFFLINE' | 'DISABLED') {
     this.db.prepare('UPDATE devices SET status = ? WHERE id = ?').run(status, deviceId);
-    this.insertAuditLog('admin@syncpaybd.site', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
+    this.insertAuditLog('admin@bolgram.ir', 'DEVICE_STATUS_CHANGE', 'Device', deviceId, '127.0.0.1', 'SUCCESS', `Set status to ${status}`);
     return { success: true, deviceId, status };
   }
 
@@ -1267,7 +1271,7 @@ export class DatabaseService {
 
   public revokeApiKeyAdmin(keyId: string) {
     this.db.prepare("UPDATE api_keys SET status = 'revoked' WHERE id = ?").run(keyId);
-    this.insertAuditLog('admin@syncpaybd.site', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
+    this.insertAuditLog('admin@bolgram.ir', 'API_KEY_REVOKE', 'ApiKey', keyId, '127.0.0.1', 'SUCCESS', 'Admin revoked merchant API key');
     return { success: true, keyId };
   }
 
@@ -1315,7 +1319,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?, 'ACTIVE', 'hashed_generated_pwd')
     `).run(id, params.name, params.email, params.role);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
+    this.insertAuditLog('admin@bolgram.ir', 'ADMIN_USER_CREATE', 'AdminUser', id, '127.0.0.1', 'SUCCESS', `Created admin ${params.name} with role ${params.role}`);
     return { id, name: params.name, email: params.email, role: params.role };
   }
 
@@ -1335,7 +1339,7 @@ export class DatabaseService {
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
     `).run(key, value);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
+    this.insertAuditLog('admin@bolgram.ir', 'SETTING_UPDATE', 'SystemSetting', key, '127.0.0.1', 'SUCCESS', `Updated ${key} to ${value}`);
     return { success: true, key, value };
   }
 
@@ -1524,6 +1528,41 @@ export class DatabaseService {
     `).all(limit);
   }
 
+  public insertUnmatchedSms(p: { deviceId: string; provider: string; sender?: string; amount: number; trxId: string; rawSms: string; status: 'UNMATCHED' | 'SUSPICIOUS' }) {
+    const exists = this.db.prepare('SELECT 1 FROM unmatched_sms WHERE trx_id = ? AND device_id = ?').get(p.trxId, p.deviceId);
+    if (exists) return;
+    this.db
+      .prepare('INSERT INTO unmatched_sms (id, device_id, provider, sender, amount, trx_id, raw_sms, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run('sms_' + crypto.randomUUID(), p.deviceId, p.provider, p.sender || null, p.amount, p.trxId, p.rawSms, p.status);
+  }
+
+  public getUnmatchedSmsForMerchant(merchantId: string, limit = 100) {
+    return this.db
+      .prepare(`SELECT u.* FROM unmatched_sms u JOIN devices d ON d.id = u.device_id WHERE d.merchant_id = ? ORDER BY u.created_at DESC LIMIT ?`)
+      .all(merchantId, limit);
+  }
+
+  /** Manual approve: the SMS and the invoice must both belong to the merchant and the invoice must still be open. */
+  public assignUnmatchedSmsForMerchant(merchantId: string, smsId: string, invoiceId: string) {
+    const sms = this.db
+      .prepare(`SELECT u.* FROM unmatched_sms u JOIN devices d ON d.id = u.device_id WHERE u.id = ? AND d.merchant_id = ? AND u.status IN ('UNMATCHED','SUSPICIOUS')`)
+      .get(smsId, merchantId) as any;
+    if (!sms) throw new Error('Deposit not found or already handled');
+    const inv = this.db.prepare(`SELECT * FROM invoices WHERE id = ? AND merchant_id = ?`).get(invoiceId, merchantId) as any;
+    if (!inv) throw new Error('Invoice not found');
+    if (inv.status === 'PAID') throw new Error('Invoice is already paid');
+    this.db.prepare(`UPDATE invoices SET status = 'PAID', trx_id = ?, payment_method = ? WHERE id = ?`).run(sms.trx_id, sms.provider, invoiceId);
+    this.db.prepare(`UPDATE unmatched_sms SET status = 'ASSIGNED', assigned_invoice_id = ? WHERE id = ?`).run(invoiceId, smsId);
+    return { webhook_url: inv.webhook_url as string | null, provider: sms.provider as string, trx_id: sms.trx_id as string, amount: Number(sms.amount) };
+  }
+
+  public rejectUnmatchedSmsForMerchant(merchantId: string, smsId: string, reason: string): boolean {
+    const r = this.db
+      .prepare(`UPDATE unmatched_sms SET status = 'REJECTED', assigned_invoice_id = ? WHERE id = ? AND device_id IN (SELECT id FROM devices WHERE merchant_id = ?) AND status IN ('UNMATCHED','SUSPICIOUS')`)
+      .run(reason ? `rejected: ${reason.slice(0, 200)}` : 'rejected', smsId, merchantId);
+    return Number(r.changes) > 0;
+  }
+
   public assignUnmatchedSms(smsId: string, invoiceId: string) {
     const sms = this.db.prepare('SELECT * FROM unmatched_sms WHERE id = ?').get(smsId) as any;
     if (!sms) throw new Error('Unmatched SMS not found');
@@ -1551,7 +1590,7 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?, ?, ?, ?, 1, datetime('now'), ?)
     `).run(inv.merchant_id, sms.device_id, sms.provider, sms.trx_id, sms.amount, sms.sender, sms.raw_sms, inv.order_id);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'ASSIGN_UNMATCHED_SMS', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Assigned SMS ${smsId} (TrxID: ${sms.trx_id}) to invoice ${invoiceId}`);
+    this.insertAuditLog('admin@bolgram.ir', 'ASSIGN_UNMATCHED_SMS', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Assigned SMS ${smsId} (TrxID: ${sms.trx_id}) to invoice ${invoiceId}`);
     return { success: true, invoiceId, trxId: sms.trx_id };
   }
 
@@ -1570,7 +1609,7 @@ export class DatabaseService {
       VALUES (?, 'admin_manual_override', ?, ?, ?, 'MANUAL_VERIFIED', 'Manually verified via Super Admin console', 1, datetime('now'), ?)
     `).run(inv.merchant_id, inv.provider, trxId, amount || inv.expected_amount, inv.order_id);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'MANUAL_PAYMENT_VERIFICATION', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Manually confirmed invoice ${invoiceId} with TrxID ${trxId} for Tk ${amount || inv.expected_amount}`);
+    this.insertAuditLog('admin@bolgram.ir', 'MANUAL_PAYMENT_VERIFICATION', 'Invoice', invoiceId, '127.0.0.1', 'SUCCESS', `Manually confirmed invoice ${invoiceId} with TrxID ${trxId} for Tk ${amount || inv.expected_amount}`);
     return { success: true, invoiceId, trxId, status: 'PAID' };
   }
 
@@ -1603,7 +1642,7 @@ export class DatabaseService {
       WHERE id = ?
     `).run(trxId, id);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'PAYOUT_APPROVAL', 'Payout', id, '127.0.0.1', 'SUCCESS', `Approved payout ${id} with disbursement TrxID ${trxId}`);
+    this.insertAuditLog('admin@bolgram.ir', 'PAYOUT_APPROVAL', 'Payout', id, '127.0.0.1', 'SUCCESS', `Approved payout ${id} with disbursement TrxID ${trxId}`);
     return { success: true, id, status: 'APPROVED', trxId };
   }
 
@@ -1614,7 +1653,7 @@ export class DatabaseService {
       WHERE id = ?
     `).run(reason, id);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'PAYOUT_REJECTION', 'Payout', id, '127.0.0.1', 'SUCCESS', `Rejected payout ${id}. Reason: ${reason}`);
+    this.insertAuditLog('admin@bolgram.ir', 'PAYOUT_REJECTION', 'Payout', id, '127.0.0.1', 'SUCCESS', `Rejected payout ${id}. Reason: ${reason}`);
     return { success: true, id, status: 'REJECTED', reason };
   }
 
@@ -1629,13 +1668,13 @@ export class DatabaseService {
       VALUES (?, ?, ?, ?, ?)
     `).run(id, type, value, reason, addedBy);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'SECURITY_BLACKLIST_ADD', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Added ${type}: ${value} to blacklist. Reason: ${reason}`);
+    this.insertAuditLog('admin@bolgram.ir', 'SECURITY_BLACKLIST_ADD', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Added ${type}: ${value} to blacklist. Reason: ${reason}`);
     return { id, type, value, reason, added_by: addedBy };
   }
 
   public removeSecurityBlacklist(id: string) {
     this.db.prepare('DELETE FROM security_blacklist WHERE id = ?').run(id);
-    this.insertAuditLog('admin@syncpaybd.site', 'SECURITY_BLACKLIST_REMOVE', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Removed blacklist item ${id}`);
+    this.insertAuditLog('admin@bolgram.ir', 'SECURITY_BLACKLIST_REMOVE', 'Blacklist', id, '127.0.0.1', 'SUCCESS', `Removed blacklist item ${id}`);
     return { success: true, id };
   }
 
@@ -1658,7 +1697,7 @@ export class DatabaseService {
       WHERE provider = ?
     `).run(regex, limit, fee, enabled, provider);
 
-    this.insertAuditLog('admin@syncpaybd.site', 'PROVIDER_RULE_UPDATE', 'ProviderRule', provider, '127.0.0.1', 'SUCCESS', `Updated rule for ${provider} (enabled=${enabled}, limit=${limit})`);
+    this.insertAuditLog('admin@bolgram.ir', 'PROVIDER_RULE_UPDATE', 'ProviderRule', provider, '127.0.0.1', 'SUCCESS', `Updated rule for ${provider} (enabled=${enabled}, limit=${limit})`);
     return { provider, regex_pattern: regex, daily_limit: limit, fee_percentage: fee, is_enabled: enabled };
   }
 
@@ -1688,7 +1727,7 @@ export class DatabaseService {
         VALUES (?, 'sim_device_gateway', ?, ?, ?, ?, ?, 1, datetime('now'), ?)
       `).run(matchedInvoice.merchant_id, provider, trxId, amount, sender, rawSms, matchedInvoice.order_id);
 
-      this.insertAuditLog('simulator@syncpaybd.site', 'SIMULATOR_MATCH', 'Invoice', matchedInvoice.id, '127.0.0.1', 'SUCCESS', `Simulated SMS matched invoice ${matchedInvoice.id}`);
+      this.insertAuditLog('simulator@bolgram.ir', 'SIMULATOR_MATCH', 'Invoice', matchedInvoice.id, '127.0.0.1', 'SUCCESS', `Simulated SMS matched invoice ${matchedInvoice.id}`);
       return { matched: true, invoiceId: matchedInvoice.id, trxId, provider, amount };
     } else {
       // Store in unmatched SMS
@@ -1697,7 +1736,7 @@ export class DatabaseService {
         VALUES (?, 'sim_device_gateway', ?, ?, ?, ?, ?, 'UNMATCHED')
       `).run(id, provider, sender, amount, trxId, rawSms);
 
-      this.insertAuditLog('simulator@syncpaybd.site', 'SIMULATOR_UNMATCHED', 'UnmatchedSms', id, '127.0.0.1', 'SUCCESS', `Simulated SMS stored in Unmatched Pool (TrxID: ${trxId})`);
+      this.insertAuditLog('simulator@bolgram.ir', 'SIMULATOR_UNMATCHED', 'UnmatchedSms', id, '127.0.0.1', 'SUCCESS', `Simulated SMS stored in Unmatched Pool (TrxID: ${trxId})`);
       return { matched: false, unmatchedSmsId: id, trxId, provider, amount };
     }
   }

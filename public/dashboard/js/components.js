@@ -1,4 +1,4 @@
-// PayFlow MFS — Production Dashboard Reusable UI Components
+// Bolgram — Production Dashboard Reusable UI Components
 import { i18n } from './i18n.js';
 import { auth } from './auth.js';
 
@@ -300,7 +300,7 @@ export const components = {
           </div>
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">SyncPay Android Forwarder APK</h3>
+              <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0;">Bolgram Android Forwarder APK</h3>
               <span class="badge badge-completed" style="font-size: 10px;">v1.2.0 STABLE</span>
             </div>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0 0;">
@@ -323,7 +323,7 @@ export const components = {
           </div>
           <h4 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px 0;">কোনো ডিভাইস কানেক্ট করা নেই</h4>
           <p style="font-size: 13px; color: var(--text-secondary); max-width: 440px; margin: 0 auto 20px auto; line-height: 1.5;">
-            আপনার ফোনে <strong>SyncPay Forwarder APK</strong> ইনস্টল করুন এবং নিচের বাটনে ক্লিক করে QR কোড স্ক্যান করে ডিভাইস যুক্ত করুন।
+            আপনার ফোনে <strong>Bolgram Forwarder APK</strong> ইনস্টল করুন এবং নিচের বাটনে ক্লিক করে QR কোড স্ক্যান করে ডিভাইস যুক্ত করুন।
           </p>
           <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <button class="btn btn-primary-action" onclick="window.payflowApp.openAddDeviceModal()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700;">
@@ -748,7 +748,7 @@ export const components = {
                 </button>
               </div>
               <p style="font-size:11px; color:var(--text-muted); margin:6px 0 0 0;">
-                SyncPay will send a POST request with HMAC-SHA256 signature when transactions succeed.
+                Bolgram will send a POST request with HMAC-SHA256 signature when transactions succeed.
               </p>
             </div>
 

@@ -1,11 +1,11 @@
 /**
- * SyncPay BD Super Admin — Bilingual (BN / EN) Translation Engine
+ * Bolgram Super Admin — Bilingual (BN / EN) Translation Engine
  */
 
 export const translations = {
   en: {
     // Brand & Topbar
-    brandTitle: 'SyncPay BD',
+    brandTitle: 'Bolgram',
     brandSubtitle: 'Super Admin Gateway',
     globalSearchPlaceholder: 'Search merchants, TrxID, invoices, devices... (Cmd+K)',
     allOperational: 'All Systems Operational',
@@ -46,7 +46,7 @@ export const translations = {
 
     // Dashboard Home
     greeting: 'Good morning, Super Admin',
-    subGreeting: "Here's the realtime operational status of your SyncPay BD payment gateway.",
+    subGreeting: "Here's the realtime operational status of your Bolgram payment gateway.",
     dateFilter: 'Date Range',
     today: 'Today',
     last7Days: '7 Days',

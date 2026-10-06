@@ -1,4 +1,4 @@
-# SyncPay BD 🇧🇩
+# Bolgram 🇧🇩
 
 > Automated MFS (bKash, Nagad, Rocket, Upay) payment verification engine with zero per-transaction fees. Turn standard Android devices into real-time payment gateways for personal and agent numbers.
 
@@ -24,7 +24,7 @@
 
 ## Architecture Overview
 
-SyncPay BD operates on an event-driven loop between mobile network incoming SMS messages, localized device ingestion endpoints, and merchant webhooks.
+Bolgram operates on an event-driven loop between mobile network incoming SMS messages, localized device ingestion endpoints, and merchant webhooks.
 
 ```
 +---------------------------+       Incoming SMS       +------------------------------------+
@@ -35,7 +35,7 @@ SyncPay BD operates on an event-driven loop between mobile network incoming SMS 
                                                                          | Encrypted HTTPS / Bearer Token
                                                                          v
 +-------------------------------+                     +------------------+------------------+
-| Merchant Store / Application  |                     | SyncPay BD Core Engine (Fastify/TS) |
+| Merchant Store / Application  |                     | Bolgram Core Engine (Fastify/TS) |
 | (WooCommerce, WHMCS, Custom)  | <================== | - Regex MFS Parser                  |
 | - Instant Order Completion    |  Automated Webhook  | - TrxID & Amount Matcher Engine     |
 +-------------------------------+  (HMAC SHA-256)     | - SQLite / Supabase Multi-Tenant DB |
@@ -44,7 +44,7 @@ SyncPay BD operates on an event-driven loop between mobile network incoming SMS 
 
 1. **Transaction Event**: A customer sends funds via bKash, Nagad, Rocket, or Upay to your designated number.
 2. **Device Capture**: The Android agent running on your physical device captures the notification or raw SMS via `Telephony.SMS_RECEIVED` broadcast receivers.
-3. **Parse & Match**: SyncPay BD's parsing engine isolates the Transaction ID (`TrxID`), sender number, and exact BDT amount.
+3. **Parse & Match**: Bolgram's parsing engine isolates the Transaction ID (`TrxID`), sender number, and exact BDT amount.
 4. **Webhook Dispatch**: A cryptographically signed webhook notification (`HMAC-SHA256`) fires to the merchant URL to mark orders as paid.
 
 ---
@@ -146,7 +146,7 @@ The services will be available at:
 
 ## Android Forwarder Setup
 
-The Android Forwarder agent runs as a persistent background service to forward incoming MFS SMS messages to the SyncPay engine.
+The Android Forwarder agent runs as a persistent background service to forward incoming MFS SMS messages to the Bolgram engine.
 
 1. Open `zinipay_forwarder` in Android Studio or VS Code.
 2. Build the APK or run directly on your test device:
@@ -232,7 +232,7 @@ Pre-packaged integrations ready for deployment:
 | **WHMCS** | `packages/whmcs-module/` | Automated invoice activation module for hosting providers |
 | **PHP / Laravel** | `packages/php-sdk/` | PSR-4 compliant composer package with webhook verification |
 | **Node.js** | `packages/node-sdk/` | TypeScript client library with type-safe methods |
-| **Python** | `packages/python-sdk/` | SyncPay REST client for Django, FastAPI, and Flask |
+| **Python** | `packages/python-sdk/` | Bolgram REST client for Django, FastAPI, and Flask |
 
 ---
 
@@ -252,7 +252,7 @@ npm run simulate
 
 ## Security & Verification
 
-- **HMAC Signatures**: Every outgoing webhook contains an `X-SyncPay-Signature` header calculated using SHA-256 and your merchant webhook secret.
+- **HMAC Signatures**: Every outgoing webhook contains an `X-Bolgram-Signature` header calculated using SHA-256 and your merchant webhook secret.
 - **Double-Spend Prevention**: The database enforces a unique constraint on all parsed `trx_id` records, preventing duplicate transaction submissions.
 - **Zero Raw Credentials**: The engine never requests or handles your MFS PIN or personal login details. It reads only incoming payment notification SMS records.
 
@@ -263,4 +263,4 @@ npm run simulate
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## API Integrations
-SyncPay BD provides standardized endpoints for secure transactional handshakes.
+Bolgram provides standardized endpoints for secure transactional handshakes.

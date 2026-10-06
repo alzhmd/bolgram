@@ -1,5 +1,5 @@
 -- ==============================================================================
--- PayFlow MFS Engine - Supabase PostgreSQL Production Schema
+-- Bolgram Engine - Supabase PostgreSQL Production Schema
 -- Version: 2.0.0
 -- Security: Row Level Security (RLS) + Anti-Replay Unique Constraints + Strict Multi-Tenant Isolation
 -- ==============================================================================
@@ -164,7 +164,7 @@ CREATE POLICY "transactions_isolation_policy"
     );
 
 -- ==============================================================================
--- 8. INITIAL SEED DATA (PayFlow Sandbox & Demo Merchants)
+-- 8. INITIAL SEED DATA (Bolgram Sandbox & Demo Merchants)
 -- ==============================================================================
 INSERT INTO merchants (id, business_name, email, phone, status, webhook_url, redirect_url)
 VALUES 
@@ -179,7 +179,7 @@ VALUES
     ),
     (
         '00000000-0000-0000-0000-000000000999',
-        'PayFlow Sandbox Merchant', 
+        'Bolgram Sandbox Merchant', 
         'sandbox@payflowmfs.com', 
         '01700000000', 
         'ACTIVE',

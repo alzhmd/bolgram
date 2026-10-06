@@ -26,7 +26,7 @@ class BiometricService {
   }
 
   /// Authenticate user — returns true if verified
-  static Future<bool> authenticate({String reason = 'SyncPay BD Agent-এ প্রবেশ করুন'}) async {
+  static Future<bool> authenticate({String reason = 'Bolgram Agent-এ প্রবেশ করুন'}) async {
     try {
       return await _auth.authenticate(
         localizedReason: reason,

@@ -3,6 +3,8 @@ import assert from 'node:assert';
 import Fastify, { FastifyInstance } from 'fastify';
 import { deviceRoutes } from '../src/routes/device.routes.js';
 import { InvoiceRepository } from '../src/db/repositories/invoice.repository.js';
+import { merchantRoutes } from '../src/routes/merchant.routes.js';
+import { CryptoUtil } from '../src/utils/crypto.js';
 
 // End-to-end card-to-card flow: unique amount → bank deposit SMS → invoice PAID automatically.
 describe('Iranian card-to-card auto verification', () => {
@@ -17,6 +19,7 @@ describe('Iranian card-to-card auto verification', () => {
   before(async () => {
     app = Fastify();
     await app.register(deviceRoutes);
+    await app.register(merchantRoutes);
     await app.ready();
   });
   after(async () => app.close());
@@ -46,5 +49,21 @@ describe('Iranian card-to-card auto verification', () => {
     assert.strictEqual((await ingest('رمز پویا شما 123456 است', 'Bank Mellat')).statusCode, 422);
     await ingest(mellatSms(inv.amount, 90_000_000), '+989121234567');
     assert.strictEqual((await InvoiceRepository.findByInvoiceId(inv.invoice_id))?.status, 'PENDING');
+  });
+
+  test('suspicious deposit is queued for review; merchant approves it manually', async () => {
+    const auth = { authorization: `Bearer ${CryptoUtil.signJwt({ id: MERCHANT, role: 'merchant' })}` };
+    const inv = await InvoiceRepository.create({ merchantId: MERCHANT, invoiceId: `IRE${Date.now()}`, customerName: 'ه', amount: 4_000_000 });
+    await ingest(mellatSms(inv.amount, 77_000_000), '+989350000000');
+    const list = JSON.parse((await app.inject({ method: 'GET', url: '/api/v1/merchant/unmatched', headers: auth })).body).data;
+    const item = list.find((x: any) => Number(x.amount) === inv.amount);
+    assert.strictEqual(item?.status, 'SUSPICIOUS');
+    const other = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, payload: { invoiceId: inv.invoice_id } });
+    assert.strictEqual(other.statusCode, 401);
+    const ok = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, headers: auth, payload: { invoiceId: inv.invoice_id } });
+    assert.strictEqual(ok.statusCode, 200, ok.body);
+    assert.strictEqual((await InvoiceRepository.findByInvoiceId(inv.invoice_id))?.status, 'PAID');
+    const twice = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, headers: auth, payload: { invoiceId: inv.invoice_id } });
+    assert.strictEqual(twice.statusCode, 409);
   });
 });

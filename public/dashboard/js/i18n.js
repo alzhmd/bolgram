@@ -1,4 +1,4 @@
-// SyncPay BD — Production Bilingual i18n Engine (BN / EN)
+// Bolgram — Production Bilingual i18n Engine (BN / EN)
 
 export const translations = {
   en: {
@@ -114,7 +114,7 @@ export const translations = {
     'devices.modal.name': 'Device Label / Model',
     'devices.modal.sim': 'SIM Phone Number (bKash/Nagad)',
     'devices.modal.submit': 'Generate Pairing Token',
-    'devices.modal.tokenNotice': 'Enter this token in your SyncPay Android APK daemon to connect.',
+    'devices.modal.tokenNotice': 'Enter this token in your Bolgram Android APK daemon to connect.',
 
     // API Keys Page
     'apiKeys.title': 'API Authentication Keys',
@@ -299,7 +299,7 @@ export const translations = {
     'devices.modal.name': 'ডিভাইসের নাম / মডেল',
     'devices.modal.sim': 'সিম ফোন নাম্বার (bKash/Nagad)',
     'devices.modal.submit': 'পেয়ারিং টোকেন তৈরি করুন',
-    'devices.modal.tokenNotice': 'এই টোকেনটি আপনার ফোনের SyncPay Android অ্যাপে ইনপুট দিয়ে কানেক্ট করুন।',
+    'devices.modal.tokenNotice': 'এই টোকেনটি আপনার ফোনের Bolgram Android অ্যাপে ইনপুট দিয়ে কানেক্ট করুন।',
 
     // API Keys Page
     'apiKeys.title': 'API অথেনটিকেশন চাবি',

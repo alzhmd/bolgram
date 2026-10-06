@@ -5,7 +5,7 @@ class AppLocalizations {
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
-      'app_name': 'SyncPay Agent',
+      'app_name': 'Bolgram Agent',
       'app_tagline': 'Secure Payment Forwarder',
       'status_online': 'ONLINE',
       'status_offline': 'OFFLINE',
@@ -43,7 +43,7 @@ class AppLocalizations {
 
       // Device Setup & Pairing
       'connect_your_device': 'Connect Your Device',
-      'connect_device_desc': 'Connect this Android device to your SyncPay merchant account.',
+      'connect_device_desc': 'Connect this Android device to your Bolgram merchant account.',
       'device_id': 'Device ID',
       'merchant_id': 'Merchant ID',
       'pairing_token': 'Pairing Token',
@@ -98,7 +98,7 @@ class AppLocalizations {
       'start_service': 'Start Service',
       'stop_service': 'Stop Service',
       'battery_settings_btn': 'Open Battery Settings',
-      'battery_guidance': 'For reliable SMS processing, allow SyncPay Agent to run unrestricted in the background.',
+      'battery_guidance': 'For reliable SMS processing, allow Bolgram Agent to run unrestricted in the background.',
 
       // Connection & Device Info
       'connected_merchant': 'Connected Merchant',
@@ -163,7 +163,7 @@ class AppLocalizations {
 
       // Device Setup & Pairing
       'connect_your_device': 'ডিভাইস সংযুক্ত করুন',
-      'connect_device_desc': 'আপনার SyncPay মার্চেন্ট অ্যাকাউন্টের সাথে এই ডিভাইসটি সংযুক্ত করুন।',
+      'connect_device_desc': 'আপনার Bolgram মার্চেন্ট অ্যাকাউন্টের সাথে এই ডিভাইসটি সংযুক্ত করুন।',
       'device_id': 'ডিভাইস আইডি',
       'merchant_id': 'মার্চেন্ট আইডি',
       'pairing_token': 'পেয়ারিং টোকেন',
@@ -218,7 +218,7 @@ class AppLocalizations {
       'start_service': 'সার্ভিস চালু করুন',
       'stop_service': 'সার্ভিস বন্ধ করুন',
       'battery_settings_btn': 'ব্যাটারি সেটিংস ওপেন করুন',
-      'battery_guidance': 'নির্ভরযোগ্য এসএমএস প্রসেসিং নিশ্চিত করতে SyncPay এজেন্টকে ব্যাকগ্রাউন্ডে আনরেস্ট্রিক্টেড চলতে দিন।',
+      'battery_guidance': 'নির্ভরযোগ্য এসএমএস প্রসেসিং নিশ্চিত করতে Bolgram এজেন্টকে ব্যাকগ্রাউন্ডে আনরেস্ট্রিক্টেড চলতে দিন।',
 
       // Connection & Device Info
       'connected_merchant': 'সংযুক্ত মার্চেন্ট',

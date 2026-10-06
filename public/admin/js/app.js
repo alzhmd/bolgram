@@ -1,5 +1,5 @@
 /**
- * PayFlow MFS Super Admin — Master Application Controller
+ * Bolgram Super Admin — Master Application Controller
  */
 
 import { i18n } from './i18n.js';
@@ -873,7 +873,7 @@ class AdminApp {
       <div class="page-header">
         <div class="page-title-wrap">
           <h1>Live Server Daemon Logs</h1>
-          <p>Stdout/Stderr streams from PayFlow payment processor daemon.</p>
+          <p>Stdout/Stderr streams from Bolgram payment processor daemon.</p>
         </div>
         <div class="header-actions">
           <div class="filter-group">

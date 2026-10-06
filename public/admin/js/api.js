@@ -1,19 +1,35 @@
 /**
- * PayFlow MFS Super Admin — Centralized API Client
+ * Bolgram Super Admin — Centralized API Client
  * Designed for atomic Fastify backend execution & seamless Supabase transition
  */
 
 class AdminApiClient {
   constructor() {
     this.baseUrl = window.location.origin;
-    this.token = localStorage.getItem('payflow_admin_token') || 'super_admin_session_token';
+    this.token = localStorage.getItem('payflow_admin_token') || '';
+    if (!this.token) this.login();
+  }
+
+  login() {
+    const email = prompt('Admin email');
+    const password = email ? prompt('Admin password') : null;
+    if (!email || !password) return;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/v1/admin/auth/login', false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({ email, password }));
+    const data = JSON.parse(xhr.responseText || '{}');
+    if (data.token) {
+      this.token = data.token;
+      localStorage.setItem('payflow_admin_token', data.token);
+    } else alert(data.error || 'Login failed');
   }
 
   getHeaders() {
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.token}`,
-      'X-PayFlow-Admin-Role': 'Super Admin',
+      'X-Bolgram-Admin-Role': 'Super Admin',
     };
   }
 
@@ -22,6 +38,7 @@ class AdminApiClient {
     const headers = { ...this.getHeaders(), ...options.headers };
     try {
       const res = await fetch(url, { ...options, headers });
+      if (res.status === 401) { localStorage.removeItem('payflow_admin_token'); this.token = ''; this.login(); }
       if (!res.ok) {
         throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
       }

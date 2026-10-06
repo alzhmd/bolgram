@@ -121,6 +121,20 @@ export class TransactionService {
       }
     }
 
+    if (!matchedInvoice) {
+      // Unknown deposit (no open invoice with this amount) or untrusted sender: hold for manual review.
+      const { dbService } = await import('../db/database.js');
+      dbService.insertUnmatchedSms({
+        deviceId: params.deviceId,
+        provider: parsed.provider,
+        sender: params.sender,
+        amount: parsed.amount,
+        trxId: parsed.trxId,
+        rawSms: params.sms,
+        status: parsed.trusted === false ? 'SUSPICIOUS' : 'UNMATCHED',
+      });
+    }
+
     return {
       success: true,
       parsed,

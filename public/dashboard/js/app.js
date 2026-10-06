@@ -1,10 +1,10 @@
-// SyncPay BD — Production Dashboard Master Application Controller
+// Bolgram — Production Dashboard Master Application Controller
 import { i18n } from './i18n.js?v=1.2.4';
 import { api } from './api.js?v=1.2.4';
 import { components } from './components.js?v=1.2.4';
 import { auth } from './auth.js?v=1.2.4';
 
-class PayFlowDashboardApp {
+class BolgramDashboardApp {
   constructor() {
     this.currentView = 'home';
     this.chartMetric = 'revenue';
@@ -28,9 +28,10 @@ class PayFlowDashboardApp {
     await this.checkOAuthCallback();
 
     // 2. Auth Gate — show login overlay if not logged in
-    if (!auth.isLoggedIn()) {
-      this.showAuthOverlay();
-      return; // Don't load dashboard data until logged in
+    // A session is only valid with a server-issued token (the old local-only login is disabled).
+    if (!auth.isLoggedIn() || !localStorage.getItem('syncpay_token')) {
+      window.location.href = '/login.html';
+      return;
     }
 
     // 3. Initialize session UI
@@ -1480,7 +1481,7 @@ class PayFlowDashboardApp {
               <span class="badge" style="background:var(--primary); color:#fff; font-size:11px; margin-bottom:8px;">Ready Integrations</span>
               <h2 style="font-size:20px; font-weight:800; color:var(--text-primary); margin:6px 0;">Official Payment Plugins & Client SDKs</h2>
               <p style="font-size:13px; color:var(--text-muted); max-width:650px; line-height:1.6;">
-                Easily integrate SyncPay BD into your WordPress/WooCommerce store, WHMCS billing platform, or custom PHP/Node/Python applications.
+                Easily integrate Bolgram into your WordPress/WooCommerce store, WHMCS billing platform, or custom PHP/Node/Python applications.
               </p>
             </div>
             <a href="#docs" class="btn btn-secondary-action" style="display:inline-flex; align-items:center; gap:8px;">
@@ -1729,11 +1730,11 @@ class PayFlowDashboardApp {
 
     showPluginGuide(pluginName) {
       const guides = {
-        woocommerce: 'WooCommerce Installation Guide:\n1. Go to WordPress Dashboard > Plugins > Add New > Upload Plugin.\n2. Upload the downloaded syncpay-woocommerce.zip file and activate it.\n3. Go to WooCommerce > Settings > Payments > SyncPay BD and paste your API Key.',
-        whmcs: 'WHMCS Module Setup Guide:\n1. Unzip the downloaded file into the /modules/gateways/ directory.\n2. Activate SyncPay in WHMCS Setup > Payments > Payment Gateways.\n3. Enter your Merchant Key and Webhook Secret, then click Save.',
-        php: 'PHP Integration Sample:\nuse SyncPay\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
-        nodejs: 'Node.js Integration Sample:\nimport { SyncPayClient } from "@syncpaybd/sdk";\nconst pay = new SyncPayClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
-        python: 'Python Integration Sample:\nfrom syncpay import SyncPay\nclient = SyncPay(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
+        woocommerce: 'WooCommerce Installation Guide:\n1. Go to WordPress Dashboard > Plugins > Add New > Upload Plugin.\n2. Upload the downloaded syncpay-woocommerce.zip file and activate it.\n3. Go to WooCommerce > Settings > Payments > Bolgram and paste your API Key.',
+        whmcs: 'WHMCS Module Setup Guide:\n1. Unzip the downloaded file into the /modules/gateways/ directory.\n2. Activate Bolgram in WHMCS Setup > Payments > Payment Gateways.\n3. Enter your Merchant Key and Webhook Secret, then click Save.',
+        php: 'PHP Integration Sample:\nuse Bolgram\\Client;\n$client = new Client(["api_key" => "YOUR_KEY"]);\n$invoice = $client->invoice->create(["amount" => 1000, "order_id" => "ORD-123"]);',
+        nodejs: 'Node.js Integration Sample:\nimport { BolgramClient } from "@syncpaybd/sdk";\nconst pay = new BolgramClient({ apiKey: "YOUR_KEY" });\nconst inv = await pay.createInvoice({ amount: 1000, orderId: "ORD-123" });',
+        python: 'Python Integration Sample:\nfrom syncpay import Bolgram\nclient = Bolgram(api_key="YOUR_KEY")\ninv = client.create_invoice(amount=1000, order_id="ORD-123")',
       };
       alert(guides[pluginName] || 'Please refer to documentation');
     }
@@ -2039,13 +2040,13 @@ class PayFlowDashboardApp {
                 <span class="badge" style="font-size:10px; background:rgba(16, 185, 129, 0.15); color:#10b981;">Active on All Paid Plans</span>
               </label>
               <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-                <span style="font-size:13px; color:var(--text-muted); font-family:var(--font-mono); font-weight:600; white-space:nowrap;">syncpaybd.site/pay/</span>
+                <span style="font-size:13px; color:var(--text-muted); font-family:var(--font-mono); font-weight:600; white-space:nowrap;">bolgram.ir/pay/</span>
                 <input type="text" id="settings-brand-slug" class="form-control" placeholder="gadgetbd" style="font-weight:700; font-family:var(--font-mono);" oninput="window.payflowApp.updateSlugPreview(this.value)">
               </div>
               <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px dashed var(--border);">
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Live Generated Customer Checkout URL:</div>
                 <div id="slug-preview-url" class="mono" style="font-size:12px; font-weight:700; color:var(--primary); word-break:break-all;">
-                  https://syncpaybd.site/pay/your-store?invoice_id=PF...
+                  https://bolgram.ir/pay/your-store?invoice_id=PF...
                 </div>
               </div>
               <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">কাস্টমার পেমেন্ট করার সময় ব্রাউজারে এই লিঙ্ক দেখতে পাবে।</span>
@@ -2074,7 +2075,7 @@ class PayFlowDashboardApp {
               <div style="margin-top:10px; padding:10px; background:rgba(0,0,0,0.15); border-radius:6px; font-size:11px; color:var(--text-muted);">
                 <div style="font-weight:700; color:var(--text); margin-bottom:4px;">DNS CNAME Configuration:</div>
                 <div>আপনার ডোমেনে একটি CNAME রেকর্ড যোগ করুন:</div>
-                <div style="margin-top:4px;"><strong style="color:var(--text);">Host:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">pay</span> &bull; <strong style="color:var(--text);">Points to:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">cname.syncpaybd.site</span></div>
+                <div style="margin-top:4px;"><strong style="color:var(--text);">Host:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">pay</span> &bull; <strong style="color:var(--text);">Points to:</strong> <span class="mono" style="color:var(--primary); font-weight:700;">cname.bolgram.ir</span></div>
               </div>
               <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:6px;">আপনার নিজস্ব ডোমেনের সাবডোমেন দিয়ে গেটওয়ে হোয়াইট-লেবেল করুন।</span>
             </div>
@@ -2746,7 +2747,7 @@ class PayFlowDashboardApp {
     }
 
     copyAllCredentials(mId, apiKey, whSec) {
-      const text = `SyncPay BD Payment Credentials:\nMerchant ID: ${mId}\nSecret API Key: ${apiKey}\nWebhook Secret: ${whSec}`;
+      const text = `Bolgram Payment Credentials:\nMerchant ID: ${mId}\nSecret API Key: ${apiKey}\nWebhook Secret: ${whSec}`;
       this.copyText(text);
       this.showToast('All 3 integration credentials copied to clipboard!', 'success');
     }
@@ -3070,7 +3071,7 @@ class PayFlowDashboardApp {
           document.getElementById('pm-routing-number').value = '225271983';
           document.getElementById('pm-sender-label').value = 'Sender Bank / Account Name *';
           document.getElementById('pm-trx-label').value = 'Bank Transfer Ref / Slip No *';
-          document.getElementById('pm-instructions').value = '1. Transfer funds from Bank App (NPSB/BEFTN)\n2. Bank: City Bank PLC, Branch: Gulshan Avenue\n3. Account: {ACCOUNT_NUMBER}, Name: SyncPay Ltd\n4. Enter amount ৳ {AMOUNT} and reference {REF}\n5. Enter reference to verify';
+          document.getElementById('pm-instructions').value = '1. Transfer funds from Bank App (NPSB/BEFTN)\n2. Bank: City Bank PLC, Branch: Gulshan Avenue\n3. Account: {ACCOUNT_NUMBER}, Name: Bolgram Ltd\n4. Enter amount ৳ {AMOUNT} and reference {REF}\n5. Enter reference to verify';
         } else if (type === 'binance') {
           document.getElementById('pm-title').value = 'Binance Pay';
           document.getElementById('pm-badge').value = 'CRYPTO';
@@ -3349,7 +3350,7 @@ class PayFlowDashboardApp {
       overlay.innerHTML = `
       <div class="auth-box">
         <div class="auth-logo">
-          <img src="/images/syncpay-logo.png" alt="SyncPay BD" style="height:44px; width:auto; object-fit:contain;">
+          <img src="/images/syncpay-logo.png" alt="Bolgram" style="height:44px; width:auto; object-fit:contain;">
         </div>
         <div class="auth-tabs">
           <button class="auth-tab active" id="tab-login" onclick="window.payflowApp.switchAuthTab('login')">Login</button>
@@ -3376,7 +3377,7 @@ class PayFlowDashboardApp {
 
           <div class="auth-field">
             <label>Email or Phone Number</label>
-            <input type="text" id="auth-email" class="form-control" placeholder="demo@syncpaybd.site or 017xxxxxxxx" autocomplete="username">
+            <input type="text" id="auth-email" class="form-control" placeholder="demo@bolgram.ir or 017xxxxxxxx" autocomplete="username">
           </div>
           <div class="auth-field">
             <label>Password</label>
@@ -3433,7 +3434,7 @@ class PayFlowDashboardApp {
         </div>
 
         <div style="text-align:center; margin-top:16px;">
-          <a href="/" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← SyncPay BD Homepage</a>
+          <a href="/" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← Bolgram Homepage</a>
         </div>
       </div>
     `;
@@ -3562,7 +3563,7 @@ class PayFlowDashboardApp {
 
     fillDemo(plan) {
       const demos = {
-        growth: { email: 'demo@syncpaybd.site', pass: 'demo1234' },
+        growth: { email: 'demo@bolgram.ir', pass: 'demo1234' },
         starter: { email: 'starter@test.com', pass: 'test1234' },
         enterprise: { email: 'enterprise@test.com', pass: 'ent1234' },
       };
@@ -3854,7 +3855,7 @@ class PayFlowDashboardApp {
   }
 
 // Global bootstrap instance
-window.syncpayApp = window.payflowApp = new PayFlowDashboardApp();
+window.syncpayApp = window.payflowApp = new BolgramDashboardApp();
 document.addEventListener('DOMContentLoaded', () => {
   window.syncpayApp.init();
 });

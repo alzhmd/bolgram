@@ -7,7 +7,7 @@ import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { MerchantRepository } from '../db/repositories/merchant.repository.js';
 import { fraudShield, recordFailedVerification, clearVerificationAttempts } from '../middleware/fraud-shield.js';
 
-// API Key extractor supporting SyncPay / PayFlow headers, query params, or body
+// API Key extractor supporting Bolgram / Bolgram headers, query params, or body
 function extractApiKey(request: FastifyRequest): string | undefined {
   const headerKey = request.headers['syncpay-api-key'] || request.headers['payflow-api-key'] || request.headers['x-api-key'] || request.headers['zini-api-key'];
   if (typeof headerKey === 'string' && headerKey.trim()) {
@@ -83,7 +83,7 @@ const legacyVerifySchema = z.object({
 
 export async function paymentRoutes(fastify: FastifyInstance) {
   // ==========================================
-  // 1. PayFlow Standard API: Create Invoice
+  // 1. Bolgram Standard API: Create Invoice
   // POST /v1/payment/create & /api/v1/payment/create
   // ==========================================
   const handlePayflowCreateInvoice = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -139,7 +139,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
   fastify.post('/api/v1/payment/create', handlePayflowCreateInvoice);
 
   // ==========================================
-  // 2. PayFlow Standard API: Verify Invoice
+  // 2. Bolgram Standard API: Verify Invoice
   // POST /v1/payment/verify & /api/v1/payment/verify
   // ==========================================
   const handlePayflowVerifyInvoice = async (request: FastifyRequest, reply: FastifyReply) => {

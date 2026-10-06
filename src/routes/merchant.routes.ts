@@ -1,3 +1,7 @@
+import { randomBytes } from 'node:crypto';
+import { merchantAuthHook } from '../middleware/auth.js';
+import { merchantWebhookSecret } from '../utils/crypto.js';
+import { WebhookService } from '../services/webhook.service.js';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import QRCode from 'qrcode';
 import { MerchantService } from '../services/merchant.service.js';
@@ -14,22 +18,15 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   const LEGACY_UUID_MERCHANT_ID = '00000000-0000-0000-0000-000000000101';
   const FALLBACK_MERCHANT_ID = 'm_demo_101';
 
+  fastify.addHook('onRequest', merchantAuthHook);
+
+  // Set by merchantAuthHook from a verified JWT or API key; headers are never trusted.
   function resolveMerchantId(request: FastifyRequest): string {
-    const headerMerchantId = (request.headers['x-merchant-id'] || request.headers['merchant-id']) as string | undefined;
-    if (headerMerchantId && typeof headerMerchantId === 'string' && headerMerchantId.trim() && headerMerchantId !== 'null' && headerMerchantId !== 'undefined') {
-      const trimmed = headerMerchantId.trim();
-      if (trimmed === LEGACY_UUID_MERCHANT_ID || trimmed === FALLBACK_MERCHANT_ID) {
-        return DEMO_17DIGIT_MERCHANT_ID;
-      }
-      return trimmed;
-    }
-    const apiKey = (request.headers['syncpay-api-key'] || request.headers['x-api-key'] || request.headers['payflow-api-key']) as string | undefined;
-    if (apiKey && typeof apiKey === 'string' && apiKey.trim() && !apiKey.startsWith('sandbox_test_')) {
-      const merchant = dbService.getMerchantByApiKey(apiKey.trim());
-      if (merchant) return merchant.id;
-    }
-    return DEMO_17DIGIT_MERCHANT_ID;
+    const id = (request as any).merchantId as string | undefined;
+    if (!id) throw new Error('Unauthenticated');
+    return id;
   }
+
 
   function resolveAuthMerchantId(request: FastifyRequest): string {
     const authHeader = request.headers.authorization;
@@ -244,7 +241,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     const keys = await MerchantService.getApiKeys(merchantId);
     const primaryKey = keys && keys.length > 0 ? keys[0] : null;
     const merchant = await MerchantRepository.findById(merchantId);
-    const webhookSecret = `whsec_${CryptoUtil.hashToken(merchantId).slice(0, 24)}`;
+    const webhookSecret = merchantWebhookSecret(merchantId);
 
     return reply.send({
       success: true,
@@ -257,6 +254,37 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         environment: primaryKey?.environment || 'production',
       },
     });
+  });
+
+  // Unknown / suspicious deposits (no matching invoice, untrusted sender): manual review queue
+  fastify.get('/api/v1/merchant/unmatched', async (request: FastifyRequest, reply: FastifyReply) => {
+    return reply.send({ success: true, data: dbService.getUnmatchedSmsForMerchant(resolveMerchantId(request)) });
+  });
+
+  fastify.post('/api/v1/merchant/unmatched/:id/assign', async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const merchantId = resolveMerchantId(request);
+    const { invoiceId } = (request.body || {}) as { invoiceId?: string };
+    if (!invoiceId) return reply.status(400).send({ success: false, error: 'invoiceId is required' });
+    try {
+      const inv = dbService.assignUnmatchedSmsForMerchant(merchantId, request.params.id, invoiceId);
+      if (inv.webhook_url) {
+        WebhookService.dispatch({
+          merchantId,
+          invoiceId,
+          webhookUrl: inv.webhook_url,
+          payload: { invoice_id: invoiceId, status: 'true', provider: inv.provider, trx_id: inv.trx_id, amount: inv.amount, timestamp: new Date().toISOString() },
+        }).catch(() => {});
+      }
+      return reply.send({ success: true, data: { invoice_id: invoiceId, status: 'PAID' } });
+    } catch (e: any) {
+      return reply.status(409).send({ success: false, error: e.message });
+    }
+  });
+
+  fastify.post('/api/v1/merchant/unmatched/:id/reject', async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const { reason } = (request.body || {}) as { reason?: string };
+    const ok = dbService.rejectUnmatchedSmsForMerchant(resolveMerchantId(request), request.params.id, reason || '');
+    return ok ? reply.send({ success: true }) : reply.status(404).send({ success: false, error: 'Not found' });
   });
 
   // Get chart data
@@ -301,7 +329,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     }
 
     const token = dev ? (dev as any).device_token || dev.id : deviceId;
-    const host = request.headers.host || 'syncpaybd.site';
+    const host = request.headers.host || 'bolgram.ir';
     const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
     const protocol = request.headers['x-forwarded-proto'] || (isLocal ? 'http' : 'https');
     const serverUrl = isLocal ? 'http://10.10.26.121:4000' : `${protocol}://${host}`;
@@ -311,7 +339,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       payloadMerchantId = DEMO_17DIGIT_MERCHANT_ID;
     }
 
-    let merchantBusinessName = 'SyncPay Merchant Store';
+    let merchantBusinessName = 'Bolgram Merchant Store';
     try {
       const merchant = await MerchantRepository.findById(payloadMerchantId);
       if (merchant?.business_name) {
@@ -326,7 +354,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       business_name: merchantBusinessName,
       device_id: dev?.id || deviceId,
       device_token: token,
-      device_name: dev?.device_name || 'SyncPay Device',
+      device_name: dev?.device_name || 'Bolgram Device',
     };
 
     try {
@@ -420,7 +448,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       status: 'ACTIVE',
       created_at: new Date().toISOString().split('T')[0],
     };
-    return reply.status(201).send({ success: true, data: newSite, message: 'Website connected to SyncPay BD gateway' });
+    return reply.status(201).send({ success: true, data: newSite, message: 'Website connected to Bolgram gateway' });
   });
 
   // ==========================================
@@ -518,8 +546,9 @@ export async function merchantRoutes(fastify: FastifyInstance) {
     const cleanPhone = (body.phone || '01700000000').replace(/\D/g, '').slice(-11).padStart(11, '0');
     const d = new Date();
     const dateStr = String(d.getFullYear()).slice(-2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-    const id = cleanPhone + dateStr; // Exactly 17 digits: 11 phone + 6 date (YYMMDD)
-    const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
+    void cleanPhone; void dateStr;
+    const id = 'm_' + randomBytes(9).toString('hex');
+    const apiKey = 'live_sk_' + randomBytes(24).toString('hex');
     const businessName = body.business_name || body.name + ' Store';
 
     // 1. Sync to Supabase (if available)
@@ -566,7 +595,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
       businessName,
       merchantName: body.name,
       apiKey,
-      loginUrl: 'https://syncpaybd.site/dashboard',
+      loginUrl: 'https://bolgram.ir/dashboard',
     }).catch((err: any) => console.warn('[MerchantRoute] Welcome email notice:', err?.message));
 
     const token = CryptoUtil.signJwt({
@@ -613,9 +642,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         return reply.status(401).send({ success: false, error: 'Invalid email or password' });
       }
     } else {
-      if (email.includes('demo') && body.password !== 'demo1234' && body.password !== 'test1234') {
-        return reply.status(401).send({ success: false, error: 'Invalid credentials for demo account' });
-      }
+      return reply.status(401).send({ success: false, error: 'Invalid email or password' });
     }
 
     let apiKey = (merchant as any).api_key || 'live_sk_no78zeijjjdrjmfe2tmmmi';
@@ -653,96 +680,10 @@ export async function merchantRoutes(fastify: FastifyInstance) {
   });
 
   // Merchant Auth: Direct Google OAuth (No Supabase dependency)
-  fastify.post('/api/v1/merchant/auth/google', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as {
-      email?: string;
-      name?: string;
-      sub?: string;
-      plan?: string;
-      billing?: string;
-      credential?: string;
-    };
-
-    if (!body.email) {
-      return reply.status(400).send({ success: false, error: 'Email is required for Google authentication' });
-    }
-
-    const email = body.email.trim().toLowerCase();
-    let merchant = await MerchantRepository.findByEmail(email);
-
-    if (!merchant) {
-      const id = '00000000-0000-4' + Math.random().toString(16).substring(2, 5) + '-a' + Math.random().toString(16).substring(2, 5) + '-' + Math.random().toString(16).substring(2, 14);
-      const apiKey = 'live_sk_' + Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14);
-      const businessName = body.name?.trim() || email.split('@')[0];
-      const plan = (body.plan || 'FREE').toUpperCase();
-
-      try {
-        dbService.insertMerchant({
-          id,
-          name: businessName,
-          api_key: apiKey,
-          webhook_url: '',
-          email,
-          phone: '',
-          status: 'ACTIVE',
-          plan,
-          payment_status: plan === 'FREE' ? 'FREE' : 'PENDING',
-          password_hash: 'oauth_google_' + (body.sub || id).slice(0, 12),
-        });
-      } catch (e: any) {
-        console.warn('[GoogleAuth] Local SQLite insert notice:', e?.message);
-      }
-
-      merchant = await MerchantRepository.findByEmail(email);
-      if (!merchant) {
-        merchant = {
-          id,
-          business_name: businessName,
-          email,
-          phone: '',
-          status: 'ACTIVE',
-          plan,
-          payment_status: plan === 'FREE' ? 'FREE' : 'PENDING',
-          payment_note: '',
-        } as any;
-      }
-    }
-
-    const activeMerchant = merchant!;
-    let apiKey = 'live_sec_' + activeMerchant.id.slice(0, 8);
-    try {
-      const { ApiKeyRepository } = await import('../db/repositories/api-key.repository.js');
-      const keys = await ApiKeyRepository.listByMerchant(activeMerchant.id);
-      if (keys && keys.length > 0) {
-        apiKey = keys[0].key_prefix + '...';
-      }
-    } catch {}
-
-    const token = CryptoUtil.signJwt({
-      id: activeMerchant.id,
-      email: activeMerchant.email,
-      name: activeMerchant.business_name,
-      role: 'merchant',
-    });
-
-    return reply.send({
-      success: true,
-      merchant: {
-        id: activeMerchant.id,
-        name: activeMerchant.business_name,
-        email: activeMerchant.email,
-        phone: activeMerchant.phone || '',
-        status: activeMerchant.status || 'ACTIVE',
-        plan: activeMerchant.plan || 'FREE',
-        payment_status: activeMerchant.payment_status || 'FREE',
-        payment_note: activeMerchant.payment_note || '',
-        api_key: apiKey,
-      },
-      token,
-      message: 'Google authentication successful',
-    });
+  fastify.post('/api/v1/merchant/auth/google', async (_request: FastifyRequest, reply: FastifyReply) => {
+    // Upstream trusted the posted email without verifying a Google ID token. Disabled.
+    return reply.status(410).send({ success: false, error: 'Google sign-in is disabled' });
   });
-
   // Merchant Auth: Current User (Session verification)
   fastify.get('/api/v1/merchant/auth/me', async (request: FastifyRequest, reply: FastifyReply) => {
     const authHeader = request.headers.authorization;
@@ -796,7 +737,7 @@ export async function merchantRoutes(fastify: FastifyInstance) {
         can_use_custom_domain: canUseCustomDomain,
         branded_checkout_url: merchant.brand_slug ? `${protocol}://${host}/pay/${merchant.brand_slug}` : `${protocol}://${host}/checkout`,
         custom_domain_checkout_url: merchant.custom_domain ? `https://${merchant.custom_domain}/checkout` : null,
-        dns_cname_target: 'cname.syncpaybd.site',
+        dns_cname_target: 'cname.bolgram.ir',
       },
     });
   });

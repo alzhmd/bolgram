@@ -1,5 +1,18 @@
 import crypto from 'node:crypto';
 
+let devSecret: string | null = null;
+export function jwtSecret(): string {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  if (process.env.NODE_ENV === 'production') throw new Error('JWT_SECRET must be set in production');
+  devSecret ??= crypto.randomBytes(32).toString('hex');
+  return devSecret;
+}
+
+/** Per-merchant webhook secret, keyed by JWT_SECRET (upstream used a public fallback / unkeyed hash). */
+export function merchantWebhookSecret(merchantId: string): string {
+  return 'whsec_' + crypto.createHmac('sha256', jwtSecret()).update(`webhook:${merchantId}`).digest('hex').slice(0, 40);
+}
+
 export class CryptoUtil {
   /**
    * Generates a SHA-256 hash of an API key or device token for secure storage
@@ -73,7 +86,7 @@ export class CryptoUtil {
    */
   public static signJwt(
     payload: Record<string, any>,
-    secret: string = process.env.JWT_SECRET || 'syncpay_jwt_secret_2026',
+    secret: string = jwtSecret(),
     expiresInHours: number = 72
   ): string {
     const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
@@ -89,7 +102,7 @@ export class CryptoUtil {
    */
   public static verifyJwt(
     token: string,
-    secret: string = process.env.JWT_SECRET || 'syncpay_jwt_secret_2026'
+    secret: string = jwtSecret()
   ): { valid: boolean; payload?: any } {
     try {
       const [header, body, signature] = token.split('.');

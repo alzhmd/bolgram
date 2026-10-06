@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webhook API | SyncPay BD</title>
-  <meta name="description" content="SyncPay BD Webhook API — Stream real-time payment SMS events directly to your endpoint.">
+  <title>Webhook API | Bolgram</title>
+  <meta name="description" content="Bolgram Webhook API — Stream real-time payment SMS events directly to your endpoint.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -57,7 +57,7 @@
 <body>
   <header>
     <div class="nav-wrap">
-      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>SyncPay BD</span></a>
+      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>Bolgram</span></a>
       <div class="nav-right">
         <a href="/docs/api">API Docs</a>
         <a href="/docs/trx-verification">Verification</a>
@@ -94,7 +94,7 @@
       </div>
 
       <h2 id="overview">How Webhooks Work</h2>
-      <p>When our Android agent receives a payment SMS, it notifies the SyncPay server. The server then dispatches an HTTP POST payload to your registered webhook URL. When your server responds with <code>200 OK</code>, delivery is confirmed.</p>
+      <p>When our Android agent receives a payment SMS, it notifies the Bolgram server. The server then dispatches an HTTP POST payload to your registered webhook URL. When your server responds with <code>200 OK</code>, delivery is confirmed.</p>
 
       <h2 id="setup">Webhook Setup</h2>
       <div class="setup-steps">
@@ -156,7 +156,7 @@
 }</pre></div>
 
       <h2 id="security">Signature Verification</h2>
-      <p>Every webhook request includes an <code>X-SyncPay-Signature</code> header. Verify the HMAC-SHA256 hash of the request body.</p>
+      <p>Every webhook request includes an <code>X-Bolgram-Signature</code> header. Verify the HMAC-SHA256 hash of the request body.</p>
       <div class="code-block"><pre><span class="c-cmt">// PHP — Signature verify</span>
 <span class="c-var">$payload</span>   = <span class="c-fn">file_get_contents</span>(<span class="c-str">'php://input'</span>);
 <span class="c-var">$signature</span> = <span class="c-var">$_SERVER</span>[<span class="c-str">'HTTP_X_SYNCPAY_SIGNATURE'</span>];

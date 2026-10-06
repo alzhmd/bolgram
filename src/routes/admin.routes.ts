@@ -1,9 +1,19 @@
+import { adminAuthHook, checkAdminCredentials } from '../middleware/auth.js';
+import { CryptoUtil } from '../utils/crypto.js';
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import os from 'node:os';
 import { dbService } from '../db/database.js';
 import { EmailService } from '../services/email.service.js';
 
 export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) => {
+  server.addHook('onRequest', adminAuthHook);
+  server.post('/api/v1/admin/auth/login', async (request, reply) => {
+    const body = (request.body || {}) as { email?: string; password?: string };
+    if (!body.email || !body.password || !checkAdminCredentials(body.email, body.password)) {
+      return reply.status(401).send({ success: false, error: 'Invalid admin credentials' });
+    }
+    return reply.send({ success: true, token: CryptoUtil.signJwt({ id: 'admin', email: body.email, role: 'admin' }, undefined, 12) });
+  });
   // Global admin stats
   server.get('/api/v1/admin/stats', async (_request, reply) => {
     try {
@@ -217,7 +227,7 @@ export const adminRoutes: FastifyPluginAsync = async (server: FastifyInstance) =
   server.post('/api/v1/admin/webhooks/retry', async (request, reply) => {
     try {
       const body = request.body as { webhookId: string };
-      dbService.insertAuditLog('admin@syncpaybd.site', 'WEBHOOK_RETRY', 'Webhook', body.webhookId, '127.0.0.1', 'SUCCESS', `Triggered manual webhook retry for ${body.webhookId}`);
+      dbService.insertAuditLog('admin@bolgram.ir', 'WEBHOOK_RETRY', 'Webhook', body.webhookId, '127.0.0.1', 'SUCCESS', `Triggered manual webhook retry for ${body.webhookId}`);
       return reply.send({ success: true, message: 'Webhook retry scheduled successfully' });
     } catch (err: any) {
       return reply.status(500).send({ success: false, error: err.message });

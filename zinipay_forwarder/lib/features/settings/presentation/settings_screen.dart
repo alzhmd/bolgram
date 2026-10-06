@@ -344,7 +344,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Card(child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('SyncPay BD Android Forwarder', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              const Text('Bolgram Android Forwarder', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               const SizedBox(height: 4),
               const Text('Version 1.2.0 • bKash, Nagad, Rocket, Upay + Banks', style: TextStyle(color: Colors.grey, fontSize: 13)),
               const SizedBox(height: 8),

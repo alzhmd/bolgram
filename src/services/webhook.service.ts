@@ -1,4 +1,5 @@
-import { CryptoUtil } from '../utils/crypto.js';
+import { CryptoUtil, merchantWebhookSecret } from '../utils/crypto.js';
+import crypto from 'node:crypto';
 import { getSupabaseClient } from '../db/supabase.js';
 
 export interface WebhookPayload {
@@ -24,7 +25,8 @@ export class WebhookService {
     payload: WebhookPayload;
     maxRetries?: number;
   }): Promise<{ success: boolean; status?: number; signature: string; attempts: number; error?: string }> {
-    const secret = params.webhookSecret || 'whsec_default_fallback_key';
+    const secret = params.webhookSecret || merchantWebhookSecret(params.merchantId);
+    const deliveryId = crypto.randomUUID();
     const payloadStr = JSON.stringify(params.payload);
     const signature = CryptoUtil.signWebhook(payloadStr, secret);
 
@@ -47,9 +49,12 @@ export class WebhookService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'User-Agent': 'SyncPayBD-Webhook-Engine/2.0',
-            'X-SyncPay-Signature': signature,
-            'X-SyncPay-Invoice-Id': params.invoiceId,
+            'User-Agent': 'Bolgram-Webhooks/1.0',
+            // t=unix,v1=HMAC_SHA256(secret, `${t}.${body}`): reject if |now - t| > 300s and dedupe by delivery id
+            'X-Bolgram-Signature': (() => { const t = Math.floor(Date.now() / 1000); return `t=${t},v1=${crypto.createHmac('sha256', secret).update(`${t}.${payloadStr}`).digest('hex')}`; })(),
+            'X-Bolgram-Delivery': deliveryId,
+            'X-Bolgram-Invoice-Id': params.invoiceId,
+            // Legacy (upstream-compatible) signature over the body only
             'X-Payflow-Signature': signature,
             'X-Payflow-Invoice-Id': params.invoiceId,
           },

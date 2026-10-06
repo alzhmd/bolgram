@@ -1,3 +1,4 @@
+import { jwtSecret } from './utils/crypto.js';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
@@ -28,7 +29,7 @@ server.setSerializerCompiler(serializerCompiler);
 
 // Register Fastify JWT plugin
 await server.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'syncpay-super-secret-production-key-2026',
+  secret: jwtSecret(),
 });
 
 // Enable CORS
@@ -41,7 +42,7 @@ await server.register(cors, {
 await server.register(fastifySwagger, {
   openapi: {
     info: {
-      title: 'SyncPay BD API Engine',
+      title: 'Bolgram API Engine',
       description: 'Automated MFS Payment Verification & Ingestion REST API (bKash, Nagad, Rocket, Upay)',
       version: '1.0.0',
     },
@@ -61,7 +62,7 @@ server.get('/api-docs', async (_req, reply) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SyncPay BD - OpenAPI Specification</title>
+  <title>Bolgram - OpenAPI Specification</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   <style>
     body { margin: 0; background: #0b0f19; font-family: system-ui, sans-serif; }
@@ -146,7 +147,7 @@ server.get('/health', async (req) => {
     publicFiles,
     indexExists: fs.existsSync(indexHtmlPath),
     indexLength: indexHtmlContent ? indexHtmlContent.length : 0,
-    system: 'SyncPay BD Gateway',
+    system: 'Bolgram Gateway',
   };
 });
 
@@ -227,9 +228,9 @@ if (!process.env.VERCEL) {
   try {
     await server.listen({ port: PORT, host: HOST });
     console.log(`\n======================================================`);
-    console.log(`🚀 SyncPay BD Engine running at: http://localhost:${PORT}`);
+    console.log(`🚀 Bolgram Engine running at: http://localhost:${PORT}`);
     console.log(`📊 Dashboard & Checkout UI:       http://localhost:${PORT}/`);
-    console.log(`🌐 Production Domain:             https://syncpaybd.site`);
+    console.log(`🌐 Production Domain:             https://bolgram.ir`);
     console.log(`======================================================\n`);
   } catch (err) {
     server.log.error(err);

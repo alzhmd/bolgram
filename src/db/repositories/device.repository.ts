@@ -172,7 +172,7 @@ export class DeviceRepository {
             return {
               id: d.id,
               merchant_id: merchantId,
-              device_name: d.device_name || localDev?.device_name || 'SyncPay Device',
+              device_name: d.device_name || localDev?.device_name || 'Bolgram Device',
               device_token_hash: d.device_token_hash,
               status: d.status as any,
               last_seen: d.last_seen_at || localDev?.last_seen,
