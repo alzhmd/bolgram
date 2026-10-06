@@ -1,107 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/storage/local_vault.dart';
-import 'core/theme/app_theme.dart';
-import 'features/dashboard/providers/agent_provider.dart';
-import 'features/splash/splash_screen.dart';
-import 'services/telephony_channel_service.dart';
-import 'services/notification_service.dart';
 
-void main() async {
+import 'native.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/pair_screen.dart';
+import 'screens/status_screen.dart';
+import 'theme.dart';
+
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService.init();
-  final vault = await LocalVault.init();
-
-  runApp(
-    ProviderScope(
-      overrides: [
-        localVaultProvider.overrideWithValue(vault),
-      ],
-      child: const BolgramForwarderApp(),
-    ),
-  );
+  runApp(const BolgramApp());
 }
 
-class BolgramForwarderApp extends ConsumerStatefulWidget {
-  const BolgramForwarderApp({super.key});
+class BolgramApp extends StatelessWidget {
+  const BolgramApp({super.key});
 
   @override
-  ConsumerState<BolgramForwarderApp> createState() => _BolgramForwarderAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'بولگرام',
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(),
+      themeMode: ThemeMode.dark,
+      locale: const Locale('fa', 'IR'),
+      // The UI is Persian only: force right-to-left for every screen.
+      builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox()),
+      home: const Gate(),
+    );
+  }
 }
 
-class _BolgramForwarderAppState extends ConsumerState<BolgramForwarderApp> {
-  final TelephonyChannelService _telephonyChannel = TelephonyChannelService();
+/// Permissions first, then pairing, then the status screen. Re-evaluated whenever the app returns to the foreground.
+class Gate extends StatefulWidget {
+  const Gate({super.key});
+
+  @override
+  State<Gate> createState() => _GateState();
+}
+
+class _GateState extends State<Gate> with WidgetsBindingObserver {
+  Perms? _perms;
+  AppState? _state;
+  bool _skipPerms = false;
 
   @override
   void initState() {
     super.initState();
-    // 1. Listen for platform SMS events emitted by Android SmsListenerReceiver (Dual-SIM aware)
-    _telephonyChannel.startListening((data) {
-      final sender = data['sender']?.toString() ?? '';
-      final body = data['body']?.toString() ?? '';
-      final simSlot = data['sim_slot'] as int?;
-      final carrier = data['carrier']?.toString();
-      if (body.isNotEmpty) {
-        ref.read(agentProvider.notifier).handleIncomingRawSms(
-          sender,
-          body,
-          simSlot: simSlot,
-          carrier: carrier,
-          source: 'SMS',
-        );
-      }
-    });
-
-    // 2. Listen for real-time bKash/Nagad push notifications
-    _telephonyChannel.startListeningNotifications((data) {
-      final provider = data['provider']?.toString() ?? 'MFS';
-      final title = data['title']?.toString() ?? '';
-      final body = data['body']?.toString() ?? '';
-      final fullText = title.isNotEmpty ? '$title: $body' : body;
-      if (fullText.isNotEmpty) {
-        ref.read(agentProvider.notifier).handleIncomingRawSms(
-          provider,
-          fullText,
-          simSlot: 0,
-          carrier: 'AppNotification',
-          source: 'APP_NOTIFICATION',
-        );
-      }
-    });
+    WidgetsBinding.instance.addObserver(this);
+    _load();
   }
 
   @override
   void dispose() {
-    _telephonyChannel.stopListening();
-    _telephonyChannel.stopListeningNotifications();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState s) {
+    if (s == AppLifecycleState.resumed) _load();
+  }
+
+  Future<void> _load() async {
+    final p = await Native.permissions();
+    final st = await Native.state();
+    if (st.paired) await Native.startService();
+    if (!mounted) return;
+    setState(() {
+      _perms = p;
+      _state = st;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final agentState = ref.watch(agentProvider);
-
-    ThemeMode mode;
-    switch (agentState.themeMode) {
-      case 'dark':
-        mode = ThemeMode.dark;
-        break;
-      case 'system':
-        mode = ThemeMode.system;
-        break;
-      case 'light':
-      default:
-        mode = ThemeMode.light;
-        break;
+    final p = _perms;
+    final st = _state;
+    if (p == null || st == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-
-    return MaterialApp(
-      title: 'Bolgram Payment Agent',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: mode,
-      home: const SplashScreen(),
-    );
+    if (!p.sms && !_skipPerms && !st.paired) {
+      return OnboardingScreen(onDone: _load, onSkip: () => setState(() => _skipPerms = true));
+    }
+    if (!st.paired) return PairScreen(onPaired: _load);
+    return StatusScreen(onUnpaired: _load);
   }
 }
