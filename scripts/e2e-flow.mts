@@ -1,0 +1,45 @@
+// End-to-end money flow against a running server: store → card → invoice → phone pairing → bank SMS → PAID → fee → notification → report; replay + fake SMS.
+import { tehranParts } from '../src/parsers/ir/jalali.ts';
+const B = process.argv[2] || 'http://127.0.0.1:4011';
+let token = '';
+const call = async (method: string, path: string, body?: any, headers: any = {}) => {
+  const r = await fetch(B + path, { method, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...headers }, body: body ? JSON.stringify(body) : undefined });
+  const j: any = await r.json().catch(() => ({}));
+  return { s: r.status, j };
+};
+const ok = (cond: any, msg: string) => { console.log(cond ? 'PASS' : 'FAIL', msg); if (!cond) process.exitCode = 1; };
+const p = tehranParts(new Date());
+const pad = (n: number) => String(n).padStart(2, '0');
+const sms = (rial: number) => `حساب1848394556\nواریز${rial.toLocaleString('en-US')}\nمانده31,894,014\n${pad(p.jy % 100)}/${pad(p.jm)}/${pad(p.jd)}-${pad(p.hour)}:${pad(p.minute)}`;
+
+const reg = await call('POST', '/api/v2/auth/register', { handle: `flow${Date.now() % 1e7}`, mobile: `0918${String(Date.now() % 1e7).padStart(7, '0')}`, password: 'Strong-pass-77', terms: true });
+token = reg.j.token; ok(reg.s === 201, 'register');
+ok((await call('POST', '/api/v2/cards', { number: '6104337800002097', holder: 'علی رضایی' })).s === 201, 'add Mellat card');
+const inv = (await call('POST', '/api/v2/invoices', { amount: '۲۵۰٬۰۰۰', note: 'کفش' })).j.invoice;
+ok(inv && inv.amount_rial >= 2_500_000, `invoice ${inv?.id} amount ${inv?.amount_rial}`);
+const inv2 = (await call('POST', '/api/v2/invoices', { amount: 250000 })).j.invoice;
+ok(inv2 && inv2.amount_rial !== inv.amount_rial, `second invoice gets a different unique amount ${inv2?.amount_rial}`);
+const pair = await call('POST', '/api/v2/devices/pair');
+ok(pair.s === 200 || pair.s === 201, 'pair code issued');
+const dev = await call('POST', '/api/v1/device/pair', { code: pair.j.code, device_model: 'Galaxy A54', android_version: '14' }, { Authorization: '' });
+ok(dev.s === 201 && dev.j.device_token, 'phone paired');
+const dt = dev.j.device_token;
+const ing = await call('POST', '/api/v1/device/sms/ingest', { sender: 'Bank Mellat', sms: sms(inv.amount_rial) }, { 'X-Device-Token': dt, Authorization: '' });
+ok(ing.s < 300, `ingest bank SMS (${ing.s} ${JSON.stringify(ing.j).slice(0, 120)})`);
+await new Promise((r) => setTimeout(r, 400));
+const d1 = (await call('GET', `/api/v2/invoices/${inv.id}`)).j;
+ok(JSON.stringify(d1).match(/"status":"paid"|"status":"PAID"/), 'invoice auto-confirmed PAID');
+const replay = await call('POST', '/api/v1/device/sms/ingest', { sender: 'Bank Mellat', sms: sms(inv.amount_rial) }, { 'X-Device-Token': dt, Authorization: '' });
+const tx = (await call('GET', '/api/v2/reports?from=' + new Date(Date.now() - 86400e3).toISOString() + '&to=' + new Date(Date.now() + 60e3).toISOString())).j;
+ok(JSON.stringify(tx).includes('"paid_count":1') || tx?.totals?.paid_count === 1 || tx?.current?.paid_count === 1, `replayed SMS not counted twice (replay ${replay.s}); report paid_count=1`);
+const fake = await call('POST', '/api/v1/device/sms/ingest', { sender: '09121234567', sms: sms(inv2.amount_rial) }, { 'X-Device-Token': dt, Authorization: '' });
+await new Promise((r) => setTimeout(r, 300));
+const d2 = (await call('GET', `/api/v2/invoices/${inv2.id}`)).j;
+ok(!JSON.stringify(d2).match(/"status":"paid"|"status":"PAID"/), `fake SMS from a personal number does NOT confirm (${fake.s})`);
+const held = (await call('GET', '/api/v2/deposits')).j;
+ok(JSON.stringify(held).includes('SUSPICIOUS') || JSON.stringify(held).match(/"trusted":false/), 'fake SMS held as suspicious for review');
+const w = (await call('GET', '/api/v2/wallet')).j;
+ok(w?.wallet?.balance_rial < 0, `fee charged to wallet (balance ${w?.wallet?.balance_rial} Rial)`);
+const n = (await call('GET', '/api/v2/notifications?per_page=20')).j;
+ok((n.data || []).some((x: any) => x.category === 'payment'), 'payment notification created');
+ok((n.data || []).some((x: any) => x.category === 'deposit'), 'held-deposit notification created');
