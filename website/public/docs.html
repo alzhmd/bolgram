@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مستندات API بلگرام | ساخت فاکتور و وب‌هوک</title>
+<meta name="description" content="مستندات فنی API بلگرام: ساخت فاکتور، استعلام، وب‌هوک با امضای HMAC-SHA256، ووکامرس، اپ اندروید و شورتکات آیفون.">
+<link rel="canonical" href="https://bolgram.ir/docs.html">
+
+<meta property="og:type" content="website"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="بلگرام">
+<meta property="og:title" content="مستندات API بلگرام | ساخت فاکتور و وب‌هوک"><meta property="og:description" content="مستندات فنی API بلگرام: ساخت فاکتور، استعلام، وب‌هوک با امضای HMAC-SHA256، ووکامرس، اپ اندروید و شورتکات آیفون."><meta property="og:image" content="https://bolgram.ir/assets/img/og.png">
+<meta name="theme-color" content="#F6F7FB">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/main.css">
+<script>try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}</script>
+<script src="/assets/js/config.js" defer></script>
+<script src="/assets/js/main.js" defer></script>
+<!-- ANALYTICS -->
+</head>
+<body>
+<!--HEADER-->
+<a class="skip" href="#main">پرش به محتوای اصلی</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="منوی اصلی">
+    <a class="logo" href="/" aria-label="بلگرام — صفحه اصلی"><img data-img="logo" src="/assets/img/logo.svg" width="34" height="34" alt=""><span data-k="brand">بلگرام</span></a>
+    <ul class="nav-links">
+      <li><a href="/#features">امکانات</a></li>
+      <li><a href="/#how">روش کار</a></li>
+      <li><a href="/pricing.html">تعرفه</a></li>
+      <li><a href="/docs.html" aria-current="page" aria-current="page">API و اتصال</a></li>
+      <li><a href="/faq.html">سؤالات</a></li>
+      <li><a href="/blog/">آموزش و وبلاگ</a></li>
+    </ul>
+    <div class="nav-end">
+      <a class="status" data-href="STATUS_URL" href="/docs.html#status" rel="noopener"><i aria-hidden="true"></i>وضعیت سرویس</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" aria-label="تغییر تم روشن و تاریک"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+      <a class="btn btn-ghost btn-sm login" data-href="LOGIN_URL" href="/login.html">ورود</a>
+      <a class="btn btn-primary btn-sm" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+      <button class="icon-btn menu-toggle" type="button" data-menu-open aria-expanded="false" aria-controls="mobile-menu" aria-label="باز کردن منو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </nav>
+</header>
+<div id="mobile-menu" class="mobile-menu" data-open="false" role="dialog" aria-modal="true" aria-label="منوی موبایل">
+  <button class="icon-btn" type="button" data-menu-close aria-label="بستن منو" style="align-self:flex-end"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <a href="/#features">امکانات</a><a href="/#how">روش کار</a><a href="/pricing.html">تعرفه</a><a href="/docs.html" aria-current="page" aria-current="page">API و اتصال</a><a href="/faq.html">سؤالات</a><a href="/blog/">آموزش و وبلاگ</a><a href="/about.html">درباره ما</a><a href="/contact.html">تماس با ما</a>
+  <a data-href="LOGIN_URL" href="/login.html">ورود</a>
+  <a class="btn btn-primary" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+</div>
+<!--/HEADER-->
+<main id="main">
+<section class="page-hero"><div class="wrap"><span class="eyebrow">API نسخهٔ ۱</span><h1>مستندات فنی</h1><p class="lead">ساخت فاکتور، استعلام وضعیت و دریافت وب‌هوک امضاشده. همهٔ مبالغ API به <b>ریال</b> است.</p></div></section>
+
+<section style="padding-top:8px"><div class="wrap doc-grid">
+<nav class="doc-nav" aria-label="فهرست مستندات">
+  <a href="#start">شروع سریع</a><a href="#auth">احراز هویت</a><a href="#create">ساخت فاکتور</a><a href="#verify">استعلام فاکتور</a><a href="#webhook">وب‌هوک و امضا</a><a href="#states">وضعیت‌ها</a><a href="#errors">خطاها</a><a href="#links">لینک پرداخت</a><a href="#woocommerce">ووکامرس</a><a href="#telegram">تلگرام و بله</a><a href="#sdk">SDKها</a><a href="#android">اپ اندروید</a><a href="#ios">شورتکات آیفون</a><a href="#status">وضعیت سرویس</a>
+</nav>
+<div class="doc-body prose">
+<h2 id="start">شروع سریع</h2>
+<ol><li>در پنل ثبت‌نام کنید و کارت بانکی خود را در بخش «روش‌های پرداخت» اضافه کنید.</li><li>اپ را روی گوشی‌ای که پیامک بانک را می‌گیرد نصب و با کد QR وصل کنید.</li><li>کلید API را از پنل بردارید و با آن فاکتور بسازید.</li><li>مشتری را به <code>payment_url</code> بفرستید و بعد از وب‌هوک «پرداخت موفق» سفارش را تحویل دهید.</li></ol>
+
+<h2 id="auth">احراز هویت</h2>
+<p>کلید API را در هدر <code>x-api-key</code> بفرستید. کلید را فقط سمت سرور نگه دارید و در کد مرورگر یا اپ قرار ندهید. از پنل می‌توانید کلید جدید بسازید و کلید قبلی را باطل کنید.</p>
+
+<h2 id="create">ساخت فاکتور</h2>
+<p><code>POST https://api.bolgram.ir/v1/payment/create</code></p>
+<table><thead><tr><th>فیلد</th><th>نوع</th><th>توضیح</th></tr></thead><tbody>
+<tr><td><code>amount</code></td><td>عدد، الزامی</td><td>مبلغ پایه به ریال. سیستم چند تومان یکتا به آن اضافه می‌کند.</td></tr>
+<tr><td><code>redirect_url</code></td><td>URL، الزامی</td><td>بازگشت مشتری بعد از پرداخت.</td></tr>
+<tr><td><code>cancel_url</code></td><td>URL</td><td>بازگشت در صورت انصراف.</td></tr>
+<tr><td><code>webhook_url</code></td><td>URL</td><td>آدرسی که رویداد پرداخت به آن ارسال می‌شود.</td></tr>
+<tr><td><code>cus_name</code>، <code>cus_email</code></td><td>متن</td><td>اطلاعات اختیاری مشتری.</td></tr>
+<tr><td><code>metadata</code></td><td>شیء JSON</td><td>حداکثر ۱ کیلوبایت؛ مثلاً شمارهٔ سفارش شما.</td></tr>
+</tbody></table>
+<div class="code"><button class="copy" type="button" data-copy="d-create">کپی</button><pre id="d-create">curl -X POST "https://api.bolgram.ir/v1/payment/create" \
+  -H "x-api-key: $TOKEN" -H "Content-Type: application/json" \
+  -d '{"amount": 4500000, "redirect_url": "https://shop.example/thanks",
+       "webhook_url": "https://shop.example/hooks/bolgram", "metadata": {"order_id": "1042"}}'
+
+# 201 Created
+{"status": true, "message": "Invoice created successfully.", "invoice_id": "PF...", "payment_url": "https://..."}</pre></div>
+
+<h2 id="verify">استعلام فاکتور</h2>
+<p><code>POST https://api.bolgram.ir/v1/payment/verify</code> با بدنهٔ <code>{"invoice_id": "..."}</code>. قبل از تحویل سفارش، حتی بعد از دریافت وب‌هوک، یک‌بار استعلام کنید و هر <code>invoice_id</code> را فقط یک‌بار تحویل دهید.</p>
+<div class="code"><button class="copy" type="button" data-copy="d-verify">کپی</button><pre id="d-verify">{"invoice_id": "PF...", "amount": 4500280, "status": "COMPLETED",
+ "transaction_id": "IR3F9A...", "payment_method": "mellat", "cus_name": "Ali"}</pre></div>
+<p>مقدار <code>amount</code> مبلغ یکتای قابل پرداخت است که مشتری واریز کرده است.</p>
+
+<h2 id="webhook">وب‌هوک و امضا</h2>
+<p>بعد از تأیید پرداخت، یک درخواست <code>POST</code> با بدنهٔ JSON به <code>webhook_url</code> فرستاده می‌شود و در صورت خطا چند بار با فاصلهٔ افزایشی تکرار می‌شود.</p>
+<table><tbody>
+<tr><td><code>X-Bolgram-Signature</code></td><td><code>t=&lt;unix&gt;,v1=&lt;hex&gt;</code> که v1 برابر HMAC-SHA256 کلید وب‌هوک روی <code>${t}.${body}</code> است.</td></tr>
+<tr><td><code>X-Bolgram-Delivery</code></td><td>شناسهٔ یکتای ارسال؛ برای جلوگیری از پردازش تکراری ذخیره‌اش کنید.</td></tr>
+<tr><td><code>X-Bolgram-Invoice-Id</code></td><td>شناسهٔ فاکتور.</td></tr>
+</tbody></table>
+<div class="code"><button class="copy" type="button" data-copy="d-hook">کپی</button><pre id="d-hook">{"invoice_id": "PF...", "status": "true", "provider": "mellat",
+ "trx_id": "IR3F9A...", "amount": 4500280, "timestamp": "2026-10-06T10:22:31.000Z"}</pre></div>
+<p>کلید وب‌هوک را از بخش «اطلاعات اتصال» پنل بردارید. اگر اختلاف زمان <code>t</code> با ساعت سرور شما بیشتر از ۵ دقیقه بود، درخواست را رد کنید. نمونهٔ کامل بررسی امضا در <a href="/#dev">صفحهٔ اصلی</a> هست.</p>
+
+<h2 id="states">وضعیت‌ها</h2>
+<table><tbody><tr><td><code>PENDING</code></td><td>در انتظار واریز</td></tr><tr><td><code>COMPLETED</code></td><td>پرداخت تأیید شده</td></tr><tr><td><code>FAILED</code></td><td>منقضی یا ناموفق</td></tr></tbody></table>
+
+<h2 id="errors">خطاها</h2>
+<table><tbody><tr><td>401</td><td>کلید API ارسال نشده یا نامعتبر است.</td></tr><tr><td>400</td><td>اعتبارسنجی بدنه ناموفق بود؛ جزئیات در <code>errors</code>.</td></tr><tr><td>404</td><td>فاکتور پیدا نشد.</td></tr><tr><td>429</td><td>تعداد درخواست بیش از حد مجاز است.</td></tr></tbody></table>
+
+<h2 id="links">لینک پرداخت (بدون سایت)</h2>
+<p>از پنل یک فاکتور بسازید و لینک صفحهٔ پرداخت را در دایرکت اینستاگرام یا پیام‌رسان بفرستید. مشتری بانکش را انتخاب می‌کند، کارت و مبلغ دقیق را می‌بیند و بعد از واریز، تأیید خودکار انجام می‌شود.</p>
+
+<h2 id="woocommerce">ووکامرس</h2>
+<p>افزونهٔ ووکامرس در مخزن پروژه (<code>packages/woocommerce-gateway</code>) قرار دارد. آن را در وردپرس نصب کنید، کلید API را وارد کنید و آدرس وب‌هوک افزونه را در پنل ثبت کنید. نسخهٔ قابل دانلود از همین صفحه به‌زودی منتشر می‌شود.</p>
+
+<h2 id="telegram">تلگرام و بله</h2>
+<p>در نسخهٔ فعلی، اعلان هر پرداخت موفق با تنظیم <code>BALE_BOT_TOKEN</code> و <code>TELEGRAM_BOT_TOKEN</code> روی سرور به ربات ارسال می‌شود. برای ربات فروش خودتان، فاکتور را با API بسازید و لینک پرداخت را به کاربر بدهید. ربات تعاملی برای ساخت فاکتور از داخل چت به‌زودی اضافه می‌شود.</p>
+
+<h2 id="sdk">SDKها</h2>
+<p>SDKهای PHP، Node.js و Python در پوشهٔ <code>packages/</code> مخزن قرار دارند و همین endpointها را صدا می‌زنند.</p>
+
+<h2 id="android">اپ اندروید</h2>
+<p>اپ دریافت پیامک روی گوشی‌ای نصب می‌شود که پیامک بانک را دریافت می‌کند. فقط پیامک‌هایی که شبیه تراکنش بانکی‌اند ارسال می‌شوند و رمز پویا و کد تأیید هرگز ارسال نمی‌شود. اتصال با اسکن کد QR از بخش «دستگاه‌ها» در پنل انجام می‌شود. لینک دانلود از بازار و گوگل‌پلی پس از انتشار اینجا قرار می‌گیرد.</p>
+
+<h2 id="ios">شورتکات آیفون</h2>
+<p>iOS اجازهٔ خواندن پیامک به اپ نمی‌دهد. با برنامهٔ Shortcuts یک اتوماسیون بسازید:</p>
+<ol><li>در Shortcuts، بخش Automation، گزینهٔ <b>Message</b> را انتخاب کنید و فرستنده را شمارهٔ پیامک بانک قرار دهید.</li><li>اکشن <b>Get Contents of URL</b> را اضافه کنید: روش <code>POST</code>، آدرس زیر، بدنهٔ JSON.</li><li>گزینهٔ «اجرا بدون پرسیدن» را روشن کنید.</li></ol>
+<div class="code"><button class="copy" type="button" data-copy="d-ios">کپی</button><pre id="d-ios">POST https://api.bolgram.ir/api/v1/device/sms/ingest
+{"device_id": "&lt;توکن دستگاه از پنل&gt;", "sender": "&lt;Shortcut Input: Sender&gt;", "sms": "&lt;Shortcut Input: Content&gt;"}</pre></div>
+<p class="note">توکن دستگاه فقط اجازهٔ ارسال پیامک را دارد، نه دسترسی به پنل یا پول. برای آیفون یک دستگاه جدا بسازید تا اگر گوشی گم شد، فقط همان را از پنل باطل کنید.</p>
+
+<h2 id="status">وضعیت سرویس</h2>
+<p>صفحهٔ وضعیت لحظه‌ای سرویس به‌زودی منتشر می‌شود. تا آن زمان در صورت مشکل از <a href="/contact.html">صفحهٔ تماس</a> به پشتیبانی پیام دهید.</p>
+</div></div></section>
+</main>
+<!--FOOTER-->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="/"><img data-img="logo" src="/assets/img/logo.svg" width="34" height="34" alt=""><span data-k="brand">بلگرام</span></a>
+        <p class="muted" style="margin-top:10px" data-k="footer.about">درگاه کارت‌به‌کارت با تأیید خودکار از روی پیامک بانک. پول مستقیم به کارت خود شما واریز می‌شود.</p>
+        <div class="enamad-slot"><!-- ENAMAD_SLOT -->جای نماد اعتماد</div>
+      </div>
+      <div><h2>محصول</h2><ul><li><a href="/#features">امکانات</a></li><li><a href="/pricing.html">تعرفه</a></li><li><a href="/#app">اپلیکیشن</a></li><li><a href="/docs.html">مستندات API</a></li></ul></div>
+      <div><h2>یادگیری</h2><ul><li><a href="/blog/">وبلاگ</a></li><li><a href="/faq.html">سؤالات متداول</a></li><li><a href="/docs.html#woocommerce">اتصال ووکامرس</a></li><li><a href="/docs.html#ios">شورتکات آیفون</a></li></ul></div>
+      <div><h2>حساب و شرکت</h2><ul><li><a data-href="LOGIN_URL" href="/login.html">ورود</a></li><li><a data-href="SIGNUP_URL" href="/login.html#register">ثبت‌نام</a></li><li><a href="/about.html">درباره ما</a></li><li><a href="/contact.html">تماس با ما</a></li></ul></div>
+      <div><h2>قوانین</h2><ul><li><a href="/legal.html#terms">قوانین استفاده</a></li><li><a href="/legal.html#privacy">حریم خصوصی</a></li><li><a href="/legal.html#disclaimer">سلب مسئولیت</a></li><li><a href="/legal.html#delete">حذف حساب</a></li></ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span data-year="1405">۱۴۰۵</span> <span data-k="brand">بلگرام</span> — همه حقوق محفوظ است.</span>
+      <span><a data-href="SUPPORT_TELEGRAM" href="/contact.html" rel="noopener">تلگرام</a> · <a href="/contact.html">بله</a> · <a href="/contact.html">ایمیل</a></span>
+    </div>
+  </div>
+</footer>
+<a class="float-support" data-href="SUPPORT_TELEGRAM" href="/contact.html" rel="noopener" aria-label="پشتیبانی تلگرام"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.2l-.4 4.3c.6 0 .8-.3 1.1-.6l2.7-2.5 5.5 4c1 .6 1.7.3 2-.9l3.6-16.8c.3-1.5-.6-2.1-1.6-1.7L1.5 9.4c-1.4.6-1.4 1.4-.2 1.8l5.4 1.7L19.3 5c.6-.4 1.1-.2.7.2z"/></svg><span>پشتیبانی تلگرام</span></a>
+<!--/FOOTER-->
+</body>
+</html>

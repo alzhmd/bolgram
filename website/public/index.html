@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بلگرام | درگاه کارت‌به‌کارت با تأیید خودکار از پیامک بانک</title>
+<meta name="description" content="مشتری کارت‌به‌کارت می‌کند و سفارش در چند ثانیه تأیید می‌شود. پول مستقیم به کارت خودتان، بدون درگاه بانکی، با API، وب‌هوک و اعلان تلگرام و بله.">
+<link rel="canonical" href="https://bolgram.ir/">
+<meta property="og:type" content="website"><meta property="og:locale" content="fa_IR"><meta property="og:site_name" content="بلگرام">
+<meta property="og:title" content="بلگرام | کارت‌به‌کارت با تأیید خودکار"><meta property="og:description" content="پول مستقیم به کارت شما، تأیید پرداخت در چند ثانیه از روی پیامک بانک.">
+<meta property="og:url" content="https://bolgram.ir/"><meta property="og:image" content="https://bolgram.ir/assets/img/og.png"><meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F6F7FB">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/Vazirmatn-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/main.css">
+<script>try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){}</script>
+<script src="/assets/js/config.js" defer></script>
+<script src="/assets/js/main.js" defer></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"بلگرام","applicationCategory":"FinanceApplication","operatingSystem":"Web, Android","description":"درگاه پرداخت کارت‌به‌کارت با تأیید خودکار از روی پیامک بانک","url":"https://bolgram.ir/"}</script>
+<!-- ANALYTICS -->
+</head>
+<body>
+<!--HEADER-->
+<a class="skip" href="#main">پرش به محتوای اصلی</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="منوی اصلی">
+    <a class="logo" href="/" aria-label="بلگرام — صفحه اصلی"><img data-img="logo" src="/assets/img/logo.svg" width="34" height="34" alt=""><span data-k="brand">بلگرام</span></a>
+    <ul class="nav-links">
+      <li><a href="/#features">امکانات</a></li>
+      <li><a href="/#how">روش کار</a></li>
+      <li><a href="/pricing.html">تعرفه</a></li>
+      <li><a href="/docs.html">API و اتصال</a></li>
+      <li><a href="/faq.html">سؤالات</a></li>
+      <li><a href="/blog/">آموزش و وبلاگ</a></li>
+    </ul>
+    <div class="nav-end">
+      <a class="status" data-href="STATUS_URL" href="/docs.html#status" rel="noopener"><i aria-hidden="true"></i>وضعیت سرویس</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" aria-label="تغییر تم روشن و تاریک"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+      <a class="btn btn-ghost btn-sm login" data-href="LOGIN_URL" href="/login.html">ورود</a>
+      <a class="btn btn-primary btn-sm" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+      <button class="icon-btn menu-toggle" type="button" data-menu-open aria-expanded="false" aria-controls="mobile-menu" aria-label="باز کردن منو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </nav>
+</header>
+<div id="mobile-menu" class="mobile-menu" data-open="false" role="dialog" aria-modal="true" aria-label="منوی موبایل">
+  <button class="icon-btn" type="button" data-menu-close aria-label="بستن منو" style="align-self:flex-end"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <a href="/#features">امکانات</a><a href="/#how">روش کار</a><a href="/pricing.html">تعرفه</a><a href="/docs.html">API و اتصال</a><a href="/faq.html">سؤالات</a><a href="/blog/">آموزش و وبلاگ</a><a href="/about.html">درباره ما</a><a href="/contact.html">تماس با ما</a>
+  <a data-href="LOGIN_URL" href="/login.html">ورود</a>
+  <a class="btn btn-primary" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+</div>
+<!--/HEADER-->
+<main id="main">
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1 data-k="hero.title">مشتری واریز می‌کند، سفارش <em>در چند ثانیه</em> تأیید می‌شود</h1>
+      <p class="lead" data-k="hero.sub">پول مستقیم به کارت خودتان می‌نشیند. پیامک بانک خوانده می‌شود، مبلغ با فاکتور جور می‌شود و پرداخت بدون دیدن رسید بسته می‌شود.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+        <a class="btn btn-ghost" href="/docs.html">مستندات API</a>
+      </div>
+      <ul class="trust">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>پول مستقیم به کارت شما</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>بدون قرارداد درگاه بانکی</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>تأیید در چند ثانیه</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>کار با بانک‌های ایرانی</li>
+      </ul>
+    </div>
+
+    <div class="demo" id="demo" data-step="0" role="group" aria-labelledby="demo-title">
+      <span class="badge demo-tag">دمو</span>
+      <h2 id="demo-title" class="sr-only">نمایش روند تأیید یک پرداخت</h2>
+      <ol class="demo-steps" aria-hidden="true"><li></li><li></li><li></li></ol>
+      <div class="receipt">
+        <div class="muted" style="font-size:.8rem">فاکتور #۱۰۴۲ · فروشگاه نمونه</div>
+        <div class="receipt-amount num"><span class="ltr">۴۵۰٬۰<span class="tail">۲۸</span></span> تومان</div>
+        <div class="receipt-row"><span>واریز به کارت</span><span class="ltr num">۶۱۰۴-۳۳۷۸-••••-۲۰۹۱</span></div>
+        <div class="receipt-row"><span>به نام</span><span>سارا محمدی</span></div>
+        <div class="receipt-row"><span>وضعیت</span><b class="state">در انتظار واریز</b></div>
+      </div>
+      <div class="sms" aria-hidden="true"><small>پیامک بانک ملت · همین الان</small>حساب۱۸۴۸۳۹۴۵۵۶
+واریز۴٬۵۰۰٬۲۸۰
+مانده۳۱٬۸۹۴٬۰۱۴
+۰۵/۰۷/۱۴-۱۰:۲۲</div>
+      <div class="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7 12l3.5 3.5L17 9"/></svg>مبلغ یکتا پیدا شد؛ سفارش ۱۰۴۲ پرداخت‌شده است</div>
+      <div class="demo-foot"><span id="demo-live" aria-live="polite">در انتظار</span><button class="link-btn" type="button" data-demo-run>اجرای دوباره</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="banks" aria-labelledby="banks-title">
+  <div class="wrap">
+    <h2 id="banks-title" class="sr-only">بانک‌های پشتیبانی‌شده</h2>
+    <div class="marquee" data-paused="false">
+      <ul class="marquee-track" style="list-style:none;margin:0;padding:0">
+        <li class="bank"><i style="background:#D3202F">م</i>ملت</li><li class="bank"><i style="background:#0E5AA7">م</i>ملی</li><li class="bank"><i style="background:#1C3F94">ص</i>صادرات</li><li class="bank"><i style="background:#1C7C3A">ک</i>کشاورزی</li><li class="bank"><i style="background:#1F6BFF">ب</i>بلو</li><li class="bank"><i style="background:#0B3D91">س</i>سپه</li><li class="bank"><i style="background:#E5781E">م</i>مسکن</li><li class="bank"><i style="background:#2BA24C">م</i>مهر ایران</li><li class="bank"><i style="background:#1E4C9A">ت</i>تجارت</li><li class="bank"><i style="background:#8C1D40">پ</i>پارسیان</li><li class="bank"><i style="background:#00A19A">ر</i>رسالت</li><li class="bank"><i style="background:#C8102E">ش</i>شهر</li><li class="bank"><i style="background:#9A7420">پ</i>پاسارگاد</li><li class="bank"><i style="background:#0B5563">خ</i>خاورمیانه</li><li class="bank"><i style="background:#0072BC">س</i>سینا</li><li class="bank"><i style="background:#B91C1C">گ</i>گردشگری</li><li class="bank"><i style="background:#0080BE">س</i>سامان</li><li class="bank"><i style="background:#7B4A2D">آ</i>آینده</li><li class="bank"><i style="background:#0D6E9C">ر</i>رفاه</li>
+      </ul>
+    </div>
+    <div class="banks-foot"><span data-k="banks.note">بانک شما در فهرست نیست؟ نمونهٔ پیامکش را بفرستید تا قالبش اضافه شود.</span><button class="link-btn" type="button" data-marquee-toggle aria-pressed="false">توقف حرکت</button></div>
+  </div>
+</section>
+
+<section id="how" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="how-title">روش کار در پنج قدم</h2><p>از ساخت فاکتور تا تحویل سفارش، بدون اینکه کسی رسید نگاه کند.</p></div>
+    <ol class="steps">
+      <li><h3>ساخت فاکتور یا لینک</h3><p>از پنل، API یا افزونه؛ برای هر سفارش یک مبلغ یکتا رزرو می‌شود.</p></li>
+      <li><h3>واریز مشتری</h3><p>مشتری بانکش را انتخاب می‌کند، کارت مقصد و مبلغ دقیق را می‌بیند و کارت‌به‌کارت می‌کند.</p></li>
+      <li><h3>خواندن پیامک بانک</h3><p>اپ روی گوشی شما پیامک واریز را می‌گیرد و امن به سرور می‌فرستد.</p></li>
+      <li><h3>تطبیق و تأیید</h3><p>مبلغ، فرستندهٔ بانک و تکراری‌نبودن بررسی و فاکتور پرداخت‌شده اعلام می‌شود.</p></li>
+      <li><h3>اعلان و تحویل</h3><p>وب‌هوک به فروشگاه، اعلان تلگرام و بله و بازگشت خودکار مشتری به سایت شما.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section aria-labelledby="why-title" style="background:var(--card);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="section-head"><h2 id="why-title">چرا کارت‌به‌کارت مستقیم؟</h2><p>سه روش رایج دریافت پول آنلاین، کنار هم.</p></div>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="جدول مقایسه روش‌های پرداخت">
+      <table class="compare">
+        <thead><tr><th scope="col"><span class="sr-only">ویژگی</span></th><th scope="col">درگاه بانکی</th><th scope="col">کارت‌به‌کارت دستی با رسید</th><th scope="col" class="us">بلگرام</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">پول کجا می‌رود</th><td>حساب پرداخت‌یار، سپس تسویه</td><td>مستقیم به کارت شما</td><td class="us">مستقیم به کارت شما</td></tr>
+          <tr><th scope="row">قرارداد و مدارک درگاه</th><td>لازم است</td><td>لازم نیست</td><td class="us">لازم نیست، فقط ثبت‌نام</td></tr>
+          <tr><th scope="row">زمان تأیید</th><td>لحظه‌ای</td><td>دقیقه‌ها تا ساعت‌ها</td><td class="us">چند ثانیه پس از پیامک بانک</td></tr>
+          <tr><th scope="row">بررسی دستی رسید</th><td>ندارد</td><td>همیشه</td><td class="us">فقط برای موارد مشکوک</td></tr>
+          <tr><th scope="row">زمان رسیدن پول</th><td>طبق چرخهٔ تسویه</td><td>فوری</td><td class="us">فوری</td></tr>
+          <tr><th scope="row">هزینه</th><td>درصدی از هر تراکنش</td><td>وقت و نیروی پشتیبانی</td><td class="us">اشتراک ماهانه طبق تعرفه</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="features" aria-labelledby="feat-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="feat-title">امکانات</h2><p>مواردی که هنوز در حال ساخت‌اند با برچسب «به‌زودی» مشخص شده‌اند.</p></div>
+
+    <div class="feat-group">
+      <h3><span aria-hidden="true">۱</span>تأیید و تطبیق</h3>
+      <div class="bento">
+        <div class="wide"><h4>تأیید خودکار از پیامک بانک</h4><p>قالب واقعی پیامک ۱۰ بانک و پارسر فارسی عمومی برای بقیه؛ اعداد فارسی، تاریخ شمسی و ریال/تومان را می‌فهمد.</p></div>
+        <div><h4>مبلغ یکتا برای هر سفارش</h4><p>دو فاکتور باز هیچ‌وقت مبلغ یکسان ندارند.</p></div>
+        <div><h4>صف بررسی</h4><p>واریز نامطابق یا مشکوک با تأیید یا رد دستی.</p></div>
+        <div><h4>صف آفلاین روی گوشی</h4><p>پیامک‌ها بعد از وصل شدن اینترنت ارسال می‌شوند.</p></div>
+        <div><h4>ضد تکرار و جعل</h4><p>پیامک تکراری، برداشت و فرستندهٔ ناشناس تأیید خودکار نمی‌شود.</p></div>
+        <div><h4>تقسیم فاکتور بزرگ <span class="badge">به‌زودی</span></h4><p>برای مبالغ بالاتر از سقف کارت‌به‌کارت.</p></div>
+        <div><h4>یادگیری پیامک جدید <span class="badge">به‌زودی</span></h4><p>افزودن قالب بانک جدید از داخل پنل.</p></div>
+      </div>
+    </div>
+
+    <div class="feat-group">
+      <h3><span aria-hidden="true">۲</span>مدیریت پول</h3>
+      <ul class="two-col">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><div><b>چند کارت بانکی</b><span>کارت‌های چند بانک را ثبت و هر کدام را فعال یا غیرفعال کنید.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h16M12 4v16"/></svg><div><b>کارت هم‌بانک برای مشتری</b><span>مشتری بانکش را می‌گوید و اگر کارت هم‌بانک داشته باشید همان نمایش داده می‌شود.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9"/></svg><div><b>توزیع بار بین کارت‌ها <span class="badge">به‌زودی</span></b><span>کارتی که امروز کمتر تراکنش داشته اول پیشنهاد می‌شود.</span></div></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg><div><b>پول مستقیم به کارت شما</b><span>هیچ کیف پول یا حساب واسطه‌ای در کار نیست.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="feat-group">
+      <h3><span aria-hidden="true">۳</span>فروش و تحویل</h3>
+      <div class="split">
+        <ul class="checklist">
+          <li>لینک پرداخت برای هر فاکتور، قابل ارسال در دایرکت و پیام‌رسان</li>
+          <li>QR Code اطلاعات پرداخت</li>
+          <li>صفحهٔ پرداخت فارسی با نام فروشگاه شما، تایمر و دکمهٔ کپی</li>
+          <li>بازگشت خودکار مشتری به سایت شما بعد از تأیید</li>
+          <li>لوگو، رنگ و آدرس اختصاصی صفحهٔ پرداخت <span class="badge">به‌زودی</span></li>
+          <li>تحویل خودکار محصول دیجیتال (لینک، کد، فایل) <span class="badge">به‌زودی</span></li>
+          <li>مارکت‌پلیس و مدیریت تیم و فروشنده‌ها <span class="badge">به‌زودی</span></li>
+        </ul>
+        <div class="split-art" aria-hidden="true">
+          <div class="muted" style="font-size:.8rem;margin-bottom:6px">لینک پرداخت</div>
+          <div class="receipt-row"><span>محصول</span><span>دورهٔ آموزشی</span></div>
+          <div class="receipt-row"><span>مبلغ</span><b class="num">۹۸۰٬۰۱۲ تومان</b></div>
+          <div class="receipt-row"><span>آدرس</span><span class="ltr num">bolgram.ir/pay/7Q2K</span></div>
+          <div class="receipt-row"><span>وضعیت</span><span class="badge badge-ok" style="margin:0">پرداخت‌شده</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat-group">
+      <h3><span aria-hidden="true">۴</span>نظارت و اتصال</h3>
+      <div class="stat-strip">
+        <div><b>داشبورد و نمودار فروش</b><span>فروش روزانه و وضعیت دستگاه‌ها</span></div>
+        <div><b>اعلان تلگرام و بله</b><span>برای هر پرداخت موفق</span></div>
+        <div><b>API و وب‌هوک</b><span>امضای HMAC-SHA256 با زمان</span></div>
+        <div><b>ربات تلگرام <span class="badge">به‌زودی</span></b><span>ساخت فاکتور از داخل چت</span></div>
+        <div><b>خروجی اکسل <span class="badge">به‌زودی</span></b><span>گزارش مالی دوره‌ای</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="app" aria-labelledby="app-title" style="background:var(--card);border-block:1px solid var(--line)">
+  <div class="wrap app-grid">
+    <div class="phone" id="phone">
+      <div class="screen">
+        <div class="toast" role="status"><b>✅ واریز تأیید شد</b><br>۴۵۰٬۰۲۸ تومان · فاکتور ۱۰۴۲</div>
+        <div class="screen-top">بلگرام <small>● متصل</small></div>
+        <div class="screen-body">
+          <div class="panel on" id="ph-home"><div class="mcard"><div class="muted">فروش امروز</div><b class="num" style="font-size:1.3rem">۸٬۴۳۰٬۵۱۲ تومان</b></div><div class="mcard"><div class="mrow"><span>پیامک در صف</span><b class="num">۰</b></div><div class="mrow"><span>آخرین همگام‌سازی</span><span>همین الان</span></div><div class="mrow"><span>باتری</span><span class="num">۸۲٪</span></div></div><button class="btn btn-primary btn-sm" type="button" data-toast style="width:100%">شبیه‌سازی واریز</button></div>
+          <div class="panel" id="ph-tx"><div class="mcard"><div class="mrow"><span>ملت · ۱۰:۲۲</span><b class="num">۴۵۰٬۰۲۸</b></div><div class="mrow"><span>بلو · ۰۹:۴۸</span><b class="num">۱۲۰٬۰۰۳</b></div><div class="mrow"><span>تجارت · ۰۹:۱۰</span><b class="num">۷۹۰٬۰۱۱</b></div></div></div>
+          <div class="panel" id="ph-cards"><div class="mcard"><b>ملت</b><div class="ltr num muted">۶۱۰۴ •••• ۲۰۹۱</div><span class="badge badge-ok" style="margin:6px 0 0">فعال</span></div><div class="mcard"><b>بلو</b><div class="ltr num muted">۶۲۱۹ •••• ۴۴۱۰</div><span class="badge badge-ok" style="margin:6px 0 0">فعال</span></div></div>
+          <div class="panel" id="ph-set"><div class="mcard"><div class="mrow"><span>شروع خودکار با روشن شدن</span><span>روشن</span></div><div class="mrow"><span>ارسال پیامک برداشت</span><span>خاموش</span></div><div class="mrow"><span>قفل اپ</span><span>روشن</span></div></div></div>
+        </div>
+        <div class="tabbar" role="group" aria-label="تب‌های اپ نمونه">
+          <button type="button" aria-pressed="true" aria-controls="ph-home">خانه</button><button type="button" aria-pressed="false" aria-controls="ph-tx">تراکنش‌ها</button><button type="button" aria-pressed="false" aria-controls="ph-cards">کارت‌ها</button><button type="button" aria-pressed="false" aria-controls="ph-set">تنظیمات</button>
+        </div>
+      </div>
+      <span class="sr-only" id="phone-live" aria-live="polite"></span>
+    </div>
+    <div>
+      <span class="badge">نمای دمو</span>
+      <h2 id="app-title" style="margin-top:10px">اپ دریافت پیامک روی گوشی شما</h2>
+      <ul class="checklist">
+        <li><b>اتصال با یک کد:</b> کد QR پنل را اسکن کنید و تمام.</li>
+        <li><b>اعلان لحظه‌ای:</b> هر واریز تأییدشده همان لحظه اعلام می‌شود.</li>
+        <li><b>حالت آفلاین:</b> بی‌اینترنتی، پیامک‌ها در صف می‌مانند و بعداً ارسال می‌شوند.</li>
+        <li><b>مدیریت کارت‌ها:</b> وضعیت و آخرین واریز هر کارت را ببینید.</li>
+      </ul>
+      <p class="muted" style="font-size:var(--fs-s)">فقط پیامک‌هایی که شبیه تراکنش بانکی‌اند پردازش می‌شوند. رمز پویا، کد تأیید و پیامک‌های شخصی هرگز ارسال نمی‌شوند.</p>
+      <div class="store-row">
+        <a class="btn btn-ghost" data-store="play" href="/docs.html#android">گوگل‌پلی <span class="badge">به‌زودی</span></a>
+        <a class="btn btn-ghost" data-store="bazaar" href="/docs.html#android">کافه‌بازار <span class="badge">به‌زودی</span></a>
+        <a class="btn btn-ghost" href="/docs.html#ios">راهنمای شورتکات آیفون</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dev" aria-labelledby="dev-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="dev-title">اتصال و توسعه‌دهنده</h2><p>یک درخواست برای ساخت فاکتور، یک وب‌هوک امضاشده برای تحویل سفارش. مبالغ API به ریال است.</p></div>
+    <div class="dev-grid">
+      <div>
+        <div class="tabs" role="tablist" aria-label="نمونه کد">
+          <button role="tab" id="t-curl" aria-controls="p-curl" aria-selected="true">cURL</button>
+          <button role="tab" id="t-php" aria-controls="p-php" aria-selected="false" tabindex="-1">PHP</button>
+          <button role="tab" id="t-node" aria-controls="p-node" aria-selected="false" tabindex="-1">Node.js</button>
+          <button role="tab" id="t-py" aria-controls="p-py" aria-selected="false" tabindex="-1">Python</button>
+          <button role="tab" id="t-hook" aria-controls="p-hook" aria-selected="false" tabindex="-1">Callback و HMAC</button>
+        </div>
+        <div class="code" role="tabpanel" id="p-curl" aria-labelledby="t-curl"><button class="copy" type="button" data-copy="c-curl">کپی</button><pre id="c-curl"><span class="c"># ساخت فاکتور (مبلغ به ریال)</span>
+curl -X POST "https://api.bolgram.ir/v1/payment/create" \
+  -H "x-api-key: $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 4500000, "cus_name": "Ali", "redirect_url": "https://shop.example/thanks",
+       "webhook_url": "https://shop.example/hooks/bolgram", "metadata": {"order_id": "1042"}}'
+
+<span class="c"># پاسخ</span>
+{"status": true, "invoice_id": "PF...", "payment_url": "https://..."}</pre></div>
+        <div class="code" role="tabpanel" id="p-php" aria-labelledby="t-php" hidden><button class="copy" type="button" data-copy="c-php">کپی</button><pre id="c-php">&lt;?php
+$ch = curl_init('https://api.bolgram.ir/v1/payment/create');
+curl_setopt_array($ch, [
+  CURLOPT_POST =&gt; true,
+  CURLOPT_RETURNTRANSFER =&gt; true,
+  CURLOPT_HTTPHEADER =&gt; ['x-api-key: ' . getenv('TOKEN'), 'Content-Type: application/json'],
+  CURLOPT_POSTFIELDS =&gt; json_encode([
+    'amount' =&gt; 4500000,
+    'redirect_url' =&gt; 'https://shop.example/thanks',
+    'webhook_url' =&gt; 'https://shop.example/hooks/bolgram',
+    'metadata' =&gt; ['order_id' =&gt; '1042'],
+  ]),
+]);
+$res = json_decode(curl_exec($ch), true);
+header('Location: ' . $res['payment_url']);</pre></div>
+        <div class="code" role="tabpanel" id="p-node" aria-labelledby="t-node" hidden><button class="copy" type="button" data-copy="c-node">کپی</button><pre id="c-node">const res = await fetch('https://api.bolgram.ir/v1/payment/create', {
+  method: 'POST',
+  headers: { 'x-api-key': process.env.TOKEN, 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    amount: 4500000,
+    redirect_url: 'https://shop.example/thanks',
+    webhook_url: 'https://shop.example/hooks/bolgram',
+    metadata: { order_id: '1042' },
+  }),
+});
+const { invoice_id, payment_url } = await res.json();</pre></div>
+        <div class="code" role="tabpanel" id="p-py" aria-labelledby="t-py" hidden><button class="copy" type="button" data-copy="c-py">کپی</button><pre id="c-py">import os, requests
+
+r = requests.post(
+    "https://api.bolgram.ir/v1/payment/create",
+    headers={"x-api-key": os.environ["TOKEN"]},
+    json={
+        "amount": 4500000,
+        "redirect_url": "https://shop.example/thanks",
+        "webhook_url": "https://shop.example/hooks/bolgram",
+        "metadata": {"order_id": "1042"},
+    },
+    timeout=15,
+)
+payment_url = r.json()["payment_url"]</pre></div>
+        <div class="code" role="tabpanel" id="p-hook" aria-labelledby="t-hook" hidden><button class="copy" type="button" data-copy="c-hook">کپی</button><pre id="c-hook"><span class="c">// Express: X-Bolgram-Signature = "t=&lt;unix&gt;,v1=&lt;hex&gt;"</span>
+<span class="c">// v1 = HMAC_SHA256(WEBHOOK_SECRET, `${t}.${rawBody}`)</span>
+app.post('/hooks/bolgram', express.raw({ type: '*/*' }), async (req, res) =&gt; {
+  const sig = Object.fromEntries(req.get('x-bolgram-signature').split(',').map(p =&gt; p.split('=')));
+  const expected = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET)
+    .update(`${sig.t}.${req.body}`).digest('hex');
+  const fresh = Math.abs(Date.now() / 1000 - Number(sig.t)) &lt; 300;
+  if (!fresh || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig.v1 || ''))) return res.sendStatus(401);
+  const event = JSON.parse(req.body);
+  <span class="c">// Confirm once more before delivering, then deliver only once per invoice_id</span>
+  await verifyInvoice(event.invoice_id);   <span class="c">// POST /v1/payment/verify</span>
+  res.sendStatus(200);
+});</pre></div>
+      </div>
+      <div class="integ">
+        <a href="/docs.html#woocommerce"><span><b>افزونهٔ ووکامرس</b><small>نصب و وارد کردن کلید API</small></span><span aria-hidden="true">←</span></a>
+        <a href="/docs.html#telegram"><span><b>اعلان تلگرام و بله</b><small>برای هر پرداخت موفق</small></span><span aria-hidden="true">←</span></a>
+        <a href="/docs.html#links"><span><b>فروش اینستاگرامی بدون سایت</b><small>لینک پرداخت در دایرکت</small></span><span aria-hidden="true">←</span></a>
+        <a href="/docs.html#sdk"><span><b>SDKها</b><small>PHP، Node.js و Python</small></span><span aria-hidden="true">←</span></a>
+        <a href="/docs.html"><span><b>مستندات کامل</b><small>همهٔ endpointها و رویدادها</small></span><span aria-hidden="true">←</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="uc-title" style="background:var(--card);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="section-head"><h2 id="uc-title">برای چه کسانی؟</h2></div>
+    <div class="cards-6">
+      <a class="uc" href="/docs.html#links"><h3>فروشندهٔ اینستاگرام</h3><p>لینک پرداخت را در دایرکت بفرستید؛ دیگر لازم نیست رسید چک کنید.</p><span class="more">راهنما ←</span></a>
+      <a class="uc" href="/docs.html#telegram"><h3>ربات تلگرام و بله</h3><p>فاکتور را با API بسازید و پرداخت را با وب‌هوک تحویل دهید.</p><span class="more">راهنما ←</span></a>
+      <a class="uc" href="/docs.html#woocommerce"><h3>فروشگاه ووکامرس</h3><p>افزونه را نصب کنید؛ سفارش خودکار «پرداخت‌شده» می‌شود.</p><span class="more">راهنما ←</span></a>
+      <a class="uc" href="/docs.html#webhook"><h3>دوره، فایل و اشتراک</h3><p>بعد از وب‌هوک «پرداخت موفق» دسترسی را خودکار فعال کنید.</p><span class="more">راهنما ←</span></a>
+      <a class="uc" href="/docs.html#links"><h3>حمایت مالی و دونیت</h3><p>یک لینک ساده برای دریافت حمایت از مخاطبان.</p><span class="more">راهنما ←</span></a>
+      <a class="uc" href="/pricing.html#marketplace"><h3>پلتفرم چندفروشنده</h3><p>پول هر فروشنده مستقیم به کارت خودش. <span class="badge">به‌زودی</span></p><span class="more">پلن‌ها ←</span></a>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="sec-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="sec-title">امنیت و اعتماد</h2></div>
+    <ul class="sec-list">
+      <li><b>پول مستقیم به کارت شما</b><span>بلگرام هیچ‌وقت پول شما را نگه نمی‌دارد.</span></li>
+      <li><b>رمز پویا خوانده نمی‌شود</b><span>پیامک رمز، کد تأیید و برداشت پردازش یا ذخیره نمی‌شود.</span></li>
+      <li><b>ارتباط رمزنگاری‌شده</b><span>اپ، پنل و API فقط از طریق HTTPS کار می‌کنند.</span></li>
+      <li><b>امضای HMAC-SHA256</b><span>هر وب‌هوک با کلید اختصاصی شما و برچسب زمان امضا می‌شود.</span></li>
+      <li><b>ضد جعل و تکرار</b><span>فرستندهٔ ناشناس و پیامک تکراری هرگز خودکار تأیید نمی‌شود.</span></li>
+      <li><b>محدودیت نرخ و لاگ</b><span>محدودیت درخواست روی API و تاریخچهٔ کامل تراکنش‌ها.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="pricing" aria-labelledby="price-title" style="background:var(--card);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="section-head"><h2 id="price-title">تعرفه</h2><p>هزینهٔ ثابت و قابل پیش‌بینی؛ پلن‌ها را مقایسه کنید یا با ماشین‌حساب هزینهٔ خودتان را ببینید.</p></div>
+    <div class="price-controls">
+      <div class="seg" id="periods" role="group" aria-label="دورهٔ پرداخت"></div>
+      <div class="seg" role="tablist" id="audience" aria-label="نوع کسب‌وکار">
+        <button role="tab" aria-selected="true" data-audience="personal" id="aud-p">شخصی</button>
+        <button role="tab" aria-selected="false" tabindex="-1" data-audience="marketplace" id="aud-m">چندفروشنده</button>
+      </div>
+    </div>
+    <div class="plans" id="plans" aria-live="polite"></div>
+    <p class="sample-note">قیمت‌ها نمونه است و پیش از راه‌اندازی رسمی نهایی می‌شود. <span class="num" data-k="pricing.trial">۷ روز استفادهٔ رایگان، بدون نیاز به کارت.</span></p>
+    <div class="calc">
+      <div><label for="calc-tx">تعداد پرداخت موفق در ماه</label><input id="calc-tx" inputmode="numeric" value="800" autocomplete="off">
+        <label for="calc-amt" style="margin-top:14px">میانگین مبلغ هر پرداخت (تومان)</label><input id="calc-amt" inputmode="numeric" value="350000" autocomplete="off"></div>
+      <div class="calc-out" id="calc-out" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="scen-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="scen-title">سه سناریوی نمونه</h2><p>این‌ها مثال‌اند، نه نظر مشتری.</p></div>
+    <div class="scen">
+      <article><span class="badge">سناریوی نمونه</span><h3>فروشندهٔ اینستاگرامی</h3><p class="muted">کارت ملتش را ثبت می‌کند، اپ را روی گوشی نصب می‌کند و برای هر سفارش لینک پرداخت می‌فرستد. بعد از واریز، اعلان «پرداخت موفق» در بله می‌آید.</p></article>
+      <article><span class="badge">سناریوی نمونه</span><h3>فروشگاه ووکامرس</h3><p class="muted">افزونه را نصب و کلید API را وارد می‌کند. مشتری بعد از کارت‌به‌کارت خودکار به صفحهٔ تشکر برمی‌گردد و سفارش «در حال انجام» می‌شود.</p></article>
+      <article><span class="badge">سناریوی نمونه</span><h3>ربات فروش اشتراک</h3><p class="muted">ربات با API فاکتور می‌سازد و با وب‌هوک امضاشده، بعد از پرداخت لینک اشتراک را برای کاربر می‌فرستد.</p></article>
+    </div>
+  </div>
+</section>
+<!-- TESTIMONIALS: hidden until we have real customers -->
+<section hidden aria-hidden="true" id="testimonials"></section>
+
+<section id="faq" aria-labelledby="faq-title" style="background:var(--card);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="section-head"><h2 id="faq-title">سؤالات متداول</h2></div>
+    <div class="faq">
+<!--FAQ:home-->
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a1" id="faq-q1">پول به حساب من واریز می‌شود یا حساب شما؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a1" role="region" aria-labelledby="faq-q1" hidden><p>مستقیم به کارت خود شما. مشتری کارت‌به‌کارت را به کارتی انجام می‌دهد که خودتان ثبت کرده‌اید و پول هیچ‌وقت از حساب ما رد نمی‌شود. ما فقط پیامک بانک را می‌خوانیم و پرداخت را تأیید می‌کنیم.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a2" id="faq-q2">برای استفاده نیاز به اینماد یا درگاه بانکی دارم؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a2" role="region" aria-labelledby="faq-q2" hidden><p>برای استفاده از بلگرام قرارداد درگاه بانکی (PSP) لازم نیست. الزامات قانونی کسب‌وکار شما، مثل اینماد، به نوع فعالیتتان بستگی دارد و بلگرام جایگزین آن‌ها نیست.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a3" id="faq-q3">تأیید پرداخت چقدر طول می‌کشد؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a3" role="region" aria-labelledby="faq-q3" hidden><p>معمولاً چند ثانیه بعد از رسیدن پیامک بانک به گوشی شما. اگر پیامک بانک دیر برسد، تأیید هم به همان اندازه دیرتر انجام می‌شود.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a4" id="faq-q4">مبلغ یکتا یعنی چه؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a4" role="region" aria-labelledby="faq-q4" hidden><p>به هر فاکتور باز چند تومان اضافه می‌شود (مثلاً ۴۵۰٬۰۲۸ به‌جای ۴۵۰٬۰۰۰) تا هیچ دو فاکتوری مبلغ یکسان نداشته باشند. همین مبلغ است که واریز را بدون نیاز به رسید، به سفارش درست وصل می‌کند.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a5" id="faq-q5">اگر گوشی خاموش باشد یا اینترنت نداشته باشد چه می‌شود؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a5" role="region" aria-labelledby="faq-q5" hidden><p>اپ پیامک‌های بانکی را روی گوشی در صف نگه می‌دارد و بعد از وصل شدن اینترنت ارسال می‌کند. تا آن زمان پرداخت در انتظار می‌ماند و از دست نمی‌رود.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a6" id="faq-q6">اگر مبلغ واریزی با هیچ فاکتوری نخواند؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a6" role="region" aria-labelledby="faq-q6" hidden><p>واریز در صف «واریزهای نامطابق» قرار می‌گیرد. شما می‌توانید آن را دستی به فاکتور درست وصل کنید یا با ذکر دلیل رد کنید. هیچ‌چیز خودکار و حدسی تأیید نمی‌شود.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a7" id="faq-q7">ربات تلگرام لازم است؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a7" role="region" aria-labelledby="faq-q7" hidden><p>خیر. با سایت، لینک پرداخت یا API هم کار می‌کند. اعلان پرداخت در تلگرام و بله اختیاری است؛ ربات تعاملی برای ساخت فاکتور در حال ساخت است.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a8" id="faq-q8">با ووکامرس و API کار می‌کند؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a8" role="region" aria-labelledby="faq-q8" hidden><p>بله. API برای ساخت و استعلام فاکتور و وب‌هوک امضاشده با HMAC-SHA256 دارد و برای ووکامرس افزونه آماده است.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a9" id="faq-q9">چه بانک‌هایی پشتیبانی می‌شوند؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a9" role="region" aria-labelledby="faq-q9" hidden><p>قالب پیامک واقعی ملت، ملی، تجارت، پاسارگاد، رسالت، پارسیان، بلو، شهر، مهر ایران و خاورمیانه شناخته می‌شود و برای بقیه بانک‌ها پارسر عمومی فارسی وجود دارد. اگر پیامک بانک شما خوانده نشد، نمونه‌اش را بفرستید تا قالبش اضافه شود.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a10" id="faq-q10">رمزارز هم پشتیبانی می‌شود؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a10" role="region" aria-labelledby="faq-q10" hidden><p>فعلاً خیر. تمرکز بلگرام روی کارت‌به‌کارت بانکی است.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a11" id="faq-q11">امنیت چطور تأمین می‌شود؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a11" role="region" aria-labelledby="faq-q11" hidden><p>پیامک رمز پویا و کد تأیید هرگز خوانده یا ذخیره نمی‌شود، پیامک برداشت نادیده گرفته می‌شود، واریز از فرستندهٔ ناشناس خودکار تأیید نمی‌شود و همهٔ وب‌هوک‌ها با کلید اختصاصی شما امضا می‌شوند.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a12" id="faq-q12">سقف پلن و کارمزد یعنی چه؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a12" role="region" aria-labelledby="faq-q12" hidden><p>هر پلن تعداد مشخصی پرداخت موفق در ماه دارد. با ماشین‌حساب صفحهٔ تعرفه می‌توانید هزینهٔ ماهانهٔ خودتان را بر اساس تعداد و مبلغ تراکنش ببینید. قیمت‌های فعلی نمونه است.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a13" id="faq-q13">اگر مبلغ فاکتور از سقف کارت‌به‌کارت بیشتر باشد؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a13" role="region" aria-labelledby="faq-q13" hidden><p>تقسیم خودکار فاکتور بزرگ به چند پرداخت در حال ساخت است. تا آن زمان می‌توانید برای مبالغ بزرگ چند فاکتور جدا بسازید.</p></div></div>
+<div class="faq-item"><h3><button type="button" aria-expanded="false" aria-controls="faq-a14" id="faq-q14">چطور از درگاه دیگری به بلگرام بیایم؟<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3><div class="ans" id="faq-a14" role="region" aria-labelledby="faq-q14" hidden><p>کافی است در فروشگاه خود به‌جای درگاه قبلی، ساخت فاکتور را به API بلگرام بفرستید یا افزونه را نصب کنید. منطق تحویل سفارش شما با وب‌هوک «پرداخت موفق» کار می‌کند و تغییری لازم ندارد.</p></div></div>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "پول به حساب من واریز می‌شود یا حساب شما؟", "acceptedAnswer": {"@type": "Answer", "text": "مستقیم به کارت خود شما. مشتری کارت‌به‌کارت را به کارتی انجام می‌دهد که خودتان ثبت کرده‌اید و پول هیچ‌وقت از حساب ما رد نمی‌شود. ما فقط پیامک بانک را می‌خوانیم و پرداخت را تأیید می‌کنیم."}}, {"@type": "Question", "name": "برای استفاده نیاز به اینماد یا درگاه بانکی دارم؟", "acceptedAnswer": {"@type": "Answer", "text": "برای استفاده از بلگرام قرارداد درگاه بانکی (PSP) لازم نیست. الزامات قانونی کسب‌وکار شما، مثل اینماد، به نوع فعالیتتان بستگی دارد و بلگرام جایگزین آن‌ها نیست."}}, {"@type": "Question", "name": "تأیید پرداخت چقدر طول می‌کشد؟", "acceptedAnswer": {"@type": "Answer", "text": "معمولاً چند ثانیه بعد از رسیدن پیامک بانک به گوشی شما. اگر پیامک بانک دیر برسد، تأیید هم به همان اندازه دیرتر انجام می‌شود."}}, {"@type": "Question", "name": "مبلغ یکتا یعنی چه؟", "acceptedAnswer": {"@type": "Answer", "text": "به هر فاکتور باز چند تومان اضافه می‌شود (مثلاً ۴۵۰٬۰۲۸ به‌جای ۴۵۰٬۰۰۰) تا هیچ دو فاکتوری مبلغ یکسان نداشته باشند. همین مبلغ است که واریز را بدون نیاز به رسید، به سفارش درست وصل می‌کند."}}, {"@type": "Question", "name": "اگر گوشی خاموش باشد یا اینترنت نداشته باشد چه می‌شود؟", "acceptedAnswer": {"@type": "Answer", "text": "اپ پیامک‌های بانکی را روی گوشی در صف نگه می‌دارد و بعد از وصل شدن اینترنت ارسال می‌کند. تا آن زمان پرداخت در انتظار می‌ماند و از دست نمی‌رود."}}, {"@type": "Question", "name": "اگر مبلغ واریزی با هیچ فاکتوری نخواند؟", "acceptedAnswer": {"@type": "Answer", "text": "واریز در صف «واریزهای نامطابق» قرار می‌گیرد. شما می‌توانید آن را دستی به فاکتور درست وصل کنید یا با ذکر دلیل رد کنید. هیچ‌چیز خودکار و حدسی تأیید نمی‌شود."}}, {"@type": "Question", "name": "ربات تلگرام لازم است؟", "acceptedAnswer": {"@type": "Answer", "text": "خیر. با سایت، لینک پرداخت یا API هم کار می‌کند. اعلان پرداخت در تلگرام و بله اختیاری است؛ ربات تعاملی برای ساخت فاکتور در حال ساخت است."}}, {"@type": "Question", "name": "با ووکامرس و API کار می‌کند؟", "acceptedAnswer": {"@type": "Answer", "text": "بله. API برای ساخت و استعلام فاکتور و وب‌هوک امضاشده با HMAC-SHA256 دارد و برای ووکامرس افزونه آماده است."}}, {"@type": "Question", "name": "چه بانک‌هایی پشتیبانی می‌شوند؟", "acceptedAnswer": {"@type": "Answer", "text": "قالب پیامک واقعی ملت، ملی، تجارت، پاسارگاد، رسالت، پارسیان، بلو، شهر، مهر ایران و خاورمیانه شناخته می‌شود و برای بقیه بانک‌ها پارسر عمومی فارسی وجود دارد. اگر پیامک بانک شما خوانده نشد، نمونه‌اش را بفرستید تا قالبش اضافه شود."}}, {"@type": "Question", "name": "رمزارز هم پشتیبانی می‌شود؟", "acceptedAnswer": {"@type": "Answer", "text": "فعلاً خیر. تمرکز بلگرام روی کارت‌به‌کارت بانکی است."}}, {"@type": "Question", "name": "امنیت چطور تأمین می‌شود؟", "acceptedAnswer": {"@type": "Answer", "text": "پیامک رمز پویا و کد تأیید هرگز خوانده یا ذخیره نمی‌شود، پیامک برداشت نادیده گرفته می‌شود، واریز از فرستندهٔ ناشناس خودکار تأیید نمی‌شود و همهٔ وب‌هوک‌ها با کلید اختصاصی شما امضا می‌شوند."}}, {"@type": "Question", "name": "سقف پلن و کارمزد یعنی چه؟", "acceptedAnswer": {"@type": "Answer", "text": "هر پلن تعداد مشخصی پرداخت موفق در ماه دارد. با ماشین‌حساب صفحهٔ تعرفه می‌توانید هزینهٔ ماهانهٔ خودتان را بر اساس تعداد و مبلغ تراکنش ببینید. قیمت‌های فعلی نمونه است."}}, {"@type": "Question", "name": "اگر مبلغ فاکتور از سقف کارت‌به‌کارت بیشتر باشد؟", "acceptedAnswer": {"@type": "Answer", "text": "تقسیم خودکار فاکتور بزرگ به چند پرداخت در حال ساخت است. تا آن زمان می‌توانید برای مبالغ بزرگ چند فاکتور جدا بسازید."}}, {"@type": "Question", "name": "چطور از درگاه دیگری به بلگرام بیایم؟", "acceptedAnswer": {"@type": "Answer", "text": "کافی است در فروشگاه خود به‌جای درگاه قبلی، ساخت فاکتور را به API بلگرام بفرستید یا افزونه را نصب کنید. منطق تحویل سفارش شما با وب‌هوک «پرداخت موفق» کار می‌کند و تغییری لازم ندارد."}}]}</script>
+<!--/FAQ-->
+    </div>
+    <p style="margin-top:18px"><a href="/faq.html">همهٔ سؤالات ←</a></p>
+  </div>
+</section>
+
+<section aria-labelledby="blog-title">
+  <div class="wrap">
+    <div class="section-head"><h2 id="blog-title">آموزش و وبلاگ</h2></div>
+    <div class="posts">
+      <a class="post" href="/blog/card-to-card-gateway.html"><span class="cover" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg></span><div class="body"><time datetime="2026-09-24">۲ مهر ۱۴۰۵</time><h3>درگاه پرداخت کارت‌به‌کارت چیست؟</h3><p>تفاوت با درگاه بانکی و کارت‌به‌کارت دستی، به زبان ساده.</p></div></a>
+      <a class="post" href="/blog/auto-verify.html"><span class="cover" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v10H8l-4 4z"/></svg></span><div class="body"><time datetime="2026-09-30">۸ مهر ۱۴۰۵</time><h3>تأیید خودکار کارت‌به‌کارت چطور کار می‌کند؟</h3><p>از پیامک بانک تا وب‌هوک؛ مبلغ یکتا و صف بررسی.</p></div></a>
+      <a class="post" href="/blog/no-enamad.html"><span class="cover" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4v6c0 4-3.5 7-8 8-4.5-1-8-4-8-8V7z"/></svg></span><div class="body"><time datetime="2026-10-06">۱۴ مهر ۱۴۰۵</time><h3>درگاه بدون اینماد؟ توضیح درست</h3><p>چه چیزی لازم است و چه چیزی نه، بدون وعدهٔ غلط.</p></div></a>
+    </div>
+    <div class="seo-links"><a href="/blog/card-to-card-gateway.html">درگاه پرداخت کارت‌به‌کارت</a><a href="/blog/auto-verify.html">تأیید خودکار کارت‌به‌کارت</a><a href="/blog/no-enamad.html">درگاه بدون اینماد</a><a href="/docs.html#telegram">درگاه ربات تلگرام</a><a href="/docs.html#links">فروش در اینستاگرام بدون سایت</a></div>
+  </div>
+</section>
+
+<section aria-labelledby="final-title">
+  <div class="wrap">
+    <div class="final">
+      <h2 id="final-title" data-k="final.title">پرداخت بعدی را خودکار تأیید کنید</h2>
+      <p>کمتر از ۱۰ دقیقه تا اولین فاکتور.</p>
+      <a class="btn btn-primary" data-href="SIGNUP_URL" href="/login.html#register">شروع رایگان</a>
+    </div>
+  </div>
+</section>
+</main>
+<!--FOOTER-->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="/"><img data-img="logo" src="/assets/img/logo.svg" width="34" height="34" alt=""><span data-k="brand">بلگرام</span></a>
+        <p class="muted" style="margin-top:10px" data-k="footer.about">درگاه کارت‌به‌کارت با تأیید خودکار از روی پیامک بانک. پول مستقیم به کارت خود شما واریز می‌شود.</p>
+        <div class="enamad-slot"><!-- ENAMAD_SLOT -->جای نماد اعتماد</div>
+      </div>
+      <div><h2>محصول</h2><ul><li><a href="/#features">امکانات</a></li><li><a href="/pricing.html">تعرفه</a></li><li><a href="/#app">اپلیکیشن</a></li><li><a href="/docs.html">مستندات API</a></li></ul></div>
+      <div><h2>یادگیری</h2><ul><li><a href="/blog/">وبلاگ</a></li><li><a href="/faq.html">سؤالات متداول</a></li><li><a href="/docs.html#woocommerce">اتصال ووکامرس</a></li><li><a href="/docs.html#ios">شورتکات آیفون</a></li></ul></div>
+      <div><h2>حساب و شرکت</h2><ul><li><a data-href="LOGIN_URL" href="/login.html">ورود</a></li><li><a data-href="SIGNUP_URL" href="/login.html#register">ثبت‌نام</a></li><li><a href="/about.html">درباره ما</a></li><li><a href="/contact.html">تماس با ما</a></li></ul></div>
+      <div><h2>قوانین</h2><ul><li><a href="/legal.html#terms">قوانین استفاده</a></li><li><a href="/legal.html#privacy">حریم خصوصی</a></li><li><a href="/legal.html#disclaimer">سلب مسئولیت</a></li><li><a href="/legal.html#delete">حذف حساب</a></li></ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span data-year="1405">۱۴۰۵</span> <span data-k="brand">بلگرام</span> — همه حقوق محفوظ است.</span>
+      <span><a data-href="SUPPORT_TELEGRAM" href="/contact.html" rel="noopener">تلگرام</a> · <a href="/contact.html">بله</a> · <a href="/contact.html">ایمیل</a></span>
+    </div>
+  </div>
+</footer>
+<a class="float-support" data-href="SUPPORT_TELEGRAM" href="/contact.html" rel="noopener" aria-label="پشتیبانی تلگرام"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.8 15.2l-.4 4.3c.6 0 .8-.3 1.1-.6l2.7-2.5 5.5 4c1 .6 1.7.3 2-.9l3.6-16.8c.3-1.5-.6-2.1-1.6-1.7L1.5 9.4c-1.4.6-1.4 1.4-.2 1.8l5.4 1.7L19.3 5c.6-.4 1.1-.2.7.2z"/></svg><span>پشتیبانی تلگرام</span></a>
+<!--/FOOTER-->
+</body>
+</html>
