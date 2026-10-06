@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نماد اعتماد بولگرام</title>
+<meta name="description" content="بررسی تأیید هویت فروشگاه توسط بولگرام">
+<link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--muted:#6b7280;--brand:#2563eb;--ok:#059669;--warn:#d97706;--line:#e5e7eb}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#121a2b;--ink:#e5e7eb;--muted:#9ca3af;--line:#1f2a3d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif;line-height:1.8}
+.wrap{max-width:460px;margin:0 auto;padding:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;margin-bottom:12px}
+.hero{text-align:center}
+.seal{width:84px;height:84px;margin:4px auto 10px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.seal.no{background:color-mix(in srgb,var(--muted) 16%,transparent);color:var(--muted)}
+.seal svg{width:44px;height:44px}
+h1{font-size:19px;margin:0 0 2px}.store{font-size:22px;font-weight:800;margin:6px 0 2px;word-break:break-word}
+.muted{color:var(--muted);font-size:13px}
+.tag{display:inline-block;background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700}
+.tag.no{background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}.row:last-child{border:0}
+.row a{color:var(--brand);text-decoration:none;direction:ltr;word-break:break-all;font-weight:600}
+.alert{border-radius:12px;padding:10px 12px;font-size:13px;background:color-mix(in srgb,var(--warn) 14%,transparent);margin-top:12px;text-align:right}
+.hide{display:none}
+footer{text-align:center;padding:14px 0 24px}footer a{color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:.3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="box hero" id="box" aria-live="polite">
+    <div class="seal no" id="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M12 9v4M12 16.5v.01"/></svg></div>
+    <h1 id="title">در حال بررسی…</h1>
+    <div class="muted" id="sub">لطفاً چند لحظه صبر کنید</div>
+  </main>
+  <section class="box hide" id="details" aria-label="مشخصات">
+    <div class="row"><span class="muted">نام فروشگاه</span><b id="d-name"></b></div>
+    <div class="row"><span class="muted">وضعیت</span><span class="tag">تأییدشده توسط بولگرام</span></div>
+    <div class="row"><span class="muted">تاریخ تأیید</span><b id="d-date"></b></div>
+    <div class="row hide" id="r-web"><span class="muted">وب‌سایت</span><a id="d-web" target="_blank" rel="noopener nofollow"></a></div>
+    <div class="row hide" id="r-ig"><span class="muted">اینستاگرام</span><a id="d-ig" target="_blank" rel="noopener nofollow"></a></div>
+    <div class="alert">بولگرام هویت صاحب این فروشگاه را با مدارک رسمی بررسی کرده است. پیش از پرداخت، مطمئن شوید آدرس همین صفحه با <b>bolgram</b> آغاز می‌شود و نام فروشگاه با فروشگاه مورد نظر شما یکی است.</div>
+  </section>
+  <section class="box hide" id="unverified">
+    <b>این فروشگاه هنوز تأیید نشده است</b>
+    <p class="muted">این به معنی تقلب نیست، فقط یعنی بولگرام هویت این فروشگاه را بررسی نکرده است. پیش از پرداخت مبلغ زیاد، از طریق راه‌های ارتباطی معتبر از اصالت فروشنده مطمئن شوید و پرداخت را فقط به کارتی انجام دهید که نام صاحب آن با نام فروشنده یکی است.</p>
+  </section>
+  <footer><a href="/" target="_blank" rel="noopener">by <b>Bolgram</b></a></footer>
+</div>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var handle=decodeURIComponent((location.pathname.split('/').filter(Boolean)[1]||'')).toLowerCase();
+  function fail(){$('title').textContent='خطا در بررسی';$('sub').textContent='ارتباط با سرور برقرار نشد؛ کمی بعد دوباره تلاش کنید.'}
+  fetch('/api/pub/trust/'+encodeURIComponent(handle),{headers:{Accept:'application/json'}}).then(function(r){return r.json()}).then(function(d){
+    if(!d||!d.success)return fail();
+    if(d.verified){
+      document.title='فروشگاه تأییدشده | '+d.store.name;
+      $('seal').className='seal';
+      $('seal').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>';
+      $('title').textContent='نماد اعتماد بولگرام';
+      var s=$('sub');s.textContent='';var b=document.createElement('span');b.className='tag';b.textContent='تأییدشده توسط بولگرام';s.appendChild(b);
+      $('d-name').textContent=d.store.name;
+      $('d-date').textContent=(d.verified_at_fa||'').replace(/\d/g,function(x){return '۰۱۲۳۴۵۶۷۸۹'[x]});
+      if(d.website){$('r-web').classList.remove('hide');var w=$('d-web');w.textContent=d.website.replace(/^https?:\/\//,'');w.href=/^https?:\/\//.test(d.website)?d.website:'#'}
+      if(d.instagram){$('r-ig').classList.remove('hide');var g=$('d-ig');g.textContent='@'+d.instagram;g.href='https://instagram.com/'+encodeURIComponent(d.instagram)}
+      $('details').classList.remove('hide');
+    }else{
+      document.title='فروشگاه تأیید نشده | بولگرام';
+      $('title').textContent='فروشگاه تأیید نشده';
+      $('sub').textContent=d.store?d.store.name:'برای این نشانی فروشگاهی با نماد اعتماد پیدا نشد';
+      $('unverified').classList.remove('hide');
+    }
+  }).catch(fail);
+})();
+</script>
+</body>
+</html>
