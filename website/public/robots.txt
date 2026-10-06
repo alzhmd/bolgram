@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /login.html
+Sitemap: https://bolgram.ir/sitemap.xml
