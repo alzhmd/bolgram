@@ -184,7 +184,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       cus_email: (invoice as any).customer_email || 'customer@example.com',
       amount: invoice.amount,
       invoice_id: invoice.invoice_id,
-      payment_method: (invoice as any).payment_method || 'bkash',
+      payment_method: (invoice as any).payment_method || 'card',
       transaction_id: (invoice as any).trx_id || null,
       status: verifyResult.status,
     });
