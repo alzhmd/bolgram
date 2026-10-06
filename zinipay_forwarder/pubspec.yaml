@@ -1,8 +1,7 @@
-name: payflow_agent
-description: Bolgram MFS Telephony Forwarder Agent developed by Jahidul Islam. Real-time verification for bKash, Nagad, Rocket, Upay & Banks.
+name: bolgram_forwarder
+description: بولگرام، اپ ارسال پیامک بانکی برای تطبیق خودکار واریزهای کارت‌به‌کارت.
 publish_to: 'none'
-version: 1.2.0+3
-homepage: https://jahidulislam.dev
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -10,37 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.5.1
   http: ^1.2.1
-  shared_preferences: ^2.2.3
-  intl: ^0.19.0
-  crypto: ^3.0.3
-
-  # QR Code Scanner (camera-based)
+  # QR scanner for pairing
   mobile_scanner: ^6.0.0
-
-  # Biometric Lock
-  local_auth: ^2.3.0
-
-  # Sound alert for big payments
-  audioplayers: ^6.1.0
-
-  # Export CSV / Share log
-  share_plus: ^10.0.0
-  path_provider: ^2.1.4
-
-  # Local push notifications
-  flutter_local_notifications: ^18.0.0
-
-  # Charts for daily/weekly stats
-  fl_chart: ^0.70.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/sounds/
