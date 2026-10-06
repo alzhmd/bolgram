@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Verification API | SyncPay BD</title>
+  <meta name="description" content="SyncPay BD Transaction Verification API — Advanced backend payment verification workflow.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f8fafc;--bg-card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#64748b;--primary:#0284c7;--primary-h:#0369a1;--primary-s:#f0f9ff;--primary-b:#bae6fd;--success:#10b981;--danger:#ef4444;--radius:16px;--radius-sm:8px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+    header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+    .nav-wrap{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:800;font-size:18px;}
+    .brand-logo{width:34px;height:34px;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+    .nav-right{display:flex;align-items:center;gap:20px;}
+    .nav-right a{text-decoration:none;color:var(--muted);font-size:13px;font-weight:600;transition:color .15s;}
+    .nav-right a:hover{color:var(--primary);}
+    .btn-back{background:var(--primary-s);border:1px solid var(--primary-b);color:var(--primary)!important;padding:7px 14px;border-radius:var(--radius-sm);}
+    .page-wrap{max-width:1200px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:40px;align-items:start;}
+    @media(max-width:768px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
+    .sidebar{position:sticky;top:80px;background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+    .sidebar h4{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--light);margin-bottom:12px;padding-left:8px;}
+    .sidebar ul{list-style:none;display:flex;flex-direction:column;gap:2px;}
+    .sidebar ul li a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;color:var(--muted);transition:all .15s;}
+    .sidebar ul li a:hover,.sidebar ul li a.active{background:var(--primary-s);color:var(--primary);}
+    .sidebar-divider{height:1px;background:var(--border);margin:10px 0;}
+    .content h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin-bottom:12px;}
+    .content .lead{font-size:16px;color:var(--muted);margin-bottom:36px;line-height:1.7;}
+    .content h2{font-size:20px;font-weight:800;margin:40px 0 14px;padding-top:40px;border-top:1px solid var(--border);}
+    .content h2:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+    .content h3{font-size:15px;font-weight:700;margin:24px 0 10px;}
+    .content p{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.7;}
+    .content ul{padding-left:20px;margin-bottom:14px;}
+    .content ul li{font-size:14px;color:var(--muted);margin-bottom:6px;line-height:1.6;}
+    .page-chip{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);background:var(--primary-s);border:1px solid var(--primary-b);padding:5px 14px;border-radius:20px;margin-bottom:14px;}
+    .alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:20px;font-size:13px;}
+    .alert-warn{background:#fffbeb;border:1px solid #fde68a;color:#b45309;}
+    .alert-info{background:var(--primary-s);border:1px solid var(--primary-b);color:#0369a1;}
+    .flow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:24px 0;}
+    .flow-step{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;}
+    .flow-step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:12px;}
+    .flow-step h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+    .flow-step p{font-size:12px;color:var(--light);margin:0;line-height:1.5;}
+    .endpoint-row{display:flex;align-items:center;gap:10px;background:#0f172a;border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:13px;}
+    .method{font-weight:700;padding:3px 9px;border-radius:5px;font-size:12px;}
+    .method.post{background:#dcfce7;color:#16a34a;}
+    .ep-url{color:#94a3b8;}
+    .ep-url span{color:#38bdf8;}
+    .code-block{background:#0f172a;border-radius:var(--radius-sm);padding:20px 24px;margin:12px 0 20px;overflow-x:auto;}
+    .code-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#e2e8f0;margin:0;}
+    .c-kw{color:#f472b6;}.c-fn{color:#60a5fa;}.c-str{color:#86efac;}.c-cmt{color:#475569;font-style:italic;}.c-num{color:#fb923c;}.c-var{color:#a78bfa;}.c-key{color:#38bdf8;}
+    .param-table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:13px;}
+    .param-table th{text-align:left;padding:10px 14px;background:#f8fafc;border:1px solid var(--border);color:var(--light);font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
+    .param-table td{padding:11px 14px;border:1px solid var(--border);color:var(--muted);vertical-align:top;}
+    .param-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--text);font-size:12px;}
+    .tag-req{background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;}
+    .tag-opt{background:#f8fafc;color:var(--light);font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;}
+    .res-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px;}
+    .res-200{background:#dcfce7;color:#16a34a;}.res-400{background:#fef2f2;color:#dc2626;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>SyncPay BD</span></a>
+      <div class="nav-right">
+        <a href="/docs/api">API Docs</a>
+        <a href="/docs/trx-verification" style="color:var(--primary)">Verification</a>
+        <a href="/docs/webhook">Webhook</a>
+        <a href="/" class="btn-back">← Home</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrap">
+    <aside class="sidebar">
+      <h4>Verification API</h4>
+      <ul>
+        <li><a href="#overview" class="active">Overview</a></li>
+        <li><a href="#flow">Verification Flow</a></li>
+        <li><a href="#endpoint">API Endpoint</a></li>
+        <li><a href="#status-codes">Status Codes</a></li>
+        <li><a href="#idempotency">Idempotency</a></li>
+        <div class="sidebar-divider"></div>
+        <li><a href="/docs/api">← API Documentation</a></li>
+        <li><a href="/docs/webhook">Webhook API</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <div class="page-chip">Transaction Verification</div>
+      <h1>Transaction Verification API</h1>
+      <p class="lead">Backend-side advanced payment verification — directly verify customer MFS transactions from your backend server. Protected against double-spending, manipulated screenshots, and forged transactions.</p>
+
+      <h2 id="overview">Why Backend Verification?</h2>
+      <p>Displaying transaction IDs on the frontend is not secure. Without backend verification:</p>
+      <ul>
+        <li>Fraudulent transaction IDs can be used to bypass checkout</li>
+        <li>Manipulated or fake screenshots can be submitted</li>
+        <li>The same transaction ID could be reused across multiple orders</li>
+      </ul>
+      <div class="alert alert-warn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>SyncPay BD ensures each transaction is <strong>verified only once</strong>. Duplicate attempts are automatically rejected.</span>
+      </div>
+
+      <h2 id="flow">Verification Flow</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-body">
+            <h4>Customer Pays</h4>
+            <p>Customer sends money from bKash/Nagad/Rocket/Upay to your merchant number and obtains a Transaction ID.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-body">
+            <h4>Server Calls API</h4>
+            <p>Send a POST request containing trx_id, amount, and provider to the SyncPay BD API.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-body">
+            <h4>SyncPay Checks SMS Log</h4>
+            <p>Our Android forwarder agent matches real SMS data against your payment invoice parameters.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-body">
+            <h4>Returns Response</h4>
+            <p>Confirm the order when <code>verified: true</code>. Prompt the customer when <code>false</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="endpoint">API Endpoint</h2>
+      <div class="endpoint-row"><span class="method post">POST</span><span class="ep-url"><span>/verify</span></span></div>
+
+      <h3>Request Body</h3>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Description</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>trx_id</td><td>string</td><td>MFS Transaction ID (e.g. 8J1B2C3K4L)</td><td><span class="tag-req">required</span></td></tr>
+          <tr><td>amount</td><td>number</td><td>Expected payment amount (BDT)</td><td><span class="tag-req">required</span></td></tr>
+          <tr><td>provider</td><td>string</td><td>bKash | Nagad | Rocket | Upay</td><td><span class="tag-req">required</span></td></tr>
+          <tr><td>tolerance</td><td>number</td><td>Amount tolerance in BDT (default: 0)</td><td><span class="tag-opt">optional</span></td></tr>
+          <tr><td>invoice_id</td><td>string</td><td>SyncPay invoice ID (if applicable)</td><td><span class="tag-opt">optional</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block"><pre><span class="c-fn">POST</span> /v1/verify
+<span class="c-key">Authorization</span>: <span class="c-str">Bearer pf_live_xxx</span>
+<span class="c-key">Content-Type</span>: <span class="c-str">application/json</span>
+
+{
+  <span class="c-key">"trx_id"</span>:   <span class="c-str">"8J1B2C3K4L"</span>,
+  <span class="c-key">"amount"</span>:   <span class="c-num">1500</span>,
+  <span class="c-key">"provider"</span>: <span class="c-str">"bKash"</span>,
+  <span class="c-key">"tolerance"</span>: <span class="c-num">5</span>
+}</pre></div>
+
+      <h3>Verified Response</h3>
+      <span class="res-pill res-200">200 — verified: true</span>
+      <div class="code-block"><pre>{
+  <span class="c-key">"success"</span>:      <span class="c-fn">true</span>,
+  <span class="c-key">"verified"</span>:     <span class="c-fn">true</span>,
+  <span class="c-key">"trx_id"</span>:      <span class="c-str">"8J1B2C3K4L"</span>,
+  <span class="c-key">"amount"</span>:      <span class="c-num">1500</span>,
+  <span class="c-key">"provider"</span>:    <span class="c-str">"bKash"</span>,
+  <span class="c-key">"sender"</span>:      <span class="c-str">"01XXXXXXXXX"</span>,
+  <span class="c-key">"verified_at"</span>: <span class="c-str">"2024-01-15T12:01:43Z"</span>
+}</pre></div>
+
+      <h3>Failed Response</h3>
+      <span class="res-pill res-400">200 — verified: false</span>
+      <div class="code-block"><pre>{
+  <span class="c-key">"success"</span>:  <span class="c-fn">true</span>,
+  <span class="c-key">"verified"</span>: <span class="c-fn">false</span>,
+  <span class="c-key">"error"</span>:    <span class="c-str">"Transaction not found"</span>,
+  <span class="c-key">"code"</span>:     <span class="c-str">"TRX_NOT_FOUND"</span>
+}</pre></div>
+
+      <h2 id="status-codes">Error Codes</h2>
+      <table class="param-table">
+        <thead><tr><th>Code</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>TRX_NOT_FOUND</td><td>Transaction ID not found in telephony database</td></tr>
+          <tr><td>AMOUNT_MISMATCH</td><td>Received amount does not match expected amount</td></tr>
+          <tr><td>PROVIDER_MISMATCH</td><td>Payment provider mismatch</td></tr>
+          <tr><td>ALREADY_USED</td><td>This transaction ID has already been verified</td></tr>
+          <tr><td>EXPIRED</td><td>Transaction is older than the allowed 24-hour window</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="idempotency">Idempotency</h2>
+      <p>Each <code>trx_id</code> can be verified only once. Attempting to verify the same trx_id again will result in an <code>ALREADY_USED</code> error, preventing double-spending.</p>
+      <div class="alert alert-info">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>In the event of network timeouts, requests can safely be retried — verified transactions return the cached verification response.</span>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

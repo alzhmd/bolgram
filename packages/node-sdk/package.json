@@ -1,0 +1,22 @@
+{
+  "name": "@syncpaybd/sdk",
+  "version": "2.0.0",
+  "description": "Official Node.js and TypeScript client for SyncPay BD Automated MFS Gateway",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "test": "node example.js"
+  },
+  "keywords": [
+    "syncpay",
+    "bkash",
+    "nagad",
+    "rocket",
+    "upay",
+    "mfs",
+    "payment",
+    "bangladesh"
+  ],
+  "author": "SyncPay BD",
+  "license": "MIT"
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80" width="220" height="80">
+  <rect x="4" y="10" width="60" height="60" rx="14" fill="#002b49"/>
+  <!-- Upay vibrant 'u' smile shape -->
+  <path d="M22 25 L22 41 C22 49, 28 55, 36 55 C44 55, 50 49, 50 41 L50 25 L43 25 L43 41 C43 45, 40 48, 36 48 C32 48, 29 45, 29 41 L29 25 Z" fill="#ffcc00"/>
+  <circle cx="46.5" cy="22" r="3.5" fill="#0284c7"/>
+  <!-- upay Text -->
+  <text x="74" y="49" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="32" font-weight="800" fill="#002b49" letter-spacing="-0.5">upay</text>
+  <text x="75" y="63" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10" font-weight="700" fill="#0284c7" letter-spacing="1">UCB FINTECH</text>
+</svg>
