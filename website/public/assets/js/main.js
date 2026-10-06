@@ -45,6 +45,14 @@
       .catch(function () {});
   }
 
+  /* ---------- live content from the Bolgram API (banner, contact, logo, FAQ, pricing, reviews); static content is the fallback ---------- */
+  if (window.fetch && S.API_BASE) {
+    var live = document.createElement('script');
+    live.src = '/assets/js/live.js';
+    live.async = true;
+    document.head.appendChild(live);
+  }
+
   /* ---------- mobile menu ---------- */
   var menu = $('#mobile-menu');
   var openBtn = $('[data-menu-open]');
