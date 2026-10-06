@@ -164,7 +164,7 @@ export function todaySummary(merchantId: string) {
   const today = one(`SELECT coalesce(sum(amount),0) AS s, count(*) AS n FROM transactions WHERE merchant_id = ? AND is_verified = 1 AND created_at >= ?`, merchantId, dayStart);
   const open = one(`SELECT count(*) AS n FROM invoices WHERE merchant_id = ? AND status = 'PENDING' AND expires_at > ?`, merchantId, nowIso);
   const orphan = one(`SELECT count(*) AS n FROM unmatched_sms u JOIN devices dv ON dv.id = u.device_id WHERE dv.merchant_id = ? AND u.status IN ('UNMATCHED','SUSPICIOUS')`, merchantId);
-  const dev = one(`SELECT count(*) AS n, sum(CASE WHEN last_seen >= ? THEN 1 ELSE 0 END) AS online FROM devices WHERE merchant_id = ?`, utcSql(new Date(Date.now() - 3 * 60_000)), merchantId);
+  const dev = one(`SELECT count(*) AS n, sum(CASE WHEN last_seen >= ? THEN 1 ELSE 0 END) AS online FROM devices WHERE merchant_id = ? AND revoked_at IS NULL`, utcSql(new Date(Date.now() - 3 * 60_000)), merchantId);
   const cards = one(`SELECT count(*) AS n FROM payment_methods WHERE merchant_id = ? AND is_active = 1`, merchantId);
   return {
     today_rial: Number(today.s),

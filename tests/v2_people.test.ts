@@ -237,7 +237,8 @@ describe('People: team + notifications', () => {
     assert.strictEqual(by(/مشکوک/).level, 'danger');
     assert.strictEqual(by(/مشکوک/).href, '#/deposits');
     assert.strictEqual(by(/آفلاین/).href, '#/devices');
-    assert.match(by(/کم است/).body, /۳٬۰۰۰ تومان/);
+    // The billing feature may also emit wallet.low for real fee charges; find the one this test emitted.
+    assert.ok(r.data.some((n: any) => /کم است/.test(n.title) && /۳٬۰۰۰ تومان/.test(n.body || '')));
     assert.strictEqual(by(/شارژ شد/).level, 'success');
     assert.strictEqual(by(/پشتیبانی/).href, '#/support');
     assert.strictEqual(by(/رد شد/).href, '#/trust');

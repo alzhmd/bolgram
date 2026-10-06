@@ -382,7 +382,7 @@ export async function v2Routes(app: FastifyInstance) {
     const open = one(`SELECT count(*) AS n FROM invoices WHERE merchant_id = ? AND status = 'PENDING' AND expires_at > ?`, m.id, nowIso);
     const expiring = one(`SELECT count(*) AS n FROM invoices WHERE merchant_id = ? AND status = 'PENDING' AND expires_at > ? AND expires_at <= ?`, m.id, nowIso, soonIso);
     const orphan = one(`SELECT count(*) AS n FROM unmatched_sms u JOIN devices dv ON dv.id = u.device_id WHERE dv.merchant_id = ? AND u.status IN ('UNMATCHED','SUSPICIOUS')`, m.id);
-    const dev = one(`SELECT count(*) AS n, sum(CASE WHEN last_seen >= ? THEN 1 ELSE 0 END) AS online, max(last_seen) AS last FROM devices WHERE merchant_id = ?`, utcSql(new Date(Date.now() - 3 * 60_000)), m.id);
+    const dev = one(`SELECT count(*) AS n, sum(CASE WHEN last_seen >= ? THEN 1 ELSE 0 END) AS online, max(last_seen) AS last FROM devices WHERE merchant_id = ? AND revoked_at IS NULL`, utcSql(new Date(Date.now() - 3 * 60_000)), m.id);
     const cards = one(`SELECT count(*) AS n FROM payment_methods WHERE merchant_id = ? AND is_active = 1`, m.id);
     const invoices = one(`SELECT count(*) AS n FROM invoices WHERE merchant_id = ?`, m.id);
     const recent = d
