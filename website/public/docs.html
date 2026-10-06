@@ -49,65 +49,97 @@
 </div>
 <!--/HEADER-->
 <main id="main">
-<section class="page-hero"><div class="wrap"><span class="eyebrow">API نسخهٔ ۱</span><h1>مستندات فنی</h1><p class="lead">ساخت فاکتور، استعلام وضعیت و دریافت وب‌هوک امضاشده. همهٔ مبالغ API به <b>ریال</b> است.</p></div></section>
+<section class="page-hero"><div class="wrap"><span class="eyebrow">API نسخهٔ ۱</span><h1>مستندات فنی</h1><p class="lead">ساخت فاکتور، استعلام وضعیت و دریافت وب‌هوک امضاشده. مبالغ پیش‌فرض به <b>ریال</b> است (با <code>currency: "IRT"</code> تومان).</p></div></section>
 
 <section style="padding-top:8px"><div class="wrap doc-grid">
 <nav class="doc-nav" aria-label="فهرست مستندات">
-  <a href="#start">شروع سریع</a><a href="#auth">احراز هویت</a><a href="#create">ساخت فاکتور</a><a href="#verify">استعلام فاکتور</a><a href="#webhook">وب‌هوک و امضا</a><a href="#states">وضعیت‌ها</a><a href="#errors">خطاها</a><a href="#links">لینک پرداخت</a><a href="#woocommerce">ووکامرس</a><a href="#telegram">تلگرام و بله</a><a href="#sdk">SDKها</a><a href="#android">اپ اندروید</a><a href="#ios">شورتکات آیفون</a><a href="#status">وضعیت سرویس</a>
+  <a href="#start">شروع سریع</a><a href="#auth">احراز هویت</a><a href="#create">ساخت فاکتور</a><a href="#verify">استعلام فاکتور</a><a href="#webhook">وب‌هوک و امضا</a><a href="#states">وضعیت‌ها</a><a href="#errors">خطاها</a><a href="#limits">محدودیت‌ها</a><a href="#links">لینک پرداخت</a><a href="#woocommerce">ووکامرس</a><a href="#telegram">تلگرام و بله</a><a href="#sdk">SDKها</a><a href="#android">اپ اندروید</a><a href="#ios">شورتکات آیفون</a><a href="#status">وضعیت سرویس</a>
 </nav>
 <div class="doc-body prose">
 <h2 id="start">شروع سریع</h2>
 <ol><li>در پنل ثبت‌نام کنید و کارت بانکی خود را در بخش «روش‌های پرداخت» اضافه کنید.</li><li>اپ را روی گوشی‌ای که پیامک بانک را می‌گیرد نصب و با کد QR وصل کنید.</li><li>کلید API را از پنل بردارید و با آن فاکتور بسازید.</li><li>مشتری را به <code>payment_url</code> بفرستید و بعد از وب‌هوک «پرداخت موفق» سفارش را تحویل دهید.</li></ol>
 
 <h2 id="auth">احراز هویت</h2>
-<p>کلید API را در هدر <code>x-api-key</code> بفرستید. کلید را فقط سمت سرور نگه دارید و در کد مرورگر یا اپ قرار ندهید. از پنل می‌توانید کلید جدید بسازید و کلید قبلی را باطل کنید.</p>
+<p>کلید API را در هدر <code>x-api-key</code> (یا <code>Authorization: Bearer &lt;key&gt;</code>) بفرستید. کلید را فقط سمت سرور نگه دارید و در کد مرورگر یا اپ قرار ندهید.</p>
+<ul><li>در پنل، بخش «افزونه‌ها و API»، چند کلید با نام بسازید (برچسب واقعی/آزمایشی). مقدار کلید فقط هنگام ساخت نمایش داده می‌شود و در سرور به‌صورت هش ذخیره است.</li><li>هر کلید را جدا باطل کنید؛ کلید باطل‌شده بلافاصله ۴۰۱ می‌گیرد. زمان آخرین استفادهٔ هر کلید در پنل دیده می‌شود.</li><li>«کلید قدیمی» حساب‌های قدیمی همچنان کار می‌کند و از همان بخش قابل چرخش یا ابطال است.</li></ul>
 
 <h2 id="create">ساخت فاکتور</h2>
-<p><code>POST https://api.bolgram.ir/v1/payment/create</code></p>
+<p><code>POST https://api.bolgram.ir/v1/payment/create</code> (همان مسیر با پیشوند <code>/api</code> هم کار می‌کند). بدنه JSON است.</p>
 <table><thead><tr><th>فیلد</th><th>نوع</th><th>توضیح</th></tr></thead><tbody>
-<tr><td><code>amount</code></td><td>عدد، الزامی</td><td>مبلغ پایه به ریال. سیستم چند تومان یکتا به آن اضافه می‌کند.</td></tr>
-<tr><td><code>redirect_url</code></td><td>URL، الزامی</td><td>بازگشت مشتری بعد از پرداخت.</td></tr>
-<tr><td><code>cancel_url</code></td><td>URL</td><td>بازگشت در صورت انصراف.</td></tr>
-<tr><td><code>webhook_url</code></td><td>URL</td><td>آدرسی که رویداد پرداخت به آن ارسال می‌شود.</td></tr>
+<tr><td><code>amount</code></td><td>عدد مثبت، الزامی</td><td>مبلغ پایه. پیش‌فرض <b>ریال</b> است؛ با <code>currency: "IRT"</code> تومان حساب می‌شود. سیستم چند تومان یکتا به آن اضافه می‌کند تا واریز مشتری با همین فاکتور تطبیق داده شود.</td></tr>
+<tr><td><code>currency</code></td><td><code>IRR</code> | <code>IRT</code></td><td>واحد <code>amount</code>؛ پیش‌فرض <code>IRR</code>.</td></tr>
+<tr><td><code>redirect_url</code></td><td>URL http/https، الزامی</td><td>بازگشت مشتری بعد از پرداخت؛ <code>invoice_id</code> و <code>status=paid</code> به آن اضافه می‌شود.</td></tr>
+<tr><td><code>cancel_url</code></td><td>URL http/https</td><td>بازگشت در صورت انصراف، لغو یا انقضا.</td></tr>
+<tr><td><code>webhook_url</code></td><td>URL https</td><td>آدرس وب‌هوک همین فاکتور؛ اگر نفرستید، آدرس وب‌هوک فروشگاه در پنل استفاده می‌شود. آدرس‌های داخلی/خصوصی و http (به‌جز localhost در توسعه) رد می‌شوند.</td></tr>
 <tr><td><code>cus_name</code>، <code>cus_email</code></td><td>متن</td><td>اطلاعات اختیاری مشتری.</td></tr>
-<tr><td><code>metadata</code></td><td>شیء JSON</td><td>حداکثر ۱ کیلوبایت؛ مثلاً شمارهٔ سفارش شما.</td></tr>
+<tr><td><code>metadata</code></td><td>شیء JSON</td><td>حداکثر ۱ کیلوبایت؛ مثلاً شمارهٔ سفارش شما. در استعلام و وب‌هوک برمی‌گردد.</td></tr>
 </tbody></table>
 <div class="code"><button class="copy" type="button" data-copy="d-create">کپی</button><pre id="d-create">curl -X POST "https://api.bolgram.ir/v1/payment/create" \
-  -H "x-api-key: $TOKEN" -H "Content-Type: application/json" \
-  -d '{"amount": 4500000, "redirect_url": "https://shop.example/thanks",
+  -H "x-api-key: $API_KEY" -H "Content-Type: application/json" \
+  -d '{"amount": 450000, "currency": "IRT", "redirect_url": "https://shop.example/thanks",
        "webhook_url": "https://shop.example/hooks/bolgram", "metadata": {"order_id": "1042"}}'
 
 # 201 Created
-{"status": true, "message": "Invoice created successfully.", "invoice_id": "PF...", "payment_url": "https://..."}</pre></div>
+{"status": true, "message": "Invoice created successfully.",
+ "invoice_id": "PF...", "payment_url": "https://...",
+ "amount": 4500280, "amount_toman": 450028, "invoice_status": "PENDING",
+ "expires_at": "2026-10-06T10:52:31.000Z"}</pre></div>
+<p><code>amount</code> در پاسخ، مبلغ قابل پرداخت به ریال (مبلغ شما + دنبالهٔ یکتا) است. فاکتور ۳۰ دقیقه اعتبار دارد.</p>
 
 <h2 id="verify">استعلام فاکتور</h2>
 <p><code>POST https://api.bolgram.ir/v1/payment/verify</code> با بدنهٔ <code>{"invoice_id": "..."}</code>. قبل از تحویل سفارش، حتی بعد از دریافت وب‌هوک، یک‌بار استعلام کنید و هر <code>invoice_id</code> را فقط یک‌بار تحویل دهید.</p>
-<div class="code"><button class="copy" type="button" data-copy="d-verify">کپی</button><pre id="d-verify">{"invoice_id": "PF...", "amount": 4500280, "status": "COMPLETED",
- "transaction_id": "IR3F9A...", "payment_method": "mellat", "cus_name": "Ali"}</pre></div>
-<p>مقدار <code>amount</code> مبلغ یکتای قابل پرداخت است که مشتری واریز کرده است.</p>
+<div class="code"><button class="copy" type="button" data-copy="d-verify">کپی</button><pre id="d-verify">{"invoice_id": "PF...", "amount": 4500280, "amount_toman": 450028,
+ "status": "COMPLETED", "invoice_status": "PAID", "paid": true,
+ "transaction_id": "IR3F9A...", "payment_method": "mellat",
+ "cus_name": "Ali", "metadata": {"order_id": "1042"}}</pre></div>
+<p>مقدار <code>amount</code> مبلغ یکتای قابل پرداخت به ریال است. برای تصمیم‌گیری از <code>invoice_status</code> یا <code>paid</code> استفاده کنید؛ <code>status</code> نگاشت سادهٔ قدیمی است (<code>COMPLETED</code>، <code>PENDING</code>، <code>FAILED</code>).</p>
 
 <h2 id="webhook">وب‌هوک و امضا</h2>
-<p>بعد از تأیید پرداخت، یک درخواست <code>POST</code> با بدنهٔ JSON به <code>webhook_url</code> فرستاده می‌شود و در صورت خطا چند بار با فاصلهٔ افزایشی تکرار می‌شود.</p>
+<p>بعد از تأیید پرداخت، یک درخواست <code>POST</code> با بدنهٔ JSON به <code>webhook_url</code> فاکتور (یا آدرس وب‌هوک فروشگاه) فرستاده می‌شود. هر تلاش در پنل (بخش «وب‌هوک») با کد پاسخ و زمان ثبت می‌شود و می‌توانید دوباره بفرستید.</p>
 <table><tbody>
-<tr><td><code>X-Bolgram-Signature</code></td><td><code>t=&lt;unix&gt;,v1=&lt;hex&gt;</code> که v1 برابر HMAC-SHA256 کلید وب‌هوک روی <code>${t}.${body}</code> است.</td></tr>
-<tr><td><code>X-Bolgram-Delivery</code></td><td>شناسهٔ یکتای ارسال؛ برای جلوگیری از پردازش تکراری ذخیره‌اش کنید.</td></tr>
+<tr><td><code>X-Bolgram-Signature</code></td><td><code>t=&lt;unix&gt;,v1=&lt;hex&gt;</code> که v1 برابر HMAC-SHA256 کلید امضا روی رشتهٔ <code>t + "." + body</code> است. تا ۲۴ ساعت بعد از چرخش کلید، دو <code>v1</code> (کلید جدید و قبلی) می‌آید؛ یکی از آن‌ها باید بخواند.</td></tr>
+<tr><td><code>X-Bolgram-Delivery</code></td><td>شناسهٔ یکتای ارسال؛ در تلاش‌های مجدد همان می‌ماند. برای جلوگیری از پردازش تکراری ذخیره‌اش کنید.</td></tr>
 <tr><td><code>X-Bolgram-Invoice-Id</code></td><td>شناسهٔ فاکتور.</td></tr>
+<tr><td><code>X-Bolgram-Event</code></td><td><code>invoice.paid</code> یا <code>ping</code> (آزمایشی).</td></tr>
 </tbody></table>
-<div class="code"><button class="copy" type="button" data-copy="d-hook">کپی</button><pre id="d-hook">{"invoice_id": "PF...", "status": "true", "provider": "mellat",
- "trx_id": "IR3F9A...", "amount": 4500280, "timestamp": "2026-10-06T10:22:31.000Z"}</pre></div>
-<p>کلید وب‌هوک را از بخش «اطلاعات اتصال» پنل بردارید. اگر اختلاف زمان <code>t</code> با ساعت سرور شما بیشتر از ۵ دقیقه بود، درخواست را رد کنید. نمونهٔ کامل بررسی امضا در <a href="/#dev">صفحهٔ اصلی</a> هست.</p>
+<div class="code"><button class="copy" type="button" data-copy="d-hook">کپی</button><pre id="d-hook">{"event": "invoice.paid", "invoice_id": "PF...", "status": "true", "provider": "mellat",
+ "trx_id": "IR3F9A...", "amount": 4500280, "timestamp": "2026-10-06T10:22:31.000Z",
+ "metadata": {"order_id": "1042"}}</pre></div>
+<p>کلید امضا را از صفحهٔ «وب‌هوک» پنل بردارید (نمایش، کپی و چرخش). رویداد <code>ping</code> با <code>status: "false"</code> می‌آید و هرگز پرداخت نیست. همیشه بدنهٔ <b>خام</b> را امضا کنید و اگر اختلاف <code>t</code> با ساعت سرور شما بیش از ۵ دقیقه بود، درخواست را رد کنید.</p>
+<div class="code"><button class="copy" type="button" data-copy="d-sig">کپی</button><pre id="d-sig"># Node.js
+const t = Number(/t=(\d+)/.exec(header)[1]);
+const sigs = [...header.matchAll(/v1=([0-9a-f]+)/g)].map((m) =&gt; m[1]);
+const expected = crypto.createHmac('sha256', SECRET).update(t + '.' + rawBody).digest('hex');
+const ok = sigs.some((s) =&gt; s.length === expected.length &amp;&amp; crypto.timingSafeEqual(Buffer.from(s), Buffer.from(expected)));
+
+# PHP
+$expected = hash_hmac('sha256', $t . '.' . $rawBody, $secret);   // سپس hash_equals با هر v1
+
+# Python
+expected = hmac.new(SECRET.encode(), f'{t}.'.encode() + raw_body, hashlib.sha256).hexdigest()</pre></div>
+<h3>تلاش مجدد</h3>
+<p>اگر پاسخ ۲xx نرسد یا پاسخ در ۸ ثانیه نیاید، حداکثر ۶ تلاش انجام می‌شود، با فاصلهٔ ۱ دقیقه، ۱۰ دقیقه، ۱ ساعت، ۶ ساعت و ۱۶ ساعت (حدود ۲۳ ساعت). ریدایرکت دنبال نمی‌شود و زمان‌بندی تلاش‌ها با راه‌اندازی دوبارهٔ سرور از بین نمی‌رود. چون ممکن است یک رویداد بیش از یک‌بار برسد، پردازش شما باید ایدمپوتنت باشد.</p>
 
 <h2 id="states">وضعیت‌ها</h2>
-<table><tbody><tr><td><code>PENDING</code></td><td>در انتظار واریز</td></tr><tr><td><code>COMPLETED</code></td><td>پرداخت تأیید شده</td></tr><tr><td><code>FAILED</code></td><td>منقضی یا ناموفق</td></tr></tbody></table>
+<table><thead><tr><th><code>invoice_status</code></th><th>معنی</th><th><code>status</code> قدیمی</th></tr></thead><tbody>
+<tr><td><code>PENDING</code></td><td>در انتظار واریز</td><td><code>PENDING</code></td></tr>
+<tr><td><code>PAID</code></td><td>پرداخت تأیید شده</td><td><code>COMPLETED</code></td></tr>
+<tr><td><code>EXPIRED</code></td><td>مهلت تمام شد</td><td><code>FAILED</code></td></tr>
+<tr><td><code>CANCELLED</code></td><td>توسط فروشنده لغو شد</td><td><code>FAILED</code></td></tr>
+</tbody></table>
 
 <h2 id="errors">خطاها</h2>
-<table><tbody><tr><td>401</td><td>کلید API ارسال نشده یا نامعتبر است.</td></tr><tr><td>400</td><td>اعتبارسنجی بدنه ناموفق بود؛ جزئیات در <code>errors</code>.</td></tr><tr><td>404</td><td>فاکتور پیدا نشد.</td></tr><tr><td>429</td><td>تعداد درخواست بیش از حد مجاز است.</td></tr></tbody></table>
+<p>پاسخ خطا به شکل <code>{"status": false, "message": "...", "errors": [...]}</code> است (و در خطاهای سقف پلن/کیف پول فیلد <code>code</code> هم می‌آید).</p>
+<table><tbody><tr><td>400</td><td>اعتبارسنجی بدنه ناموفق بود (مثلاً <code>redirect_url</code> نامعتبر یا <code>webhook_url</code> داخلی)؛ جزئیات در <code>errors</code>.</td></tr><tr><td>401</td><td>کلید API ارسال نشده، نامعتبر یا باطل شده، یا فروشگاه فعال نیست.</td></tr><tr><td>402</td><td>سقف پلن یا موجودی کیف پول اجازهٔ ساخت فاکتور نمی‌دهد (<code>code</code> را ببینید).</td></tr><tr><td>404</td><td>فاکتور پیدا نشد یا متعلق به این فروشگاه نیست.</td></tr><tr><td>429</td><td>تعداد درخواست بیش از حد مجاز است؛ بعد از چند ثانیه دوباره بفرستید.</td></tr></tbody></table>
+
+<h2 id="limits">محدودیت‌ها</h2>
+<ul><li>هر آدرس IP حداکثر ۱۲۰ درخواست در دقیقه؛ بعد از آن پاسخ <code>429</code> می‌گیرد.</li><li>حداکثر ۱۰ کلید API فعال برای هر فروشگاه.</li><li><code>metadata</code> حداکثر ۱ کیلوبایت؛ مبلغ باید مثبت باشد (ریال، یا تومان با <code>currency</code>).</li><li>صفحهٔ پرداخت هر فاکتور ۳۰ دقیقه باز است.</li></ul>
 
 <h2 id="links">لینک پرداخت (بدون سایت)</h2>
 <p>از پنل یک فاکتور بسازید و لینک صفحهٔ پرداخت را در دایرکت اینستاگرام یا پیام‌رسان بفرستید. مشتری بانکش را انتخاب می‌کند، کارت و مبلغ دقیق را می‌بیند و بعد از واریز، تأیید خودکار انجام می‌شود.</p>
 
 <h2 id="woocommerce">ووکامرس</h2>
-<p>افزونهٔ ووکامرس در مخزن پروژه (<code>packages/woocommerce-gateway</code>) قرار دارد. آن را در وردپرس نصب کنید، کلید API را وارد کنید و آدرس وب‌هوک افزونه را در پنل ثبت کنید. نسخهٔ قابل دانلود از همین صفحه به‌زودی منتشر می‌شود.</p>
+<p>افزونهٔ ووکامرس را از پنل (بخش «افزونه‌ها و API») دانلود کنید؛ آدرس سرور شما از قبل داخل آن گذاشته شده است. در وردپرس نصب و فعال کنید، سپس در «ووکامرس > تنظیمات > پرداخت > بولگرام» کلید API و کلید امضای وب‌هوک (از صفحهٔ «وب‌هوک» پنل) را وارد کنید. افزونه خودش فاکتور می‌سازد، مشتری را به صفحهٔ پرداخت می‌برد، امضای وب‌هوک را بررسی می‌کند و سفارش را فقط یک‌بار «پرداخت‌شده» می‌کند. کد منبع در <code>integrations/woocommerce/bolgram-gateway</code> است.</p>
 
 <h2 id="telegram">تلگرام و بله</h2>
 <p>در نسخهٔ فعلی، اعلان هر پرداخت موفق با تنظیم <code>BALE_BOT_TOKEN</code> و <code>TELEGRAM_BOT_TOKEN</code> روی سرور به ربات ارسال می‌شود. برای ربات فروش خودتان، فاکتور را با API بسازید و لینک پرداخت را به کاربر بدهید. ربات تعاملی برای ساخت فاکتور از داخل چت به‌زودی اضافه می‌شود.</p>
