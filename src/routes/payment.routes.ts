@@ -7,6 +7,8 @@ import { PaymentService } from '../services/payment.service.js';
 import { MerchantService } from '../services/merchant.service.js';
 import { InvoiceRepository } from '../db/repositories/invoice.repository.js';
 import { MerchantRepository } from '../db/repositories/merchant.repository.js';
+import { dbService } from '../db/database.js';
+import { validateWebhookUrl } from '../services/webhook.service.js';
 import { fraudShield, recordFailedVerification, clearVerificationAttempts } from '../middleware/fraud-shield.js';
 
 // API Key extractor supporting Bolgram / Bolgram headers, query params, or body
@@ -18,7 +20,7 @@ function extractApiKey(request: FastifyRequest): string | undefined {
   const authHeader = request.headers.authorization;
   if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
-    if (token.startsWith('live_') || token.startsWith('sand_') || token.startsWith('zini_')) {
+    if (token.startsWith('live_') || token.startsWith('test_') || token.startsWith('sand_') || token.startsWith('zini_')) {
       return token;
     }
   }
@@ -50,17 +52,22 @@ async function resolvePaymentUrl(request: FastifyRequest, merchantId: string, in
 }
 
 // Request Validation Schemas
+const httpUrl = (label: string) =>
+  z.string().url(`${label} must be a valid URL`).refine((v) => /^https?:\/\//i.test(v), `${label} must start with http:// or https://`);
+
 const payflowCreateInvoiceSchema = z.object({
-  cus_name: z.string().optional(),
+  cus_name: z.string().max(120).optional(),
   cus_email: z.string().email('Invalid email address format').optional().or(z.literal('')),
-  amount: z.number().positive('amount must be greater than 0'),
+  // Rial by default; send currency "IRT" to give the amount in Toman.
+  amount: z.number().positive('amount must be greater than 0').finite(),
+  currency: z.enum(['IRR', 'IRT']).optional(),
   metadata: z.record(z.any()).optional().refine((val) => {
     if (!val) return true;
     return JSON.stringify(val).length <= 1024;
   }, 'metadata must be valid JSON and stay within 1 KB'),
-  redirect_url: z.string().url('redirect_url must be a valid URL'),
-  cancel_url: z.string().url('cancel_url must be a valid URL').optional().or(z.literal('')),
-  webhook_url: z.string().url('webhook_url must be a valid URL').optional().or(z.literal('')),
+  redirect_url: httpUrl('redirect_url'),
+  cancel_url: httpUrl('cancel_url').optional().or(z.literal('')),
+  webhook_url: httpUrl('webhook_url').optional().or(z.literal('')),
 });
 
 const payflowVerifyInvoiceSchema = z.object({
@@ -114,7 +121,13 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const { cus_name, cus_email, amount, metadata, redirect_url, cancel_url, webhook_url } = parseResult.data;
+    const { cus_name, cus_email, metadata, redirect_url, cancel_url, webhook_url, currency } = parseResult.data;
+    const amount = Math.round(parseResult.data.amount * (currency === 'IRT' ? 10 : 1));
+    if (amount < 1) return reply.status(400).send({ status: false, message: 'Validation failed.', errors: [{ path: ['amount'], message: 'amount is too small' }] });
+    if (webhook_url) {
+      const check = validateWebhookUrl(webhook_url);
+      if (!check.ok) return reply.status(400).send({ status: false, message: 'Validation failed.', errors: [{ path: ['webhook_url'], message: check.message }] });
+    }
 
     let created;
     try {
@@ -134,6 +147,13 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
     const { invoice } = created;
 
+    // PaymentService does not persist these; keep them for webhooks, verify and the checkout page.
+    try {
+      (dbService as any).db
+        .prepare('UPDATE invoices SET metadata = ?, cancel_url = ? WHERE id = ? AND merchant_id = ?')
+        .run(metadata ? JSON.stringify(metadata) : null, cancel_url || null, invoice.invoice_id, authResult.merchant.id);
+    } catch {}
+
     const payment_url = await resolvePaymentUrl(request, authResult.merchant.id, invoice.invoice_id);
 
     return reply.status(201).send({
@@ -141,6 +161,11 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       message: 'Invoice created successfully.',
       invoice_id: invoice.invoice_id,
       payment_url,
+      // The payable amount: your amount plus a unique tail of a few Toman so the deposit can be matched.
+      amount: invoice.amount,
+      amount_toman: Math.round(invoice.amount / 10),
+      invoice_status: 'PENDING',
+      expires_at: invoice.expires_at,
     });
   };
 
@@ -188,14 +213,24 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
 
     const invoice = verifyResult.invoice;
+    const raw = String((invoice as any).status || '');
+    let meta: unknown = null;
+    try {
+      const r = (dbService as any).db.prepare('SELECT metadata FROM invoices WHERE id = ? AND merchant_id = ?').get(invoice.invoice_id, authResult.merchant.id);
+      meta = r?.metadata ? JSON.parse(r.metadata) : null;
+    } catch {}
     return reply.send({
+      invoice_status: raw,
+      paid: raw === 'PAID',
+      amount_toman: Math.round(Number(invoice.amount) / 10),
+      metadata: meta,
       cus_name: invoice.customer_name,
       cus_email: (invoice as any).customer_email || 'customer@example.com',
       amount: invoice.amount,
       invoice_id: invoice.invoice_id,
       payment_method: (invoice as any).payment_method || 'card',
       transaction_id: (invoice as any).trx_id || null,
-      status: verifyResult.status,
+      status: raw === 'CANCELLED' ? 'FAILED' : verifyResult.status,
     });
   };
 
@@ -327,20 +362,25 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       return reply.status(404).send({ success: false, error: 'Invoice not found' });
     }
 
-    // Enrich response with merchant name for checkout header branding
+    // Public endpoint: expose only what the checkout page needs (never merchant ids, webhook URLs or e-mails).
     let merchant_name: string | null = null;
-    let merchant_logo_url: string | null = null;
     if (invoice.merchant_id) {
       try {
-        const { dbService } = await import('../db/database.js');
-        const merchant = dbService.getMerchantById(invoice.merchant_id);
-        if (merchant) {
-          merchant_name = merchant.name || null;
-        }
+        merchant_name = dbService.getMerchantById(invoice.merchant_id)?.name || null;
       } catch (_) {}
     }
-
-    return reply.send({ success: true, invoice: { ...invoice, merchant_name, merchant_logo_url } });
+    const safeUrl = (u?: string | null) => (u && /^https?:\/\//i.test(u) ? u : null);
+    return reply.send({
+      success: true,
+      invoice: {
+        invoice_id: invoice.invoice_id,
+        amount: invoice.amount,
+        status: invoice.status,
+        expires_at: invoice.expires_at,
+        redirect_url: safeUrl(invoice.redirect_url),
+        merchant_name,
+      },
+    });
   });
 
   // ==========================================
@@ -360,9 +400,10 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    reply.raw.write(`data: ${JSON.stringify({ status: invoice.status, invoice })}\n\n`);
+    const FINAL = ['PAID', 'EXPIRED', 'CANCELLED'];
+    reply.raw.write(`data: ${JSON.stringify({ status: invoice.status })}\n\n`);
 
-    if (invoice.status === 'PAID' || invoice.status === 'EXPIRED') {
+    if (FINAL.includes(invoice.status)) {
       reply.raw.end();
       return;
     }
@@ -380,8 +421,8 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       try {
         const current = await InvoiceRepository.findByInvoiceId(invoiceId);
         if (current) {
-          reply.raw.write(`data: ${JSON.stringify({ status: current.status, invoice: current })}\n\n`);
-          if (current.status === 'PAID' || current.status === 'EXPIRED') {
+          reply.raw.write(`data: ${JSON.stringify({ status: current.status })}\n\n`);
+          if (FINAL.includes(current.status)) {
             clearInterval(interval);
             reply.raw.end();
           }

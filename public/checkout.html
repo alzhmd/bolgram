@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
 <title>پرداخت کارت به کارت</title>
 <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--muted:#6b7280;--brand:#2563eb;--ok:#059669;--warn:#d97706;--line:#e5e7eb}
+:root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--muted:#6b7280;--brand:#2563eb;--ok:#059669;--warn:#d97706;--bad:#dc2626;--line:#e5e7eb}
 @media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#121a2b;--ink:#e5e7eb;--muted:#9ca3af;--line:#1f2a3d}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,sans-serif}
 .wrap{max-width:460px;margin:0 auto;padding:16px}.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
 h1{font-size:17px;margin:0 0 4px}.muted{color:var(--muted);font-size:13px}.amount{font-size:26px;font-weight:800;margin:6px 0}
+.brand{display:flex;align-items:center;gap:12px}.brand img{width:44px;height:44px;border-radius:12px;object-fit:cover;border:1px solid var(--line);flex:none}
+.brand .ph{width:44px;height:44px;border-radius:12px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);display:grid;place-items:center;font-weight:800;flex:none}
 .banks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .banks button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:10px 4px;font:inherit;font-size:13px;cursor:pointer}
 .banks button.on{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent)}
@@ -18,27 +21,37 @@ h1{font-size:17px;margin:0 0 4px}.muted{color:var(--muted);font-size:13px}.amoun
 .v{font-weight:700;direction:ltr;letter-spacing:.5px}.copy{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
 .tag{display:inline-block;background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok);border-radius:8px;padding:2px 8px;font-size:12px}
 .alert{border-radius:12px;padding:10px;font-size:13px;background:color-mix(in srgb,var(--warn) 14%,transparent)}
-.status{text-align:center;padding:24px 8px}.big{font-size:44px}.hide{display:none}
+.status{text-align:center;padding:24px 14px}.hide{display:none!important}
+.ico{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;margin:0 auto 10px}
+.ico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ico.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}.ico.warn{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}.ico.bad{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
+.receipt{text-align:start;margin-top:14px;border-top:1px dashed var(--line)}
+.btn{display:inline-block;margin-top:12px;border:0;background:var(--brand);color:#fff;border-radius:12px;padding:10px 18px;font:inherit;font-size:14px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--line)}
 .timer{font-variant-numeric:tabular-nums;font-weight:700}
+.support{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.support a{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;color:var(--ink);text-decoration:none}
+.support a:hover,.support a:focus-visible{border-color:var(--brand);color:var(--brand)}
+.support bdi{direction:ltr;unicode-bidi:isolate}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="box">
-    <h1 id="merchant">در حال بارگذاری…</h1>
-    <div class="muted">پرداخت کارت به کارت با تأیید خودکار</div>
+  <div class="box" id="head">
+    <div class="brand"><span class="ph" id="logo-ph" aria-hidden="true"></span><img id="logo" class="hide" alt="" width="44" height="44">
+      <div><h1 id="merchant">در حال بارگذاری…</h1><div class="muted">پرداخت کارت به کارت با تأیید خودکار</div></div></div>
     <div class="amount" id="amount"></div>
-    <div class="muted">زمان باقی‌مانده: <span class="timer" id="timer">--:--</span></div>
+    <div class="muted" id="timer-row">زمان باقی‌مانده: <span class="timer" id="timer">--:--</span></div>
   </div>
 
-  <div class="box" id="step1">
+  <div class="box hide" id="step1">
     <b>با کارت کدام بانک پرداخت می‌کنید؟</b>
     <div class="muted">اگر کارت هم‌بانک داشته باشیم، همان را نشان می‌دهیم تا انتقال فوری و بدون کارمزد شبا باشد.</div>
     <div class="banks" id="banks"></div>
   </div>
 
   <div class="box hide" id="step2">
-    <div class="alert">⚠️ دقیقاً همین مبلغ را واریز کنید (رقم‌های آخر برای شناسایی خودکار پرداخت شماست). نیازی به ارسال رسید نیست.</div>
+    <div class="alert">دقیقاً همین مبلغ را واریز کنید (رقم‌های آخر برای شناسایی خودکار پرداخت شماست). نیازی به ارسال رسید نیست.</div>
     <div class="row"><span>مبلغ (ریال)</span><span class="v" id="rial"></span><button class="copy" data-copy="rial">کپی</button></div>
     <div class="row"><span>شماره کارت</span><span class="v" id="card"></span><button class="copy" data-copy="card">کپی</button></div>
     <div class="row"><span>به نام</span><span id="holder"></span><span id="same"></span></div>
@@ -47,10 +60,28 @@ h1{font-size:17px;margin:0 0 4px}.muted{color:var(--muted);font-size:13px}.amoun
     <button class="copy" id="change" style="background:transparent;color:var(--brand)">تغییر بانک</button>
   </div>
 
-  <div class="box status hide" id="done"><div class="big">✅</div><b>پرداخت شما تأیید شد</b><p class="muted" id="redir"></p></div>
-  <div class="box status hide" id="expired"><div class="big">⏱️</div><b>مهلت پرداخت تمام شد</b>
-    <p class="muted">اگر مبلغ را واریز کرده‌اید نگران نباشید؛ واریز شما ثبت شده و توسط فروشنده بررسی می‌شود.</p></div>
-  <footer style="text-align:center;padding:14px 0 24px"><a href="/" target="_blank" rel="noopener" style="color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:.3px">by <b>Bolgram</b></a></footer>
+  <div class="box status hide" id="done" role="status">
+    <div class="ico ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <b>پرداخت شما تأیید شد</b>
+    <div class="receipt" id="receipt"></div>
+    <p class="muted" id="redir"></p>
+    <a class="btn hide" id="back-paid" href="#">بازگشت به فروشگاه</a>
+  </div>
+  <div class="box status hide" id="expired" role="status">
+    <div class="ico warn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+    <b>مهلت پرداخت تمام شد</b>
+    <p class="muted">اگر مبلغ را واریز کرده‌اید نگران نباشید؛ واریز شما ثبت شده و توسط فروشنده بررسی می‌شود. در غیر این صورت، از فروشگاه دوباره درخواست پرداخت کنید.</p>
+    <a class="btn ghost hide" id="back-expired" href="#">بازگشت به فروشگاه</a>
+  </div>
+  <div class="box status hide" id="cancelled" role="status">
+    <div class="ico bad"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    <b>این پرداخت لغو شده است</b>
+    <p class="muted">فاکتور توسط فروشنده لغو شد و دیگر نباید واریزی انجام دهید. اگر قبلاً واریز کرده‌اید، با فروشگاه تماس بگیرید.</p>
+    <a class="btn ghost hide" id="back-cancelled" href="#">بازگشت به فروشگاه</a>
+  </div>
+
+  <div class="box hide" id="support"><b style="font-size:14px">نیاز به کمک دارید؟</b><div class="support" id="support-links"></div></div>
+  <footer style="text-align:center;padding:14px 0 24px"><a href="https://bolgram.ir" target="_blank" rel="noopener" style="color:var(--muted);font-size:12px;text-decoration:none;letter-spacing:.3px">by <b>Bolgram</b></a></footer>
 </div>
 <script>
 const BANKS={mellat:'ملت',melli:'ملی',saderat:'صادرات',tejarat:'تجارت',sepah:'سپه',saman:'سامان',blu:'بلو',pasargad:'پاسارگاد',parsian:'پارسیان','eghtesad-novin':'اقتصاد نوین',ayandeh:'آینده',keshavarzi:'کشاورزی',maskan:'مسکن',refah:'رفاه',post:'پست بانک',shahr:'شهر',resalat:'رسالت','mehr-iran':'مهر ایران',khavarmianeh:'خاورمیانه',other:'سایر'};
@@ -58,15 +89,18 @@ const PARENT={blu:'saman'};
 const fa=n=>new Intl.NumberFormat('fa-IR').format(n);
 const $=id=>document.getElementById(id);
 const id=new URLSearchParams(location.search).get('invoice_id');
-let inv=null,methods=[],chosen=localStorage.getItem('bg_bank_'+id);
+const FINAL=['PAID','EXPIRED','CANCELLED'];
+let inv=null,brand=null,methods=[],chosen=null,final=null;
+try{chosen=localStorage.getItem('bg_bank_'+id)}catch{}
 
+const httpUrl=u=>{try{const x=new URL(u);return x.protocol==='http:'||x.protocol==='https:'?x:null}catch{return null}};
 function norm(m){const t=(m.provider_type||m.bank_name||'').toLowerCase();return Object.keys(BANKS).find(k=>t.includes(k))||Object.keys(BANKS).find(k=>(m.bank_name||'').includes(BANKS[k]))||t}
 function pick(bank){
   const want=PARENT[bank]||bank;
   return methods.find(m=>(PARENT[norm(m)]||norm(m))===want)||methods[0];
 }
 function show(bank){
-  chosen=bank;localStorage.setItem('bg_bank_'+id,bank);
+  chosen=bank;try{localStorage.setItem('bg_bank_'+id,bank)}catch{}
   const m=pick(bank);if(!m){$('step2').innerHTML='<div class="alert">فعلاً کارت فعالی برای پرداخت تعریف نشده است.</div>';$('step2').classList.remove('hide');return}
   const same=(PARENT[norm(m)]||norm(m))===(PARENT[bank]||bank);
   $('rial').textContent=Number(inv.amount).toLocaleString('en-US');
@@ -76,36 +110,74 @@ function show(bank){
   $('same').innerHTML=same?'<span class="tag">هم‌بانک • انتقال فوری</span>':'';
   $('step1').classList.add('hide');$('step2').classList.remove('hide');
 }
+function applyBrand(){
+  const s=brand&&brand.store;
+  const name=(s&&s.name)||inv.merchant_name||'فروشگاه';
+  $('merchant').textContent=name;document.title=name+' | پرداخت';
+  $('logo-ph').textContent=name.trim().charAt(0).toUpperCase();
+  if(s&&s.logo_url){const im=$('logo');im.src=s.logo_url;im.alt='لوگوی '+name;im.onload=()=>{im.classList.remove('hide');$('logo-ph').classList.add('hide')}}
+  if(!s)return;
+  const links=[];
+  const add=(href,label,text)=>{const a=document.createElement('a');a.href=href;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label',label);const b=document.createElement('bdi');b.textContent=text;a.append(label+': ',b);links.push(a)};
+  if(s.support_phone)add('tel:'+s.support_phone.replace(/[^\d+]/g,''),'تلفن',s.support_phone);
+  if(s.support_telegram)add('https://t.me/'+encodeURIComponent(s.support_telegram),'تلگرام','@'+s.support_telegram);
+  if(s.support_instagram)add('https://instagram.com/'+encodeURIComponent(s.support_instagram),'اینستاگرام','@'+s.support_instagram);
+  const w=s.website&&httpUrl(s.website);if(w)add(w.href,'وب‌سایت',w.hostname);
+  if(links.length){$('support-links').replaceChildren(...links);$('support').classList.remove('hide')}
+}
+function back(elId,url){const u=url&&httpUrl(url);if(!u)return null;const a=$(elId);a.href=u.href;a.classList.remove('hide');return u}
+const jalali=iso=>{try{return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{timeZone:'Asia/Tehran',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}catch{return ''}};
+function receiptRow(k,v,ltr){const r=document.createElement('div');r.className='row';const a=document.createElement('span');a.textContent=k;const b=document.createElement('span');b.className=ltr?'v':'';b.style.fontWeight='700';b.textContent=v;r.append(a,b);return r}
+function showFinal(status){
+  if(final===status)return;final=status;
+  ['step1','step2','done','expired','cancelled'].forEach(x=>$(x).classList.add('hide'));
+  $('timer-row').classList.add('hide');
+  const i=(brand&&brand.invoice)||{};
+  if(status==='PAID'){
+    $('done').classList.remove('hide');
+    const rc=$('receipt');rc.replaceChildren();
+    rc.append(receiptRow('مبلغ پرداختی',fa(Math.round((i.amount_rial||inv.amount)/10))+' تومان'));
+    if(i.paid_at)rc.append(receiptRow('زمان پرداخت',jalali(i.paid_at)));
+    rc.append(receiptRow('کد پیگیری',i.tracking_code||inv.invoice_id,true));
+    if(i.tracking_code&&i.tracking_code!==inv.invoice_id)rc.append(receiptRow('شمارهٔ فاکتور',inv.invoice_id,true));
+    const u=back('back-paid',i.redirect_url||inv.redirect_url);
+    if(u){$('redir').textContent='تا چند ثانیه دیگر به فروشگاه برمی‌گردید…';
+      const t=new URL(u.href);t.searchParams.set('invoice_id',inv.invoice_id);t.searchParams.set('status','paid');$('back-paid').href=t.href;
+      setTimeout(()=>{location.href=t.href},8000)}
+  }else if(status==='EXPIRED'){$('expired').classList.remove('hide');back('back-expired',i.cancel_url||(brand&&brand.store&&brand.store.website))}
+  else{$('cancelled').classList.remove('hide');back('back-cancelled',i.cancel_url||(brand&&brand.store&&brand.store.website))}
+}
 function render(){
-  $('merchant').textContent=inv.merchant_name||'فروشگاه';
   $('amount').textContent=fa(Math.round(inv.amount/10))+' تومان';
   $('banks').innerHTML=Object.entries(BANKS).map(([k,v])=>`<button data-b="${k}">${v}</button>`).join('');
-  if(inv.status==='PAID')return finish();
+  if(FINAL.includes(inv.status))return showFinal(inv.status);
+  $('step1').classList.remove('hide');
   if(chosen)show(chosen);
 }
-function finish(){
-  ['step1','step2','expired'].forEach(x=>$(x).classList.add('hide'));$('done').classList.remove('hide');
-  if(inv.redirect_url){$('redir').textContent='در حال بازگشت به فروشگاه…';setTimeout(()=>{const u=new URL(inv.redirect_url);u.searchParams.set('invoice_id',inv.invoice_id);u.searchParams.set('status','paid');location.href=u},2500)}
-}
 function tick(){
-  if(!inv)return;const left=Math.max(0,new Date(inv.expires_at)-Date.now());
+  if(!inv||final)return;const left=Math.max(0,new Date(inv.expires_at)-Date.now());
   $('timer').textContent=fa(String(Math.floor(left/60000)).padStart(2,'0'))+':'+fa(String(Math.floor(left%60000/1000)).padStart(2,'0'));
-  if(left===0&&inv.status!=='PAID'){['step1','step2'].forEach(x=>$(x).classList.add('hide'));$('expired').classList.remove('hide')}
+  if(left===0)refreshFinal('EXPIRED');
 }
+async function loadBrand(){try{const r=await fetch('/api/pub/checkout/'+encodeURIComponent(id)+'/brand').then(r=>r.json());if(r.success){brand=r;return r}}catch{}return null}
+async function refreshFinal(status){await loadBrand();const s=(brand&&brand.invoice&&brand.invoice.status)||status;showFinal(FINAL.includes(s)?s:status)}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-b]');if(b)return show(b.dataset.b);
   const c=e.target.closest('[data-copy]');if(c){navigator.clipboard?.writeText($(c.dataset.copy).dataset.raw);c.textContent='کپی شد ✓';setTimeout(()=>c.textContent='کپی',1500)}
   if(e.target.id==='change'){$('step2').classList.add('hide');$('step1').classList.remove('hide')}
 });
 async function load(){
-  if(!id){$('merchant').textContent='لینک پرداخت نامعتبر است';return}
-  const r=await fetch('/api/v1/payments/invoice/'+encodeURIComponent(id)).then(r=>r.json());
-  if(!r.success){$('merchant').textContent='فاکتور پیدا نشد';return}
+  if(!id){$('merchant').textContent='لینک پرداخت نامعتبر است';$('timer-row').classList.add('hide');return}
+  const [r]=await Promise.all([fetch('/api/v1/payments/invoice/'+encodeURIComponent(id)).then(r=>r.json()).catch(()=>({})),loadBrand()]);
+  if(!r.success){$('merchant').textContent='فاکتور پیدا نشد';$('timer-row').classList.add('hide');return}
   inv=r.invoice;
-  methods=((await fetch('/api/v1/payments/methods?invoice_id='+encodeURIComponent(id)).then(r=>r.json())).methods||[]).filter(m=>m.is_active!==0);
+  if(brand&&brand.invoice&&FINAL.includes(brand.invoice.status))inv.status=brand.invoice.status;
+  applyBrand();
+  if(!FINAL.includes(inv.status))methods=((await fetch('/api/v1/payments/methods?invoice_id='+encodeURIComponent(id)).then(r=>r.json()).catch(()=>({}))).methods||[]).filter(m=>m.is_active!==0);
   render();setInterval(tick,1000);tick();
+  if(FINAL.includes(inv.status))return;
   const es=new EventSource('/api/v1/payments/events/'+encodeURIComponent(id));
-  es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.status==='PAID'){inv.status='PAID';es.close();finish()}}catch{}};
+  es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(FINAL.includes(d.status)){inv.status=d.status;es.close();refreshFinal(d.status)}}catch{}};
 }
 load();
 </script>
