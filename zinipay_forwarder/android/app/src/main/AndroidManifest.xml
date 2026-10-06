@@ -1,34 +1,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- SMS Permissions -->
+    <!-- Bank SMS: receive live messages, and re-read the inbox after a reboot or outage so none is missed -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Background / Foreground Service -->
+    <!-- Background service -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Biometric authentication -->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-    <!-- In-App APK Auto Update & Installation -->
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <!-- Boot Auto-Start -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Dual-SIM Detection -->
+    <!-- SIM operator names shown in the panel -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!-- Camera for QR Code scanning -->
+    <!-- Camera: only to scan the pairing QR -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <application
-        android:label="Bolgram Receiver"
+        android:label="بولگرام"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"
@@ -48,34 +45,23 @@
             </intent-filter>
         </activity>
 
-        <!-- Sticky Foreground Service — keeps agent alive under Doze -->
+        <!-- Keeps the process alive: heartbeat, retries, queue flush -->
         <service
             android:name=".ForegroundSyncService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
-        <!-- BroadcastReceiver — intercepts all incoming SMS at Priority 999 -->
+        <!-- Incoming SMS (bank senders only; OTP messages are dropped in Filter.kt) -->
         <receiver
             android:name=".SmsListenerReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
-        <!-- NotificationListenerService — intercepts real-time bKash/Nagad app push notifications -->
-        <service
-            android:name=".MfsNotificationListener"
-            android:label="Bolgram Receiver"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
-
-        <!-- BootReceiver — auto-starts foreground service when device powers on -->
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
@@ -86,17 +72,6 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-
-        <!-- FileProvider for APK In-App Auto Updates -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
 
         <meta-data
             android:name="flutterEmbedding"
@@ -110,4 +85,3 @@
         </intent>
     </queries>
 </manifest>
-

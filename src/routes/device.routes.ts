@@ -1,16 +1,28 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { DeviceService } from '../services/device.service.js';
+import { DeviceService, appLatest, bankSenders, ensureDeviceSchema, tokenFromRequest } from '../services/device.service.js';
 import { TransactionService } from '../services/transaction.service.js';
+import { GuardError, checkLimit } from '../services/events.js';
+import { dbService } from '../db/database.js';
 
+const db = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
+
+/**
+ * Ingest payload. The Android app sends `{ sms, sender }` (token in the `X-Device-Token` header or, for
+ * older builds, in `device_id`). iPhone Shortcuts send `{ sender, body }` with the same header.
+ */
 const ingestSchema = z.object({
-  device_id: z.string().min(1, 'device_id is required'),
-  sms: z.string().min(1, 'sms body is required'),
-  sender: z.string().optional(),
-  received_at: z.string().optional(),
+  device_id: z.string().max(200).optional(),
+  device_token: z.string().max(200).optional(),
+  sms: z.string().max(4000).optional(),
+  body: z.string().max(4000).optional(),
+  text: z.string().max(4000).optional(),
+  message: z.string().max(4000).optional(),
+  sender: z.string().max(80).optional(),
+  received_at: z.string().max(60).optional(),
   sim_slot: z.number().optional(),
-  carrier: z.string().optional(),
-  source: z.string().optional(),
+  carrier: z.string().max(60).optional(),
+  source: z.string().max(40).optional(),
 });
 
 const legacySyncSchema = z.object({
@@ -34,13 +46,66 @@ const heartbeatSchema = z.object({
   device_name: z.string().optional(),
   device_model: z.string().optional(),
   android_version: z.string().optional(),
+  app_version: z.string().optional(),
   sim_number: z.string().optional(),
 });
 
+const pairSchema = z.object({
+  code: z.string().min(4).max(20),
+  device_name: z.string().max(80).optional(),
+  device_model: z.string().max(80).optional(),
+  android_version: z.string().max(40).optional(),
+  app_version: z.string().max(40).optional(),
+});
+
 export async function deviceRoutes(fastify: FastifyInstance) {
+  ensureDeviceSchema();
+
   /**
-   * Android Forwarder Ingestion API:
-   * Enforces 9-Step Verification & Instant Invoice Matching
+   * Pairing: the app exchanges the one-time code from the panel (typed or scanned from the QR)
+   * for a long-lived device token. Public, strictly rate limited.
+   * POST /api/v1/device/pair
+   */
+  fastify.post('/api/v1/device/pair', { config: { rateLimit: { max: 12, timeWindow: '1 minute' } } }, async (request, reply) => {
+    const parsed = pairSchema.safeParse(request.body);
+    if (!parsed.success) return reply.status(400).send({ success: false, error: 'invalid_payload', message: 'کد اتصال معتبر نیست' });
+    const b = parsed.data;
+    const code = DeviceService.normalizeCode(b.code);
+    const row = code.length === 8 ? DeviceService.pairCodeRow(code) : null;
+    if (!row || row.used_at || row.expires_at <= Date.now()) {
+      return reply.status(404).send({ success: false, error: 'invalid_code', message: 'کد اتصال اشتباه است یا منقضی شده؛ در پنل کد جدید بسازید' });
+    }
+    try {
+      checkLimit(row.merchant_id, 'devices', DeviceService.activeCount(row.merchant_id));
+    } catch (e) {
+      if (e instanceof GuardError) return reply.status(e.status).send({ success: false, error: e.code, message: e.message });
+      throw e;
+    }
+    const merchantId = DeviceService.consumePairCode(code);
+    if (!merchantId) return reply.status(404).send({ success: false, error: 'invalid_code', message: 'کد اتصال اشتباه است یا منقضی شده؛ در پنل کد جدید بسازید' });
+    const model = (b.device_model || '').trim() || null;
+    const name = (b.device_name || '').trim().slice(0, 60) || model || 'گوشی اندروید';
+    const { id, token } = DeviceService.createDevice({ merchantId, name, kind: 'android', model, androidVersion: b.android_version || null, appVersion: b.app_version || null });
+    DeviceService.linkPairCode(code, id);
+    const m = db().prepare('SELECT name, handle FROM merchants WHERE id = ?').get(merchantId) as any;
+    return reply.status(201).send({
+      success: true,
+      device_id: id,
+      device_token: token,
+      device_name: name,
+      merchant_name: m?.name || m?.handle || '',
+    });
+  });
+
+  /** Trusted bank SMS senders so the app can filter locally. GET /api/v1/device/senders */
+  fastify.get('/api/v1/device/senders', async (request: FastifyRequest, reply: FastifyReply) => {
+    const auth = await DeviceService.authenticateDevice(tokenFromRequest(request.headers as any));
+    if (!auth.authenticated) return reply.status(401).send({ success: false, error: 'unauthorized', message: 'توکن دستگاه معتبر نیست' });
+    return reply.send({ success: true, ...bankSenders() });
+  });
+
+  /**
+   * Ingestion API (9-step verification + instant invoice matching)
    * POST /api/v1/device/sms/ingest
    */
   fastify.post('/api/v1/device/sms/ingest', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -49,14 +114,22 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({
         success: false,
         step_failed: 'Payload Validation',
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
     }
 
-    const { device_id, sms, sender, sim_slot, carrier, source } = parseResult.data;
+    const data = parseResult.data;
+    const sms = data.sms ?? data.body ?? data.text ?? data.message ?? '';
+    const token = tokenFromRequest(request.headers as any, data.device_id, data.device_token);
+    if (!sms.trim()) {
+      return reply.status(400).send({ success: false, step_failed: 'Payload Validation', error: 'sms body is required' });
+    }
+    if (!token) {
+      return reply.status(401).send({ success: false, step_failed: 'Step 1: Device Authentication', error: 'Device token missing' });
+    }
 
     // STEP 1, 2 & 3: Device valid, active and belongs to active merchant?
-    const auth = await DeviceService.authenticateDevice(device_id);
+    const auth = await DeviceService.authenticateDevice(token);
     if (!auth.authenticated || !auth.device || !auth.merchant) {
       const isUnregistered = auth.error?.includes('not registered') || auth.error?.includes('invalid token');
       return reply.status(isUnregistered ? 401 : 403).send({
@@ -66,19 +139,18 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // Update heartbeat
-    await DeviceService.recordHeartbeat(device_id);
+    // Shortcut devices have no heartbeat: every forwarded SMS counts as a sign of life.
+    await DeviceService.recordHeartbeat(token);
 
-    // Run Ingestion Pipeline (Step 4 through 9)
     const ingest = await TransactionService.ingestSms({
       merchantId: auth.merchant.id,
       deviceId: auth.device.id,
       sms,
-      sender,
+      sender: data.sender,
       webhookSecret: (auth.merchant as any).webhook_secret,
-      simSlot: sim_slot,
-      carrier,
-      source,
+      simSlot: data.sim_slot,
+      carrier: data.carrier,
+      source: data.source || ((auth.device as any).kind === 'ios_shortcut' ? 'ios_shortcut' : undefined),
     });
 
     if (ingest.isDuplicate) {
@@ -96,7 +168,6 @@ export async function deviceRoutes(fastify: FastifyInstance) {
         success: false,
         step_failed: ingest.stepFailed,
         error: ingest.error,
-        raw: sms,
       });
     }
 
@@ -133,7 +204,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
     const ingest = await TransactionService.ingestSms({
       merchantId: auth.merchant.id,
       deviceId: auth.device.id,
-      sms: raw_sms,
+      sms: raw_sms.slice(0, 4000),
       sender,
       simSlot: parseResult.data.sim_slot,
       carrier: parseResult.data.carrier,
@@ -153,21 +224,20 @@ export async function deviceRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * Device Heartbeat Endpoint
-   * Ingests hardware telemetry and dispatches remote commands
+   * Device heartbeat: hardware telemetry from the app (token in header, or body for older builds).
    */
   fastify.post('/api/v1/device/heartbeat', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = heartbeatSchema.safeParse(request.body);
+    const parseResult = heartbeatSchema.safeParse(request.body ?? {});
     if (!parseResult.success) {
       return reply.status(400).send({
         success: false,
         error: 'Invalid heartbeat payload structure',
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
     }
 
     const data = parseResult.data;
-    const token = data.device_token || data.device_id;
+    const token = tokenFromRequest(request.headers as any, data.device_token, data.device_id);
     if (!token) {
       return reply.status(400).send({ success: false, error: 'device_token or device_id required' });
     }
@@ -177,7 +247,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       return reply.status(401).send({ success: false, error: 'Device not found' });
     }
 
-    // Persist hardware telemetry
+    // The device name is owned by the merchant (rename in the panel); telemetry never overwrites it.
     await DeviceService.recordHeartbeat(token, {
       battery_level: data.battery_level,
       battery_temp: data.battery_temp,
@@ -185,9 +255,9 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       charger_type: data.charger_type,
       free_ram_mb: data.free_ram_mb,
       sim_slots: data.sim_slots,
-      device_name: data.device_name,
       device_model: data.device_model,
       android_version: data.android_version,
+      app_version: data.app_version,
       sim_number: data.sim_number,
     });
 
@@ -195,31 +265,22 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       success: true,
       status: 'ONLINE',
       device_name: auth.device.device_name,
-      commands: [], // Remote command array (e.g. RESYNC_SMS)
+      merchant_name: (auth.merchant as any)?.name || '',
+      commands: [],
     });
   });
 
-  /**
-   * App Auto-Update Metadata Endpoint
-   * GET /api/v1/app/version
-   */
+  /** App update metadata (same data as /api/pub/app/latest). GET /api/v1/app/version */
   fastify.get('/api/v1/app/version', async (_request: FastifyRequest, reply: FastifyReply) => {
+    const a = appLatest();
     return reply.send({
       success: true,
-      app_name: 'Bolgram Agent',
-      package_name: 'dev.jahidulislam.syncpay',
-      developer: 'Jahidul Islam',
-      developer_url: 'https://jahidulislam.dev',
-      latest_version: '1.2.0',
-      version_code: 2,
-      min_supported_version: '1.0.0',
-      force_update: false,
-      download_url: 'https://bolgram.ir/downloads/syncpay-forwarder-arm64.apk',
-      file_size_bytes: 31548842,
-      file_size_formatted: '29 MB',
-      release_date: '2026-09-19',
-      changelog: '• Real-time bKash, Nagad, Rocket, Upay SMS verification\n• New In-App 1-Click Auto Update & Downloader\n• Enhanced background sync service stability\n• Battery optimization and disconnect prevention',
-      changelog_bn: '• বিকাশ, নগদ, রকেট ও উপায় এসএমএস অটো ভেরিফিকেশন\n• অ্যাপের ভেতরেই ১-ক্লিক অটো আপডেট ও ইনস্টলেশন\n• ব্যাকগ্রাউন্ড সার্ভিস ও ব্যাটারি অপটিমাইজেশন উন্নত করা হয়েছে\n• নিরবচ্ছিন্ন কানেকশন ও বাগ ফিক্স'
+      app_name: 'بولگرام',
+      package_name: 'ir.bolgram.forwarder',
+      latest_version: a.version,
+      download_url: a.apk_url,
+      sha256: a.sha256,
+      min_android: a.min_android,
     });
   });
 }
