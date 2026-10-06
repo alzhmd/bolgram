@@ -8,7 +8,10 @@ window.SITE = {
   BRAND: 'بولگرام', // alias of SERVICE_NAME
   BRAND_EN: 'Bolgram',
   DOMAIN: 'bolgram.ir',
-  API_BASE: 'https://api.bolgram.ir',          // used in code samples
+  // Base URL of the Bolgram server. The site reads /api/pub/site, /api/pub/plans and /api/pub/reviews from here at runtime
+  // (announcement banner, contact info, logo, FAQ, pricing, testimonials) and falls back to the static content when it is unreachable.
+  // Placeholder domain: use the same value as CONFIG.PAY_BASE_URL in the merchant panel (public/panel/assets/js/core.js).
+  API_BASE: 'https://pay.bolgram.example',
   APP_URL: 'https://app.bolgram.ir',            // merchant panel (login/signup live there)
   LOGIN_URL: 'https://app.bolgram.ir/login.html',
   SIGNUP_URL: 'https://app.bolgram.ir/login.html#register',

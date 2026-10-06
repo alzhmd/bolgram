@@ -186,6 +186,9 @@ server.get('/uploads/:file', async (req, reply) => {
   return reply.type(f.mime).header('Cache-Control', 'public, max-age=31536000, immutable').header('X-Content-Type-Options', 'nosniff').send(f.buf);
 });
 server.get('/panel/', async (_req, reply) => reply.type('text/html; charset=utf-8').header('Cache-Control', 'no-cache').sendFile('panel/index.html'));
+// Platform owner admin panel (single page app with hash routes)
+server.get('/owner', async (_req, reply) => reply.redirect('/owner/'));
+server.get('/owner/', async (_req, reply) => reply.type('text/html; charset=utf-8').header('Cache-Control', 'no-cache').sendFile('owner/index.html'));
 
 server.get('/', sendIndex);
 server.get('/index', sendIndex);
