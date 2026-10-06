@@ -1,8 +1,8 @@
 <?php
 /**
- * SyncPay BD - WHMCS Payment Gateway Module
+ * Bolgram - WHMCS Payment Gateway Module
  *
- * @copyright 2026 SyncPay BD
+ * @copyright 2026 Bolgram
  * @version 1.8.0
  */
 
@@ -13,7 +13,7 @@ if (!defined("WHMCS")) {
 function syncpay_MetaData()
 {
     return array(
-        'DisplayName' => 'SyncPay BD (bKash, Nagad & Rocket)',
+        'DisplayName' => 'Bolgram (bKash, Nagad & Rocket)',
         'APIVersion' => '1.1',
         'DisableLocalCreditCardInput' => true,
         'TokenisedStorage' => false,
@@ -25,21 +25,21 @@ function syncpay_config()
     return array(
         'FriendlyName' => array(
             'Type' => 'System',
-            'Value' => 'SyncPay BD (bKash / Nagad / Rocket)',
+            'Value' => 'Bolgram (bKash / Nagad / Rocket)',
         ),
         'apiUrl' => array(
-            'FriendlyName' => 'SyncPay Server Endpoint URL',
+            'FriendlyName' => 'Bolgram Server Endpoint URL',
             'Type' => 'text',
             'Size' => '50',
             'Default' => 'http://localhost:4000',
-            'Description' => 'Base URL of your SyncPay instance (e.g. http://localhost:4000)',
+            'Description' => 'Base URL of your Bolgram instance (e.g. http://localhost:4000)',
         ),
         'apiKey' => array(
             'FriendlyName' => 'Merchant API Key',
             'Type' => 'password',
             'Size' => '50',
             'Default' => '',
-            'Description' => 'Your SyncPay Secret API Key from the merchant dashboard',
+            'Description' => 'Your Bolgram Secret API Key from the merchant dashboard',
         ),
         'instructions' => array(
             'FriendlyName' => 'Customer Instructions',

@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 setup(
     name="syncpay-bd",
     version="2.0.0",
-    description="Official Python SDK for SyncPay BD Automated MFS Gateway",
-    author="SyncPay BD",
-    author_email="support@syncpaybd.site",
+    description="Official Python SDK for Bolgram Automated MFS Gateway",
+    author="Bolgram",
+    author_email="support@bolgram.ir",
     packages=find_packages(),
     python_requires=">=3.7",
     classifiers=[

@@ -1,4 +1,4 @@
-export interface SyncPayConfig {
+export interface BolgramConfig {
   apiKey: string;
   baseUrl?: string;
 }
@@ -37,12 +37,12 @@ export interface VerifyResponse {
   };
 }
 
-export class SyncPayClient {
-  constructor(config?: string | SyncPayConfig);
+export class BolgramClient {
+  constructor(config?: string | BolgramConfig);
   createInvoice(params: CreateInvoiceParams): Promise<InvoiceResponse>;
   verifyTransaction(trxId: string): Promise<VerifyResponse>;
   getTransactions(): Promise<any>;
   getDevices(): Promise<any>;
 }
 
-export default SyncPayClient;
+export default BolgramClient;

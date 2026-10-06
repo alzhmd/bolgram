@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/SyncPayClient.php';
+require_once __DIR__ . '/BolgramClient.php';
 
-use SyncPay\SyncPayClient;
+use Bolgram\BolgramClient;
 
-$client = new SyncPayClient('YOUR_MERCHANT_API_KEY', 'http://localhost:4000');
+$client = new BolgramClient('YOUR_MERCHANT_API_KEY', 'http://localhost:4000');
 
 try {
     // 1. Create a payment invoice

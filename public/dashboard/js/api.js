@@ -1,9 +1,9 @@
-// PayFlow MFS — Production API Client with Supabase Abstraction Layer
+// Bolgram — Production API Client with Supabase Abstraction Layer
 
 export class ApiClient {
   constructor() {
     this.baseUrl = window.location.origin;
-    this.apiKey = localStorage.getItem('payflow_api_key') || 'sandbox_test_8f4c9a2e7b31';
+    this.apiKey = localStorage.getItem('payflow_api_key') || '';
     this.useSupabase = false; // Set to true when integrating Supabase directly
   }
 
@@ -27,7 +27,7 @@ export class ApiClient {
       'syncpay-api-key': effectiveApiKey,
       'payflow-api-key': effectiveApiKey,
       'zini-api-key': effectiveApiKey,
-      'x-merchant-id': sessionMerchantId,
+      ...(localStorage.getItem('syncpay_token') ? { Authorization: `Bearer ${localStorage.getItem('syncpay_token')}` } : {}),
       ...options.headers,
     };
 

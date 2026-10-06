@@ -1,5 +1,5 @@
 /**
- * PayFlow MFS Super Admin — Reusable UI Components
+ * Bolgram Super Admin — Reusable UI Components
  */
 
 import { i18n } from './i18n.js';

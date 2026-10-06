@@ -206,7 +206,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
   fastify.get('/api/v1/app/version', async (_request: FastifyRequest, reply: FastifyReply) => {
     return reply.send({
       success: true,
-      app_name: 'SyncPay Agent',
+      app_name: 'Bolgram Agent',
       package_name: 'dev.jahidulislam.syncpay',
       developer: 'Jahidul Islam',
       developer_url: 'https://jahidulislam.dev',
@@ -214,7 +214,7 @@ export async function deviceRoutes(fastify: FastifyInstance) {
       version_code: 2,
       min_supported_version: '1.0.0',
       force_update: false,
-      download_url: 'https://syncpaybd.site/downloads/syncpay-forwarder-arm64.apk',
+      download_url: 'https://bolgram.ir/downloads/syncpay-forwarder-arm64.apk',
       file_size_bytes: 31548842,
       file_size_formatted: '29 MB',
       release_date: '2026-09-19',

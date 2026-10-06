@@ -102,7 +102,7 @@ class DashboardScreen extends ConsumerWidget {
                           Text(
                             agentState.merchantName.isNotEmpty
                                 ? agentState.merchantName
-                                : 'SyncPay Merchant Store',
+                                : 'Bolgram Merchant Store',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -243,7 +243,7 @@ class DashboardScreen extends ConsumerWidget {
                           child: Text(
                             agentState.deviceName.isNotEmpty
                                 ? agentState.deviceName
-                                : 'SyncPay Telephony Agent',
+                                : 'Bolgram Telephony Agent',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                         ),

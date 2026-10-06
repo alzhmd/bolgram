@@ -32,7 +32,7 @@ export class EmailService {
   }
 
   public static async sendEmail(options: SendEmailOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || '"SyncPay BD" <noreply@syncpaybd.site>';
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || '"Bolgram" <noreply@bolgram.ir>';
 
     // 1. If Resend API Key is provided, use Resend HTTP API
     const resendApiKey = process.env.RESEND_API_KEY;
@@ -100,13 +100,13 @@ export class EmailService {
     apiKey: string;
     loginUrl?: string;
   }) {
-    const loginUrl = params.loginUrl || 'https://syncpaybd.site/dashboard';
+    const loginUrl = params.loginUrl || 'https://bolgram.ir/dashboard';
     const html = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Welcome to SyncPay BD</title>
+      <title>Welcome to Bolgram</title>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b; }
         .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
@@ -122,13 +122,13 @@ export class EmailService {
     <body>
       <div class="card">
         <div class="header">
-          <h1>SyncPay BD</h1>
+          <h1>Bolgram</h1>
           <p style="margin: 6px 0 0 0; opacity: 0.9; font-size: 14px;">Next-Gen Mobile Financial Services Gateway</p>
         </div>
         <div class="content">
           <span class="badge">Account Verified</span>
           <h2 style="margin-top: 0; font-size: 20px;">Welcome, ${params.businessName}! 🎉</h2>
-          <p>Your merchant account has been registered successfully on SyncPay BD. You can now access your merchant dashboard, connect your Android forwarder app, and automate bKash, Nagad, Rocket, and Upay payments.</p>
+          <p>Your merchant account has been registered successfully on Bolgram. You can now access your merchant dashboard, connect your Android forwarder app, and automate bKash, Nagad, Rocket, and Upay payments.</p>
           
           <h3 style="font-size: 15px; margin-bottom: 6px;">Your Live API Secret Key:</h3>
           <div class="box">${params.apiKey}</div>
@@ -141,7 +141,7 @@ export class EmailService {
           <p style="font-size: 13px; color: #475569;">If you did not create this account, please contact our support team immediately.</p>
         </div>
         <div class="footer">
-          © ${new Date().getFullYear()} SyncPay BD. All rights reserved. Automated Payment Engine.
+          © ${new Date().getFullYear()} Bolgram. All rights reserved. Automated Payment Engine.
         </div>
       </div>
     </body>
@@ -150,7 +150,7 @@ export class EmailService {
 
     return this.sendEmail({
       to: params.to,
-      subject: `Welcome to SyncPay BD - ${params.businessName} Account Active`,
+      subject: `Welcome to Bolgram - ${params.businessName} Account Active`,
       html,
     });
   }
@@ -189,7 +189,7 @@ export class EmailService {
     <body>
       <div class="card">
         <div class="header">
-          <h1>SyncPay BD</h1>
+          <h1>Bolgram</h1>
           <p style="margin: 6px 0 0 0; opacity: 0.9; font-size: 14px;">Administrative Account Notification</p>
         </div>
         <div class="content">
@@ -199,7 +199,7 @@ export class EmailService {
             <h3 style="margin: 0 0 8px 0; color: ${isReqPay ? '#92400e' : '#166534'};">${title}</h3>
             <p style="margin: 0; font-size: 14px; color: ${isReqPay ? '#78350f' : '#14532d'};">
               ${isFree 
-                ? 'Your account has been granted lifetime access to the SyncPay BD Free Tier by the administrator. You can now use payment automation with zero platform commission.' 
+                ? 'Your account has been granted lifetime access to the Bolgram Free Tier by the administrator. You can now use payment automation with zero platform commission.' 
                 : (isReqPay 
                     ? 'The administrator has requested payment to activate/renew your subscription features.' 
                     : `Your subscription tier has been set to ${params.plan}.`)}
@@ -208,11 +208,11 @@ export class EmailService {
           </div>
 
           <div style="text-align: center; margin: 28px 0;">
-            <a href="https://syncpaybd.site/dashboard" class="btn">Open Merchant Dashboard →</a>
+            <a href="https://bolgram.ir/dashboard" class="btn">Open Merchant Dashboard →</a>
           </div>
         </div>
         <div class="footer">
-          © ${new Date().getFullYear()} SyncPay BD. Automated Payment Gateway Engine.
+          © ${new Date().getFullYear()} Bolgram. Automated Payment Gateway Engine.
         </div>
       </div>
     </body>
@@ -221,7 +221,7 @@ export class EmailService {
 
     return this.sendEmail({
       to: params.to,
-      subject: `[SyncPay BD] ${title} - ${params.businessName}`,
+      subject: `[Bolgram] ${title} - ${params.businessName}`,
       html,
     });
   }

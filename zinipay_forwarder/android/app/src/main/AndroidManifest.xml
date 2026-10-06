@@ -26,7 +26,7 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
-        android:label="SyncPay Agent"
+        android:label="Bolgram Receiver"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -67,7 +67,7 @@
         <!-- NotificationListenerService — intercepts real-time bKash/Nagad app push notifications -->
         <service
             android:name=".MfsNotificationListener"
-            android:label="SyncPay Notification Interceptor"
+            android:label="Bolgram Receiver"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:exported="true">
             <intent-filter>

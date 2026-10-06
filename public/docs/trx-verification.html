@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transaction Verification API | SyncPay BD</title>
-  <meta name="description" content="SyncPay BD Transaction Verification API — Advanced backend payment verification workflow.">
+  <title>Transaction Verification API | Bolgram</title>
+  <meta name="description" content="Bolgram Transaction Verification API — Advanced backend payment verification workflow.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -66,7 +66,7 @@
 <body>
   <header>
     <div class="nav-wrap">
-      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>SyncPay BD</span></a>
+      <a href="/" class="brand"><div class="brand-logo">⚡</div><span>Bolgram</span></a>
       <div class="nav-right">
         <a href="/docs/api">API Docs</a>
         <a href="/docs/trx-verification" style="color:var(--primary)">Verification</a>
@@ -105,7 +105,7 @@
       </ul>
       <div class="alert alert-warn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span>SyncPay BD ensures each transaction is <strong>verified only once</strong>. Duplicate attempts are automatically rejected.</span>
+        <span>Bolgram ensures each transaction is <strong>verified only once</strong>. Duplicate attempts are automatically rejected.</span>
       </div>
 
       <h2 id="flow">Verification Flow</h2>
@@ -121,13 +121,13 @@
           <div class="flow-step-num">2</div>
           <div class="flow-step-body">
             <h4>Server Calls API</h4>
-            <p>Send a POST request containing trx_id, amount, and provider to the SyncPay BD API.</p>
+            <p>Send a POST request containing trx_id, amount, and provider to the Bolgram API.</p>
           </div>
         </div>
         <div class="flow-step">
           <div class="flow-step-num">3</div>
           <div class="flow-step-body">
-            <h4>SyncPay Checks SMS Log</h4>
+            <h4>Bolgram Checks SMS Log</h4>
             <p>Our Android forwarder agent matches real SMS data against your payment invoice parameters.</p>
           </div>
         </div>
@@ -151,7 +151,7 @@
           <tr><td>amount</td><td>number</td><td>Expected payment amount (BDT)</td><td><span class="tag-req">required</span></td></tr>
           <tr><td>provider</td><td>string</td><td>bKash | Nagad | Rocket | Upay</td><td><span class="tag-req">required</span></td></tr>
           <tr><td>tolerance</td><td>number</td><td>Amount tolerance in BDT (default: 0)</td><td><span class="tag-opt">optional</span></td></tr>
-          <tr><td>invoice_id</td><td>string</td><td>SyncPay invoice ID (if applicable)</td><td><span class="tag-opt">optional</span></td></tr>
+          <tr><td>invoice_id</td><td>string</td><td>Bolgram invoice ID (if applicable)</td><td><span class="tag-opt">optional</span></td></tr>
         </tbody>
       </table>
 

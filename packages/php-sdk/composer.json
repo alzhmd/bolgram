@@ -1,12 +1,12 @@
 {
     "name": "syncpay/mfs-sdk",
-    "description": "Official PHP SDK for SyncPay BD Automated MFS Gateway",
+    "description": "Official PHP SDK for Bolgram Automated MFS Gateway",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "SyncPay BD Team",
-            "email": "support@syncpaybd.site"
+            "name": "Bolgram Team",
+            "email": "support@bolgram.ir"
         }
     ],
     "require": {
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "SyncPay\\": ""
+            "Bolgram\\": ""
         }
     }
 }

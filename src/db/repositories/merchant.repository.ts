@@ -104,7 +104,7 @@ export class MerchantRepository {
     }
 
     // Check demo accounts
-    if (email === 'demo@syncpaybd.site' || email === 'merchant@example.com') {
+    if (email === 'demo@bolgram.ir' || email === 'merchant@example.com') {
       return {
         id: '00000000-0000-0000-0000-000000000101',
         business_name: 'Demo Merchant Store',

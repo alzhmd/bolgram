@@ -1,11 +1,11 @@
 <?php
-namespace SyncPay;
+namespace Bolgram;
 
 /**
- * SyncPay BD - Official PHP SDK Client
+ * Bolgram - Official PHP SDK Client
  * Version: 2.0.0
  */
-class SyncPayClient {
+class BolgramClient {
     private $apiKey;
     private $baseUrl;
 
@@ -44,7 +44,7 @@ class SyncPayClient {
         if (curl_errno($ch)) {
             $error = curl_error($ch);
             curl_close($ch);
-            throw new \Exception("SyncPay Request Failed: " . $error);
+            throw new \Exception("Bolgram Request Failed: " . $error);
         }
 
         curl_close($ch);

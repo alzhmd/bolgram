@@ -86,7 +86,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
               ),
               const SizedBox(height: 28),
               const Text(
-                'SyncPay BD',
+                'Bolgram',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,

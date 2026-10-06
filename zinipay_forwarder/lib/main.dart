@@ -17,19 +17,19 @@ void main() async {
       overrides: [
         localVaultProvider.overrideWithValue(vault),
       ],
-      child: const SyncPayForwarderApp(),
+      child: const BolgramForwarderApp(),
     ),
   );
 }
 
-class SyncPayForwarderApp extends ConsumerStatefulWidget {
-  const SyncPayForwarderApp({super.key});
+class BolgramForwarderApp extends ConsumerStatefulWidget {
+  const BolgramForwarderApp({super.key});
 
   @override
-  ConsumerState<SyncPayForwarderApp> createState() => _SyncPayForwarderAppState();
+  ConsumerState<BolgramForwarderApp> createState() => _BolgramForwarderAppState();
 }
 
-class _SyncPayForwarderAppState extends ConsumerState<SyncPayForwarderApp> {
+class _BolgramForwarderAppState extends ConsumerState<BolgramForwarderApp> {
   final TelephonyChannelService _telephonyChannel = TelephonyChannelService();
 
   @override
@@ -96,7 +96,7 @@ class _SyncPayForwarderAppState extends ConsumerState<SyncPayForwarderApp> {
     }
 
     return MaterialApp(
-      title: 'SyncPay BD Payment Agent',
+      title: 'Bolgram Payment Agent',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

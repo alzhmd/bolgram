@@ -1,4 +1,4 @@
-# SyncPay BD / PayFlow MFS — Agent Quick-Navigation & Codebase Index
+# Bolgram / Bolgram — Agent Quick-Navigation & Codebase Index
 
 This document acts as an instant index and lookup directory for AI agents and developers working on `syncpay-bd` / `payflow-mfs`. Use this map to locate any feature, route, database query, or bug location without blind crawling.
 

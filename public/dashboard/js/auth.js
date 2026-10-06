@@ -1,5 +1,5 @@
 /**
- * SyncPay BD — Auth & Session Manager
+ * Bolgram — Auth & Session Manager
  * Handles merchant login, registration, package-based access control
  */
 
@@ -117,7 +117,7 @@ const PLANS = {
 const DEMO_ACCOUNTS = [
   {
     id: '01711000000260923',
-    email: 'demo@syncpaybd.site',
+    email: 'demo@bolgram.ir',
     phone: '01711000000',
     password: 'demo1234',
     name: 'Demo Merchant',
@@ -230,6 +230,8 @@ export const auth = {
 
   logout() {
     localStorage.removeItem(this.SESSION_KEY);
+    localStorage.removeItem('syncpay_token');
+    localStorage.removeItem('payflow_api_key');
     window.location.href = '/';
   },
 

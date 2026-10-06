@@ -18,7 +18,7 @@ class CsvExportService {
 
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'text/csv')],
-      subject: 'SyncPay BD SMS Log — $timestamp',
+      subject: 'Bolgram SMS Log — $timestamp',
     );
   }
 

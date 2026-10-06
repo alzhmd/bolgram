@@ -1,15 +1,15 @@
 class AppConfig {
-  static const String appName = 'SyncPay Agent';
+  static const String appName = 'Bolgram Agent';
   static const String appTagline = 'Secure Payment Forwarder';
   static const String appVersion = '1.2.0';
   static const String developerName = 'Jahidul Islam';
   static const String developerWebsite = 'https://jahidulislam.dev';
-  static const String privacyPolicyUrl = 'https://syncpaybd.site/privacy';
+  static const String privacyPolicyUrl = 'https://bolgram.ir/privacy';
 
   // Default server URLs
   static const String defaultEmulatorBackendUrl = 'http://10.0.2.2:4000';
   static const String defaultLocalhostBackendUrl = 'http://localhost:4000';
-  static const String defaultProductionBackendUrl = 'https://syncpaybd.site';
+  static const String defaultProductionBackendUrl = 'https://bolgram.ir';
 
   // Backend Endpoints
   static const String ingestEndpoint = '/api/v1/device/sms/ingest';

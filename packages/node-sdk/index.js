@@ -1,15 +1,15 @@
 /**
- * SyncPay BD - Official Node.js & TypeScript SDK
+ * Bolgram - Official Node.js & TypeScript SDK
  * Version: 2.0.0
  */
 
-class SyncPayClient {
+class BolgramClient {
   constructor(config = {}) {
     this.apiKey = typeof config === 'string' ? config : (config.apiKey || process.env.SYNCPAY_API_KEY || '');
     this.baseUrl = (config.baseUrl || process.env.SYNCPAY_BASE_URL || 'http://localhost:4000').replace(/\/$/, '');
 
     if (!this.apiKey) {
-      console.warn('[SyncPay] Warning: API Key is not set.');
+      console.warn('[Bolgram] Warning: API Key is not set.');
     }
   }
 
@@ -78,5 +78,5 @@ class SyncPayClient {
   }
 }
 
-module.exports = { SyncPayClient };
-module.exports.default = SyncPayClient;
+module.exports = { BolgramClient };
+module.exports.default = BolgramClient;

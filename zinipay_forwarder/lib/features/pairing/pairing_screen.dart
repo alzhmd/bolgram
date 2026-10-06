@@ -42,7 +42,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         storedUrl.contains('localhost') ||
         storedUrl.contains('127.0.0.1');
     _backendUrlCtrl = TextEditingController(
-      text: isLocalUrl ? 'https://syncpaybd.site' : storedUrl,
+      text: isLocalUrl ? 'https://bolgram.ir' : storedUrl,
     );
   }
 
@@ -75,7 +75,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
         final name = json['merchant_name'] ?? json['business_name'] ?? json['device_name'];
         _businessNameCtrl.text = (name != null && name.toString().isNotEmpty)
             ? name.toString()
-            : 'SyncPay Merchant Store';
+            : 'Bolgram Merchant Store';
         if (json['device_token'] != null) _tokenCtrl.text = json['device_token'].toString();
         if (json['backend_url'] != null) _backendUrlCtrl.text = json['backend_url'].toString();
         if (json['device_id'] != null) _scannedDeviceId = json['device_id'].toString();
@@ -132,7 +132,7 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
       if (!mounted) return;
 
       final merchantName = _businessNameCtrl.text.trim();
-      final displayName = merchantName.isNotEmpty ? merchantName : 'SyncPay Merchant Store';
+      final displayName = merchantName.isNotEmpty ? merchantName : 'Bolgram Merchant Store';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

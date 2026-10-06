@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: SyncPay BD - MFS Payment Gateway for WooCommerce
- * Plugin URI: https://syncpaybd.site
+ * Plugin Name: Bolgram - MFS Payment Gateway for WooCommerce
+ * Plugin URI: https://bolgram.ir
  * Description: Automated bKash, Nagad, Rocket & Upay direct payments for WooCommerce with real-time SMS TrxID verification.
  * Version: 2.4.2
- * Author: SyncPay BD
- * Author URI: https://syncpaybd.site
+ * Author: Bolgram
+ * Author URI: https://bolgram.ir
  * Text Domain: syncpay-woocommerce
  * Domain Path: /languages
  * Requires at least: 5.8
@@ -26,20 +26,20 @@ function syncpay_woocommerce_init() {
         return;
     }
 
-    class WC_Gateway_SyncPay extends WC_Payment_Gateway {
+    class WC_Gateway_Bolgram extends WC_Payment_Gateway {
 
         public function __construct() {
             $this->id = 'syncpay';
             $this->icon = apply_filters('woocommerce_syncpay_icon', plugins_url('assets/icon.png', __FILE__));
             $this->has_fields = false;
-            $this->method_title = __('SyncPay BD (bKash/Nagad/Rocket)', 'syncpay-woocommerce');
+            $this->method_title = __('Bolgram (bKash/Nagad/Rocket)', 'syncpay-woocommerce');
             $this->method_description = __('Automated Mobile Financial Services (MFS) payment gateway with direct SIM forwarder integration.', 'syncpay-woocommerce');
 
             // Load settings
             $this->init_form_fields();
             $this->init_settings();
 
-            $this->title = $this->get_option('title', 'bKash / Nagad / Rocket (SyncPay BD)');
+            $this->title = $this->get_option('title', 'bKash / Nagad / Rocket (Bolgram)');
             $this->description = $this->get_option('description', 'বিকাশ, নগদ বা রকেট এর মাধ্যমে নিরাপদে এবং স্বয়ংক্রিয়ভাবে পেমেন্ট করুন।');
             $this->api_url = rtrim($this->get_option('api_url', 'http://localhost:4000'), '/');
             $this->api_key = $this->get_option('api_key', '');
@@ -57,14 +57,14 @@ function syncpay_woocommerce_init() {
                 'enabled' => array(
                     'title'       => __('Enable/Disable', 'syncpay-woocommerce'),
                     'type'        => 'checkbox',
-                    'label'       => __('Enable SyncPay BD MFS Gateway', 'syncpay-woocommerce'),
+                    'label'       => __('Enable Bolgram MFS Gateway', 'syncpay-woocommerce'),
                     'default'     => 'yes',
                 ),
                 'title' => array(
                     'title'       => __('Title', 'syncpay-woocommerce'),
                     'type'        => 'text',
                     'description' => __('Payment method title displayed to customer at checkout.', 'syncpay-woocommerce'),
-                    'default'     => __('bKash / Nagad / Rocket (SyncPay BD)', 'syncpay-woocommerce'),
+                    'default'     => __('bKash / Nagad / Rocket (Bolgram)', 'syncpay-woocommerce'),
                     'desc_tip'    => true,
                 ),
                 'description' => array(
@@ -74,16 +74,16 @@ function syncpay_woocommerce_init() {
                     'default'     => __('বিকাশ, নগদ বা রকেট এর মাধ্যমে নিরাপদে এবং স্বয়ংক্রিয়ভাবে পেমেন্ট করুন।', 'syncpay-woocommerce'),
                 ),
                 'api_url' => array(
-                    'title'       => __('SyncPay Server URL', 'syncpay-woocommerce'),
+                    'title'       => __('Bolgram Server URL', 'syncpay-woocommerce'),
                     'type'        => 'text',
-                    'description' => __('Your SyncPay server endpoint (e.g. http://localhost:4000 or https://pay.yourdomain.com)', 'syncpay-woocommerce'),
+                    'description' => __('Your Bolgram server endpoint (e.g. http://localhost:4000 or https://pay.yourdomain.com)', 'syncpay-woocommerce'),
                     'default'     => 'http://localhost:4000',
                     'desc_tip'    => true,
                 ),
                 'api_key' => array(
                     'title'       => __('Merchant API Key', 'syncpay-woocommerce'),
                     'type'        => 'password',
-                    'description' => __('Find your API key in SyncPay Dashboard > API Keys.', 'syncpay-woocommerce'),
+                    'description' => __('Find your API key in Bolgram Dashboard > API Keys.', 'syncpay-woocommerce'),
                     'default'     => '',
                 ),
                 'order_status_success' => array(
@@ -197,11 +197,11 @@ function syncpay_woocommerce_init() {
                 if ($order->get_status() !== 'completed' && $order->get_status() !== 'processing') {
                     $order->payment_complete($trx_id);
                     $order->add_order_note(sprintf(
-                        __('SyncPay BD Payment Verified via %s. Transaction ID: %s', 'syncpay-woocommerce'),
+                        __('Bolgram Payment Verified via %s. Transaction ID: %s', 'syncpay-woocommerce'),
                         esc_html($provider),
                         esc_html($trx_id)
                     ));
-                    $order->update_status($this->order_status_success, __('Payment confirmed via SyncPay MFS.', 'syncpay-woocommerce'));
+                    $order->update_status($this->order_status_success, __('Payment confirmed via Bolgram MFS.', 'syncpay-woocommerce'));
                 }
             }
 
@@ -212,7 +212,7 @@ function syncpay_woocommerce_init() {
     }
 
     function add_syncpay_gateway_class($methods) {
-        $methods[] = 'WC_Gateway_SyncPay';
+        $methods[] = 'WC_Gateway_Bolgram';
         return $methods;
     }
 

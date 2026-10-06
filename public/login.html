@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secure Client Login | SyncPay BD</title>
-  <meta name="description" content="Secure Client Login for SyncPay BD Merchant Portal. Manage personal MFS automation, bKash, Nagad, Rocket, API keys, and forwarder nodes.">
+  <title>Secure Client Login | Bolgram</title>
+  <meta name="description" content="Secure Client Login for Bolgram Merchant Portal. Manage personal MFS automation, bKash, Nagad, Rocket, API keys, and forwarder nodes.">
   <link rel="icon" type="image/png" href="/images/syncpay-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -526,7 +526,7 @@
 
   <div class="login-container">
     
-    <!-- LEFT HERO SECTION (SyncPay BD) -->
+    <!-- LEFT HERO SECTION (Bolgram) -->
     <aside class="hero-banner">
       <!-- Top Brand -->
       <a href="/" class="brand-logo-wrap">
@@ -535,7 +535,7 @@
             <rect width="32" height="32" rx="8" fill="#ffffff"/>
             <path d="M17 6L9 18H16L15 26L23 14H16L17 6Z" fill="#0045d8"/>
           </svg>
-          SyncPay<span>BD</span>
+          Bolgram<span>BD</span>
         </div>
       </a>
 
@@ -550,7 +550,7 @@
             <span id="banner-notice-title">Important Notice: License & Automated MFS Compliance</span>
           </div>
           <p class="hero-notice-text" id="banner-notice-desc">
-            Dear Valued SyncPay BD Users, To ensure compliance with Bangladesh telecom & financial regulations, our automated MFS telephony engine and webhook dispatch operate with end-to-end encrypted device pairing. Personal bKash, Nagad, and Rocket numbers are fully verified in real-time.
+            Dear Valued Bolgram Users, To ensure compliance with Bangladesh telecom & financial regulations, our automated MFS telephony engine and webhook dispatch operate with end-to-end encrypted device pairing. Personal bKash, Nagad, and Rocket numbers are fully verified in real-time.
           </p>
         </div>
 
@@ -564,7 +564,7 @@
 
       <!-- Footer info on left banner -->
       <div style="font-size: 12px; color: rgba(255,255,255,0.6); z-index:2;">
-        © 2026 SyncPay BD. All rights reserved.
+        © 2026 Bolgram. All rights reserved.
       </div>
     </aside>
 
@@ -711,12 +711,12 @@
       {
         date: 'Feb 2026',
         title: 'Important Notice: License & Automated MFS Compliance',
-        desc: 'Dear Valued SyncPay BD Users, To ensure compliance with Bangladesh telecom & financial regulations, our automated MFS telephony engine and webhook dispatch operate with end-to-end encrypted device pairing. Personal bKash, Nagad, and Rocket numbers are fully verified in real-time.'
+        desc: 'Dear Valued Bolgram Users, To ensure compliance with Bangladesh telecom & financial regulations, our automated MFS telephony engine and webhook dispatch operate with end-to-end encrypted device pairing. Personal bKash, Nagad, and Rocket numbers are fully verified in real-time.'
       },
       {
         date: 'Jan 2026',
         title: 'Android Agent v2.1 Released with Auto SMS Sync',
-        desc: 'The latest SyncPay Forwarder APK ensures zero battery drain, background wakelock resistance, and sub-second instant SMS relay to your merchant webhook listener.'
+        desc: 'The latest Bolgram Forwarder APK ensures zero battery drain, background wakelock resistance, and sub-second instant SMS relay to your merchant webhook listener.'
       },
       {
         date: 'Dec 2025',
@@ -955,62 +955,30 @@
     // ==========================================
     // LOGIN & REGISTER HANDLERS
     // ==========================================
-    function handleLoginSubmit(e) {
+    async function handleLoginSubmit(e) {
       e.preventDefault();
-      const loginVal = document.getElementById('login-identifier').value.trim();
-      const cleanInput = loginVal.toLowerCase();
-      const cleanPhone = loginVal.replace(/[\s\-\(\)\+]/g, '');
-      const passInput = document.getElementById('login-password').value;
+      const email = document.getElementById('login-identifier').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
       const errAlert = document.getElementById('auth-error-alert');
-
-      const DEFAULT_ACCOUNTS = [
-        { id: '01711000000260923', email: 'demo@syncpaybd.site', phone: '01711000000', password: 'demo1234', name: 'Demo Merchant', business: 'Demo Store BD', plan: 'growth', apiKey: 'live_sk_demo_99410abc' },
-        { id: '01811000000260923', email: 'starter@test.com', phone: '01811000000', password: 'test1234', name: 'Starter User', business: 'My Small Shop', plan: 'starter', apiKey: 'live_sk_starter_11111' },
-        { id: '01911000000260923', email: 'enterprise@test.com', phone: '01911000000', password: 'ent1234', name: 'Enterprise Corp', business: 'BigCorp BD Ltd', plan: 'enterprise', apiKey: 'live_sk_ent_999abc' }
-      ];
-
-      const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
-      const storedEmails = storedAccounts.map(a => a.email);
-      const allAccounts = [...DEFAULT_ACCOUNTS.filter(d => !storedEmails.includes(d.email)), ...storedAccounts];
-
-      const merchant = allAccounts.find(a => {
-        const aEmail = (a.email || '').toLowerCase();
-        const aPhone = (a.phone || '').replace(/[\s\-\(\)\+]/g, '');
-        if (aEmail && aEmail === cleanInput) return true;
-        if (cleanPhone.length >= 6 && aPhone && (aPhone === cleanPhone || aPhone.endsWith(cleanPhone.slice(-10)))) return true;
-        return false;
-      });
-
-      if (!merchant) {
-        errAlert.textContent = 'Account not found with this email or phone number. Please check credentials or register.';
+      errAlert.style.display = 'none';
+      try {
+        const res = await fetch('/api/v1/merchant/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Login failed');
+        localStorage.setItem('syncpay_token', data.token);
+        const m = data.merchant;
+        localStorage.setItem('syncpay_session', JSON.stringify({
+          merchantId: m.id, email: m.email, phone: m.phone, name: m.name, business: m.name,
+          plan: (m.plan || 'FREE').toLowerCase(), apiKey: m.api_key, loginAt: new Date().toISOString()
+        }));
+        if (m.api_key) localStorage.setItem('payflow_api_key', m.api_key);
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        errAlert.textContent = err.message === 'Invalid email or password' ? 'ایمیل یا رمز عبور اشتباه است' : err.message;
         errAlert.style.display = 'block';
-        return;
       }
-
-      if (merchant.password !== passInput) {
-        errAlert.textContent = 'Incorrect password. Please try again.';
-        errAlert.style.display = 'block';
-        return;
-      }
-
-      // Login success
-      const session = {
-        merchantId: merchant.id,
-        email: merchant.email || cleanInput,
-        phone: merchant.phone || (cleanPhone.length >= 6 ? cleanPhone : ''),
-        name: merchant.name,
-        business: merchant.business,
-        plan: merchant.plan || 'business',
-        apiKey: merchant.apiKey || ('live_sk_' + Math.random().toString(36).slice(2, 18)),
-        loginAt: new Date().toISOString()
-      };
-      localStorage.setItem('syncpay_session', JSON.stringify(session));
-      localStorage.setItem('payflow_api_key', session.apiKey);
-
-      // Redirect
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectTarget = urlParams.get('redirect') || '/dashboard';
-      window.location.href = redirectTarget;
     }
 
     function handleRegisterSubmit(e) {
@@ -1023,7 +991,7 @@
       const password = document.getElementById('reg-password').value;
       const errAlert = document.getElementById('auth-error-alert');
 
-      const DEFAULT_EMAILS = ['demo@syncpaybd.site', 'starter@test.com', 'enterprise@test.com'];
+      const DEFAULT_EMAILS = ['demo@bolgram.ir', 'starter@test.com', 'enterprise@test.com'];
       const storedAccounts = JSON.parse(localStorage.getItem('syncpay_accounts') || '[]');
       if (DEFAULT_EMAILS.includes(email) || storedAccounts.some(a => a.email === email)) {
         errAlert.textContent = 'An account with this email already exists. Please log in.';
