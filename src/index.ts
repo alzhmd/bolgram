@@ -1,3 +1,4 @@
+import { v2Routes } from './routes/v2.routes.js';
 import { jwtSecret } from './utils/crypto.js';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
@@ -131,6 +132,7 @@ await server.register(deviceRoutes);
 await server.register(paymentRoutes);
 await server.register(merchantRoutes);
 await server.register(adminRoutes);
+await server.register(v2Routes);
 
 // Health check
 server.get('/health', async (req) => {
