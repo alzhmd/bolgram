@@ -11,16 +11,16 @@ import { dbService } from '../db/database.js';
 import { validateWebhookUrl } from '../services/webhook.service.js';
 import { fraudShield, recordFailedVerification, clearVerificationAttempts } from '../middleware/fraud-shield.js';
 
-// API Key extractor supporting Bolgram / Bolgram headers, query params, or body
+// API key from the x-api-key header, Authorization: Bearer, or ?apikey
 function extractApiKey(request: FastifyRequest): string | undefined {
-  const headerKey = request.headers['syncpay-api-key'] || request.headers['payflow-api-key'] || request.headers['x-api-key'] || request.headers['zini-api-key'];
+  const headerKey = request.headers['x-api-key'];
   if (typeof headerKey === 'string' && headerKey.trim()) {
     return headerKey.trim();
   }
   const authHeader = request.headers.authorization;
   if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
-    if (token.startsWith('live_') || token.startsWith('test_') || token.startsWith('sand_') || token.startsWith('zini_')) {
+    if (token.startsWith('live_') || token.startsWith('test_') || token.startsWith('sand_')) {
       return token;
     }
   }
@@ -36,26 +36,17 @@ function extractApiKey(request: FastifyRequest): string | undefined {
 }
 
 // Centralized payment URL resolver supporting custom merchant domains and brand slugs
-async function resolvePaymentUrl(request: FastifyRequest, merchantId: string, invoiceId: string): Promise<string> {
-  const host = request.headers.host || 'localhost:4000';
-  const protocol = (request.headers['x-forwarded-proto'] as string) || request.protocol || 'http';
-  let paymentUrl = `${protocol}://${host}/checkout?invoice_id=${invoiceId}`;
-  try {
-    const fullMerchant = await MerchantRepository.findById(merchantId);
-    if (fullMerchant?.custom_domain && fullMerchant.has_custom_domain) {
-      paymentUrl = `https://${fullMerchant.custom_domain}/checkout?invoice_id=${invoiceId}`;
-    } else if (fullMerchant?.brand_slug) {
-      paymentUrl = `${protocol}://${host}/pay/${fullMerchant.brand_slug}?invoice_id=${invoiceId}`;
-    }
-  } catch {}
-  return paymentUrl;
+/** Customer payment page. PUBLIC_BASE_URL wins; otherwise the request's own origin (proxy-aware). */
+async function resolvePaymentUrl(request: FastifyRequest, _merchantId: string, invoiceId: string): Promise<string> {
+  const base = process.env.PUBLIC_BASE_URL?.replace(/\/+$/, '') || `${request.protocol}://${request.headers.host || 'localhost:4000'}`;
+  return `${base}/checkout.html?invoice_id=${encodeURIComponent(invoiceId)}`;
 }
 
 // Request Validation Schemas
 const httpUrl = (label: string) =>
   z.string().url(`${label} must be a valid URL`).refine((v) => /^https?:\/\//i.test(v), `${label} must start with http:// or https://`);
 
-const payflowCreateInvoiceSchema = z.object({
+const createInvoiceSchema = z.object({
   cus_name: z.string().max(120).optional(),
   cus_email: z.string().email('Invalid email address format').optional().or(z.literal('')),
   // Rial by default; send currency "IRT" to give the amount in Toman.
@@ -70,7 +61,7 @@ const payflowCreateInvoiceSchema = z.object({
   webhook_url: httpUrl('webhook_url').optional().or(z.literal('')),
 });
 
-const payflowVerifyInvoiceSchema = z.object({
+const verifyInvoiceSchema = z.object({
   invoice_id: z.string().min(1, 'invoice_id is required'),
 });
 
@@ -95,12 +86,12 @@ export async function paymentRoutes(fastify: FastifyInstance) {
   // 1. Bolgram Standard API: Create Invoice
   // POST /v1/payment/create & /api/v1/payment/create
   // ==========================================
-  const handlePayflowCreateInvoice = async (request: FastifyRequest, reply: FastifyReply) => {
+  const handleCreateInvoice = async (request: FastifyRequest, reply: FastifyReply) => {
     const apiKey = extractApiKey(request);
     if (!apiKey) {
       return reply.status(401).send({
         status: false,
-        message: 'Missing API key. Please provide syncpay-api-key header or ?apikey query parameter.',
+        message: 'Missing API key: send it in the x-api-key header.',
       });
     }
 
@@ -112,7 +103,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const parseResult = payflowCreateInvoiceSchema.safeParse(request.body);
+    const parseResult = createInvoiceSchema.safeParse(request.body);
     if (!parseResult.success) {
       return reply.status(400).send({
         status: false,
@@ -169,19 +160,19 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     });
   };
 
-  fastify.post('/v1/payment/create', handlePayflowCreateInvoice);
-  fastify.post('/api/v1/payment/create', handlePayflowCreateInvoice);
+  fastify.post('/v1/payment/create', handleCreateInvoice);
+  fastify.post('/api/v1/payment/create', handleCreateInvoice);
 
   // ==========================================
   // 2. Bolgram Standard API: Verify Invoice
   // POST /v1/payment/verify & /api/v1/payment/verify
   // ==========================================
-  const handlePayflowVerifyInvoice = async (request: FastifyRequest, reply: FastifyReply) => {
+  const handleVerifyInvoice = async (request: FastifyRequest, reply: FastifyReply) => {
     const apiKey = extractApiKey(request);
     if (!apiKey) {
       return reply.status(401).send({
         status: false,
-        message: 'Missing API key. Please provide syncpay-api-key header or ?apikey parameter.',
+        message: 'Missing API key: send it in the x-api-key header.',
       });
     }
 
@@ -193,7 +184,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const parseResult = payflowVerifyInvoiceSchema.safeParse(request.body);
+    const parseResult = verifyInvoiceSchema.safeParse(request.body);
     if (!parseResult.success) {
       return reply.status(400).send({
         status: false,
@@ -234,8 +225,8 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     });
   };
 
-  fastify.post('/v1/payment/verify', handlePayflowVerifyInvoice);
-  fastify.post('/api/v1/payment/verify', handlePayflowVerifyInvoice);
+  fastify.post('/v1/payment/verify', handleVerifyInvoice);
+  fastify.post('/api/v1/payment/verify', handleVerifyInvoice);
 
   // ==========================================
   // 3. Checkout Settlement Endpoint
@@ -300,7 +291,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       data: {
         trx_id: trx_id.toUpperCase(),
         amount: effectiveAmount,
-        provider: settleResult.transaction?.provider || 'bKash',
+        provider: settleResult.transaction?.provider || 'card',
         order_id: effectiveOrderId,
         invoice_id: invoice_id || null,
       },

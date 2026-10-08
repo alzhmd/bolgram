@@ -193,8 +193,6 @@ async function runAttempt(a: AttemptInput): Promise<AttemptResult> {
     'X-Bolgram-Invoice-Id': a.invoiceId,
     'X-Bolgram-Event': a.event,
     // Legacy (upstream-compatible) signature over the body only
-    'X-Payflow-Signature': CryptoUtil.signWebhook(a.body, secrets[0]),
-    'X-Payflow-Invoice-Id': a.invoiceId,
   };
   const started = Date.now();
   let status: number | undefined;

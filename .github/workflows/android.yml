@@ -3,10 +3,10 @@ name: Android app
 on:
   push:
     branches: [main]
-    paths: ['zinipay_forwarder/**', '.github/workflows/android.yml']
+    paths: ['app/**', '.github/workflows/android.yml']
     tags: ['v*']
   pull_request:
-    paths: ['zinipay_forwarder/**', '.github/workflows/android.yml']
+    paths: ['app/**', '.github/workflows/android.yml']
   workflow_dispatch:
 
 permissions:
@@ -14,22 +14,36 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned runner image (ubuntu-latest is moving to a new release)
+    runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: zinipay_forwarder
+        working-directory: app
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
-      - uses: subosito/flutter-action@v2
+      # Flutter from the official stable branch (no third-party action, so no deprecated Node.js runtime)
+      - name: Install Flutter (stable)
+        working-directory: ${{ runner.temp }}
+        run: |
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git flutter
+          echo "${{ runner.temp }}/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Cache pub packages
+        uses: actions/cache@v5
         with:
-          channel: stable
-          cache: true
+          path: ~/.pub-cache
+          key: pub-${{ runner.os }}-${{ hashFiles('app/pubspec.lock') }}
+          restore-keys: pub-${{ runner.os }}-
+
+      - name: Flutter version
+        run: flutter --version
 
       - name: Install dependencies
         run: flutter pub get
@@ -83,20 +97,20 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "$SHA  bolgram-${VERSION}.apk" > "bolgram-${VERSION}.apk.sha256"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: bolgram-apk
           path: |
-            zinipay_forwarder/bolgram-*.apk
-            zinipay_forwarder/bolgram-*.apk.sha256
+            app/bolgram-*.apk
+            app/bolgram-*.apk.sha256
           if-no-files-found: error
 
       - name: Attach to GitHub release (tags v*)
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
-            zinipay_forwarder/bolgram-*.apk
-            zinipay_forwarder/bolgram-*.apk.sha256
+            app/bolgram-*.apk
+            app/bolgram-*.apk.sha256
           body: |
             SHA-256: `${{ steps.apk.outputs.sha }}`

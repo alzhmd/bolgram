@@ -1,0 +1,32 @@
+# docker compose up -d --build   (fill .env first; DOMAIN must point to this server)
+services:
+  bolgram:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_PATH: /data/bolgram.db
+      UPLOAD_DIR: /data/uploads
+      # Caddy reaches the app over the Docker network
+      TRUST_PROXY: 172.16.0.0/12
+    volumes:
+      - bolgram-data:/data
+    expose:
+      - "4000"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [bolgram]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+volumes:
+  bolgram-data:
+  caddy-data:

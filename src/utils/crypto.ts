@@ -31,17 +31,6 @@ export class CryptoUtil {
     return `sha256=${hmac}`;
   }
 
-  /**
-   * Constant-time comparison to prevent timing attacks when verifying webhook signatures
-   */
-  public static verifyWebhookSignature(payload: string, signatureHeader: string, secret: string): boolean {
-    const expected = this.signWebhook(payload, secret);
-    try {
-      return crypto.timingSafeEqual(Buffer.from(signatureHeader), Buffer.from(expected));
-    } catch {
-      return false;
-    }
-  }
 
   /**
    * Generate secure random token

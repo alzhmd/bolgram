@@ -1,0 +1,19 @@
+# systemd unit for running without Docker: copy to /etc/systemd/system/, then
+#   systemctl daemon-reload && systemctl enable --now bolgram
+[Unit]
+Description=Bolgram payment gateway
+After=network-online.target
+
+[Service]
+Type=simple
+User=bolgram
+WorkingDirectory=/opt/bolgram
+EnvironmentFile=/opt/bolgram/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

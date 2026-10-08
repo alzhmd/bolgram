@@ -10,12 +10,13 @@ window.SITE = {
   DOMAIN: 'bolgram.ir',
   // Base URL of the Bolgram server. The site reads /api/pub/site, /api/pub/plans and /api/pub/reviews from here at runtime
   // (announcement banner, contact info, logo, FAQ, pricing, testimonials) and falls back to the static content when it is unreachable.
-  // Placeholder domain: use the same value as CONFIG.PAY_BASE_URL in the merchant panel (public/panel/assets/js/core.js).
+  // Placeholder domain: replace pay.bolgram.example everywhere in website/public with your server address.
   API_BASE: 'https://pay.bolgram.example',
-  APP_URL: 'https://app.bolgram.ir',            // merchant panel (login/signup live there)
-  LOGIN_URL: 'https://app.bolgram.ir/login.html',
-  SIGNUP_URL: 'https://app.bolgram.ir/login.html#register',
-  STATUS_URL: 'https://app.bolgram.ir/health',   // TODO: real status page
+  // Merchant panel on the same server (sign-in and sign-up live there)
+  APP_URL: 'https://pay.bolgram.example/panel/',
+  LOGIN_URL: 'https://pay.bolgram.example/panel/#/login',
+  SIGNUP_URL: 'https://pay.bolgram.example/panel/#/register',
+  STATUS_URL: 'https://pay.bolgram.example/health',
   SUPPORT_TELEGRAM: 'https://t.me/bolgram_support',
   SUPPORT_EMAIL: 'support@bolgram.ir',
   TRIAL_DAYS: 7,

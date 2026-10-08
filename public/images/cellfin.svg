@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" width="240" height="80">
-  <rect x="4" y="10" width="60" height="60" rx="14" fill="#006837"/>
-  <!-- CellFin stylized C shape and dot -->
-  <circle cx="34" cy="40" r="18" fill="none" stroke="#fbb03b" stroke-width="6"/>
-  <circle cx="34" cy="40" r="8" fill="#ffffff"/>
-  <!-- Text -->
-  <text x="74" y="48" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="28" font-weight="800" fill="#006837" letter-spacing="-0.5">CellFin</text>
-  <text x="75" y="62" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10" font-weight="700" fill="#fbb03b" letter-spacing="1">IBBL DIGITAL</text>
-</svg>

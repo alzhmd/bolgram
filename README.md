@@ -1,266 +1,150 @@
-# Bolgram 🇧🇩
+⭐ اگه این پروژه براتون مفیده، لطفاً بهش استار بدید.
 
-> Automated MFS (bKash, Nagad, Rocket, Upay) payment verification engine with zero per-transaction fees. Turn standard Android devices into real-time payment gateways for personal and agent numbers.
+# بولگرام — درگاه پرداخت کارت‌به‌کارت با تأیید خودکار
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](package.json)
-[![Fastify](https://img.shields.io/badge/Fastify-5.2-black.svg)](https://fastify.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](tsconfig.json)
-[![Latest Release](https://img.shields.io/github/v/release/jahidulislamseo/syncpay-bd?color=orange&label=Release)](https://github.com/jahidulislamseo/syncpay-bd/releases/latest)
-[![Download APK](https://img.shields.io/badge/Download-Android%20Forwarder%20APK%20(v1.2.0)-success?logo=android)](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-forwarder.apk)
+بولگرام پول را مستقیم به کارت بانکی خود فروشنده می‌رساند و پرداخت را بدون دخالت انسان تأیید می‌کند:
+1. هر فاکتور یک **مبلغ یکتا** می‌گیرد؛ مثلاً ۲۵۰٬۰۰۱ تومان به‌جای ۲۵۰٬۰۰۰.
+2. مشتری کارت‌به‌کارت می‌کند.
+3. گوشی اندروید فروشنده پیامک واریز بانک را به سرور می‌فرستد.
+4. سرور از روی مبلغ، فاکتور را پیدا و پرداخت را تأیید می‌کند.
 
-### 📥 Direct Downloads (v1.2.0)
+## امکانات
+- **پنل فروشنده** (`/panel/`):
+  - فروش: داشبورد، فاکتورها (فیلتر، جزئیات، لغو، خروجی اکسل)، واریزی‌های بی‌صاحب (اتصال به فاکتور یا رد)، گزارش فروش با نمودار
+  - مالی: لینک پرداخت (مبلغ ثابت، آزاد یا چندگزینه‌ای، و لینک ارزی)، کیف پول کارمزد و شارژ با هدیه، پلن‌ها، کارت‌ها
+  - اتصال: دستگاه‌ها و اتصال گوشی با QR، شورتکات آیفون، ربات تلگرام و بله، وب‌هوک، کلید API و افزونهٔ ووکامرس
+  - کسب‌وکار: نماد اعتماد، همکاران با نقش (مالک، مدیر، حسابدار، صندوق‌دار، فقط مشاهده)، دعوت دوستان، پشتیبانی، آموزش، اعلان‌ها، تنظیمات
+- **پنل مالک سرویس** (`/owner/`):
+  - داشبورد کل، فروشگاه‌ها (تعلیق، خروج اجباری)، پلن‌ها و تنظیمات مالی، کیف پول‌ها و شارژها
+  - تیکت‌ها، بررسی نماد اعتماد، نظرها، اعلان همگانی، وب‌هوک‌های ناموفق، ویرایش محتوای سایت
+  - آزمایشگاه پیامک بانک، گزارش فعالیت، سلامت سیستم
+- **صفحه‌های مشتری:** پرداخت `/checkout.html` (نمایش کارت هم‌بانک با مشتری)، لینک پرداخت `/l/<نام>`، نماد اعتماد `/trust/<نام فروشگاه>`
+- **تشخیص پیامک بانک‌های ایرانی:**
+  - بانک‌ها: ملت، ملی، تجارت، پاسارگاد، رسالت، پارسیان، بلو، شهر، مهر ایران، خاورمیانه و قالب عمومی، با ارقام فارسی و تاریخ شمسی.
+  - پیامک فرستندهٔ غیربانکی هرگز خودکار تأیید نمی‌شود.
+  - پیامک تکراری دوباره حساب نمی‌شود و پیامک رمز یکبارمصرف و برداشت نادیده گرفته می‌شود.
+- **ربات تلگرام و بله:** ساخت فاکتور با فرستادن مبلغ، مدیریت کارت‌ها، گزارش، بررسی واریزی‌ها و اعلان لحظه‌ای پرداخت. در تلگرام با Rich Message (جدول فشرده، دکمه‌های رنگی و نقل‌قول بازشو).
+- **اپ اندروید** (`app/`): ارسال پیامک بانکی با صف آفلاین؛ پیامک‌های رمز و OTP هرگز فرستاده نمی‌شوند.
+- **سایت معرفی** (`website/`): برای Cloudflare Pages؛ محتوا، پلن‌ها و نظرها را زنده از سرور می‌خواند.
 
-| Asset | Type | Link |
-|---|---|---|
-| **Android Forwarder Agent** | `.apk` (15 MB, Android 8.0+) | [**Download APK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-forwarder.apk) |
-| **WooCommerce Gateway** | WordPress Plugin (`.zip`) | [**Download Plugin**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-woocommerce-v2.4.2.zip) |
-| **WHMCS Payment Module** | Gateway Module (`.zip`) | [**Download Module**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-whmcs-v1.8.0.zip) |
-| **PHP / Laravel SDK** | Package (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-php-sdk.zip) |
-| **Node.js SDK** | TypeScript SDK (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-node-sdk.zip) |
-| **Python Client SDK** | REST Client (`.zip`) | [**Download SDK**](https://github.com/jahidulislamseo/syncpay-bd/releases/download/v1.2.0/syncpay-python-sdk.zip) |
-
----
-
-## Architecture Overview
-
-Bolgram operates on an event-driven loop between mobile network incoming SMS messages, localized device ingestion endpoints, and merchant webhooks.
-
+## ساختار پروژه
 ```
-+---------------------------+       Incoming SMS       +------------------------------------+
-| Bangladesh MFS Providers  |  =====================>  | Dedicated Android Forwarder Device |
-| (bKash, Nagad, Rocket)    |                          | (Foreground Service + Telephony)   |
-+---------------------------+                          +-----------------+------------------+
-                                                                         |
-                                                                         | Encrypted HTTPS / Bearer Token
-                                                                         v
-+-------------------------------+                     +------------------+------------------+
-| Merchant Store / Application  |                     | Bolgram Core Engine (Fastify/TS) |
-| (WooCommerce, WHMCS, Custom)  | <================== | - Regex MFS Parser                  |
-| - Instant Order Completion    |  Automated Webhook  | - TrxID & Amount Matcher Engine     |
-+-------------------------------+  (HMAC SHA-256)     | - SQLite / Supabase Multi-Tenant DB |
-                                                      +-------------------------------------+
-```
-
-1. **Transaction Event**: A customer sends funds via bKash, Nagad, Rocket, or Upay to your designated number.
-2. **Device Capture**: The Android agent running on your physical device captures the notification or raw SMS via `Telephony.SMS_RECEIVED` broadcast receivers.
-3. **Parse & Match**: Bolgram's parsing engine isolates the Transaction ID (`TrxID`), sender number, and exact BDT amount.
-4. **Webhook Dispatch**: A cryptographically signed webhook notification (`HMAC-SHA256`) fires to the merchant URL to mark orders as paid.
-
----
-
-## Features
-
-- **Zero Transaction Fees**: Process unlimited payments through your own SIM cards without paying 1.5% - 2.0% merchant gateway commissions.
-- **Multi-Provider Regex Parsing**: Production-tested parsers for bKash (`bKash`), Nagad (`NAGAD`), Rocket (`16216`), and Upay (`UPAY`).
-- **Device Health Monitoring**: Track battery levels, network status, active SIM slots, and last heartbeat timestamps directly from the dashboard.
-- **Merchant Single-Page Application (SPA)**:
-  - Live SMS Stream & Telemetry
-  - Quick TrxID Match Tool
-  - API Key & Webhook Secret Management
-  - Invoice Generator & Dynamic Checkout URLs
-  - Package-based Feature Entitlements
-- **Offline SMS Caching**: Android agent queues transactions locally when internet access drops and re-syncs upon connection restore.
-
----
-
-## Project Structure
-
-```
-├── src/
-│   ├── config/             # Environment variables and runtime configuration
-│   ├── db/                 # Repositories and SQLite/Supabase database adapters
-│   ├── parsers/            # Regex parsers for bKash, Nagad, Rocket, and Upay
-│   ├── routes/             # Fastify REST routes (merchant, device, payment, admin)
-│   ├── services/           # Payment verification, transaction matching, and webhooks
-│   └── index.ts            # Fastify application entry point
-├── public/                 # Merchant Dashboard & Landing Page
-│   ├── dashboard.html      # Merchant SPA shell
-│   ├── checkout.html       # Hosted payment checkout page
-│   ├── admin.html          # Super admin console
-│   └── dashboard/          # Frontend assets, auth logic, components, and i18n
-├── packages/               # Official Integration SDKs & Plugins
-│   ├── woocommerce-gateway/# WordPress / WooCommerce Payment Plugin
-│   ├── whmcs-module/       # WHMCS Billing Gateway Module
-│   ├── php-sdk/            # Standalone PHP & Laravel SDK
-│   ├── node-sdk/           # Node.js & TypeScript SDK
-│   └── python-sdk/         # Python Client SDK
-├── zinipay_forwarder/      # Flutter & Native Android SMS forwarder source code
-├── scripts/                # SMS simulation and database migration tools
-└── tests/                  # Integration and unit tests
+src/            سرور (Fastify + TypeScript، دیتابیس SQLite داخلی Node.js)
+  routes/v2/    API پنل فروشنده و پنل مالک
+  parsers/ir/   تشخیص پیامک بانک‌های ایرانی
+  bot/          ربات تلگرام و بله
+public/         پنل فروشنده، پنل مالک، صفحهٔ پرداخت و لینک پرداخت
+app/            اپ اندروید (Flutter)
+website/        سایت معرفی (استاتیک)
+integrations/   افزونهٔ ووکامرس
+deploy/         Caddyfile و سرویس systemd
+tests/          تست‌ها
 ```
 
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Node.js**: v20.x or higher
-- **npm** or **pnpm**
-- Physical Android phone (Android 8.0+) with active MFS SIMs
-
-### 1. Installation
-
-Clone the repository and install dependencies:
+## راه‌اندازی روی سرور (پیشنهادی: Docker)
+پیش‌نیاز: یک سرور لینوکس با Docker، و یک دامنه (مثلاً `pay.example.com`) که رکورد A آن به IP سرور اشاره کند.
 
 ```bash
-git clone https://github.com/jahidulislamseo/syncpay-bd.git
-cd syncpay-bd
-npm install
-```
-
-### 2. Environment Configuration
-
-Create a `.env` file based on `.env.example`:
-
-```bash
+git clone https://github.com/alzhmd/bolgram.git && cd bolgram
 cp .env.example .env
+openssl rand -hex 32   # برای JWT_SECRET
+openssl rand -hex 32   # برای CARD_ENC_KEY
+nano .env               # مقادیر را پر کنید (پایین را ببینید)
+docker compose up -d --build
 ```
 
-Configure your environment variables:
+حداقل مقادیر لازم در `.env`:
 
-```env
-PORT=4000
-HOST=0.0.0.0
-NODE_ENV=development
-API_SECRET=your-secure-random-token
-DB_PATH=./payflow.db
-BASE_URL=http://localhost:4000
-```
+| متغیر | توضیح |
+|---|---|
+| `DOMAIN` و `PUBLIC_BASE_URL` | دامنهٔ شما، مثلاً `pay.example.com` و `https://pay.example.com` |
+| `JWT_SECRET` | رشتهٔ تصادفی؛ عوض کردنش همه را از حساب خارج می‌کند |
+| `CARD_ENC_KEY` | کلید رمزنگاری شمارهٔ کارت‌ها. **از آن نسخهٔ پشتیبان بگیرید و هرگز عوضش نکنید.** |
+| `ADMIN_EMAIL` و `ADMIN_PASSWORD` | ورود به پنل مالک |
+| `SMSIR_API_KEY` و `SMSIR_TEMPLATE_ID` | پیامک کد ورود. در پنل SMS.IR یک قالب Verify با پارامتر `CODE` بسازید. |
 
-### 3. Start Development Server
+Caddy گواهی HTTPS را خودکار می‌گیرد. بعد از بالا آمدن:
+- پنل فروشنده: `https://دامنه/panel/`
+- پنل مالک: `https://دامنه/owner/`
+- **پشتیبان‌گیری:** همهٔ داده‌ها (دیتابیس و فایل‌ها) در volume `bolgram-data` هستند:
+  ```bash
+  docker compose exec bolgram node -e "new (require('node:sqlite').DatabaseSync)('/data/bolgram.db').exec(\"VACUUM INTO '/data/backup.db'\")"
+  docker compose cp bolgram:/data/backup.db ./bolgram-backup.db
+  ```
+  فایل `.env` را هم جای امن نگه دارید.
+- **به‌روزرسانی:**
+  ```bash
+  git pull && docker compose up -d --build
+  ```
 
-Run the development server with live reload:
-
+### بدون Docker
+Node.js 22.13 یا بالاتر لازم است.
 ```bash
-npm run dev
+npm ci && npm run build && npm prune --omit=dev
+sudo cp deploy/bolgram.service /etc/systemd/system/ && sudo systemctl enable --now bolgram
 ```
+- سرویس از پوشهٔ `/opt/bolgram` و کاربر `bolgram` اجرا می‌شود؛ در صورت نیاز فایل سرویس را ویرایش کنید.
+- جلوی آن Caddy یا Nginx با HTTPS بگذارید و به پورت 4000 وصل کنید.
+- اگر پراکسی روی همان سرور است، `TRUST_PROXY` را خالی بگذارید.
 
-The services will be available at:
-- **Landing Page**: [http://localhost:4000](http://localhost:4000)
-- **Merchant Dashboard**: [http://localhost:4000/dashboard.html](http://localhost:4000/dashboard.html)
-- **Developer Documentation**: [http://localhost:4000/docs/api.html](http://localhost:4000/docs/api.html)
+## بعد از نصب
+1. **فروشگاه سرویس (برای شارژ کیف پول فروشنده‌ها):**
+   1. در پنل فروشنده یک فروشگاه برای خود سرویس بسازید.
+   2. کارت و گوشی آن را وصل کنید.
+   3. در پنل مالک ← «تنظیمات مالی» آن را به‌عنوان فروشگاه سرویس انتخاب کنید.
+   از این به بعد شارژ کیف پول فروشنده‌ها با همان سازوکار کارت‌به‌کارت به این فروشگاه واریز و خودکار تأیید می‌شود.
+2. **ربات‌ها (اختیاری):**
+   - تلگرام: `TELEGRAM_BOT_TOKEN` و `TELEGRAM_BOT_USERNAME` از BotFather. سرورِ داخل ایران برای تلگرام یک رله در `TELEGRAM_API_BASE` لازم دارد.
+   - بله: `BALE_BOT_TOKEN` و `BALE_BOT_USERNAME`؛ بله داخل ایران مستقیم کار می‌کند.
+3. **سلامت سیستم:** در پنل مالک صفحهٔ «سلامت سیستم» نشان می‌دهد چه تنظیمی کم است.
 
----
-
-## Android Forwarder Setup
-
-The Android Forwarder agent runs as a persistent background service to forward incoming MFS SMS messages to the Bolgram engine.
-
-1. Open `zinipay_forwarder` in Android Studio or VS Code.
-2. Build the APK or run directly on your test device:
+## اپ اندروید
+GitHub Actions (`.github/workflows/android.yml`) با هر push به `main` که پوشهٔ `app/` را تغییر دهد، APK را می‌سازد. می‌توانید دستی از تب Actions هم اجرایش کنید.
+1. **کلید امضا** را یک‌بار بسازید:
    ```bash
-   cd zinipay_forwarder
-   flutter pub get
-   flutter build apk --release
+   keytool -genkeypair -v -keystore release.jks -alias bolgram -keyalg RSA -keysize 2048 -validity 10000
+   base64 -w0 release.jks
    ```
-3. Install the generated APK on your device:
+   این فایل و رمزهایش را گم نکنید؛ بدون آن‌ها به‌روزرسانی اپ ممکن نیست.
+2. **در GitHub ← Settings ← Secrets and variables ← Actions:**
+   - Secretها: `ANDROID_KEYSTORE_BASE64` (خروجی دستور بالا)، `ANDROID_KEY_ALIAS`، `ANDROID_KEY_PASSWORD` و `ANDROID_STORE_PASSWORD`.
+   - Variable: `BOLGRAM_SERVER` با مقدار `https://دامنه`.
+3. **انتشار:** با push یک تگ مثل `v1.0.0`، APK همراه SHA-256 در Releases منتشر می‌شود.
+4. **لینک دانلود در پنل:** آدرس، نسخه و SHA-256 را در `.env` بگذارید (`ANDROID_APK_URL`، `ANDROID_APP_VERSION`، `ANDROID_APK_SHA256`) تا در پنل ← «اپلیکیشن» نمایش داده شوند.
+5. **فروشگاه‌ها:** برای بازار و مایکت همین APK کافی است. Google Play برای مجوز پیامک فرم «Permissions Declaration» می‌خواهد.
+
+## سایت معرفی (Cloudflare Pages)
+1. **اتصال مخزن:** در Cloudflare مسیر Workers & Pages ← Create ← Pages ← Connect to Git را بزنید و این مخزن را انتخاب کنید.
+2. **تنظیمات ساخت:** Build command را خالی بگذارید و Build output directory را `website/public` بگذارید.
+3. **دامنهٔ سرور:** در کل پوشهٔ `website/public`، عبارت `pay.bolgram.example` را با آدرس سرور خود جایگزین کنید:
    ```bash
-   adb install build/app/outputs/flutter-apk/app-release.apk
+   grep -rl pay.bolgram.example website/public | xargs sed -i 's#pay.bolgram.example#pay.example.com#g'
    ```
-4. Open the app, grant SMS and Battery Optimization permissions, then pair with your dashboard by scanning the Device QR code.
+4. **هدر، فوتر و FAQ:** بعد از ویرایش `website/tools/` این را اجرا کنید:
+   ```bash
+   python3 website/tools/build_pages.py
+   ```
 
----
+## اتصال فروشگاه اینترنتی
+- **ساخت فاکتور:** `POST /api/v1/payment/create` با هدر `x-api-key`؛ کلید را از پنل ← «افزونه‌ها و API» بگیرید. پاسخ شامل `payment_url` است؛ مشتری را به آن بفرستید.
+- **وب‌هوک:** با `X-Bolgram-Signature: t=<unix>,v1=<hmac-sha256(secret, t + "." + body)>` امضا می‌شود.
+- **ووکامرس:** فایل zip افزونه از همان صفحهٔ پنل دانلود می‌شود. سورس آن در `integrations/woocommerce/` است.
+- **مستندات کامل:** `website/public/docs.html`.
 
-## API Reference
+## امنیت
+- **ورود و دسترسی:** ورود، نقش‌ها و دسترسی‌ها سمت سرور بررسی می‌شوند و نشست‌ها با تغییر رمز یا تعلیق فروشگاه باطل می‌شوند.
+- **کارت‌ها:** شمارهٔ کامل کارت‌ها با AES-256-GCM ذخیره می‌شود و همه‌جا فقط ۴ رقم آخر نمایش داده می‌شود.
+- **محدودیت درخواست:** محدودیت تعداد درخواست بر اساس IP واقعی مشتری است؛ هدر جعلی `X-Forwarded-For` پذیرفته نمی‌شود.
+- **قفل ورود:** ورود با رمز اشتباه، کد اتصال ربات و کد پیامکی پس از چند تلاش قفل می‌شوند.
 
-### Create an Invoice
-
-```http
-POST /api/v1/payment/create
-Content-Type: application/json
-Authorization: Bearer <MERCHANT_API_KEY>
-
-{
-  "amount": 1500,
-  "orderId": "ORD-98421",
-  "customerPhone": "017XXXXXXXX",
-  "redirectUrl": "https://yourshop.com/checkout/success",
-  "webhookUrl": "https://yourshop.com/api/payment-webhook"
-}
-```
-
-**Response (`201 Created`):**
-
-```json
-{
-  "success": true,
-  "invoiceId": "INV-89124-BD",
-  "paymentUrl": "http://localhost:4000/checkout.html?invoice=INV-89124-BD",
-  "amount": 1500,
-  "expiresAt": "2026-09-19T10:30:00.000Z"
-}
-```
-
-### Ingest Incoming SMS (Device Endpoint)
-
-```http
-POST /api/v1/device/ingest
-Content-Type: application/json
-X-Device-Token: <DEVICE_TOKEN>
-
-{
-  "sender": "bKash",
-  "message": "You have received Tk 1,500.00 from 017XXXXXXXX. Fee Tk 0.00. Balance Tk 25,430.00. TrxID 9K38DF12A at 19/09/2026 15:20",
-  "receivedAt": 1789809600000,
-  "simSlot": 1
-}
-```
-
-**Response (`200 OK`):**
-
-```json
-{
-  "status": "matched",
-  "matchedInvoice": "INV-89124-BD",
-  "trxId": "9K38DF12A",
-  "amount": 1500,
-  "provider": "bkash"
-}
-```
-
----
-
-## SDKs & Integrations
-
-Pre-packaged integrations ready for deployment:
-
-| Module | Location | Description |
-|---|---|---|
-| **WooCommerce** | `packages/woocommerce-gateway/` | Native WordPress plugin with custom checkout fields |
-| **WHMCS** | `packages/whmcs-module/` | Automated invoice activation module for hosting providers |
-| **PHP / Laravel** | `packages/php-sdk/` | PSR-4 compliant composer package with webhook verification |
-| **Node.js** | `packages/node-sdk/` | TypeScript client library with type-safe methods |
-| **Python** | `packages/python-sdk/` | Bolgram REST client for Django, FastAPI, and Flask |
-
----
-
-## Testing & Simulation
-
-Test the complete end-to-end flow without waiting for actual mobile SMS transfers:
-
+## توسعه و تست
 ```bash
-# Run unit and integration tests
-npm test
-
-# Simulate an incoming bKash payment SMS
-npm run simulate
+npm ci
+npm run dev                                   # http://localhost:4000/panel/
+npm test                                      # تست‌های سرور
+npm run e2e -- http://127.0.0.1:4000          # چرخهٔ کامل پرداخت روی سرور در حال اجرا
 ```
+قراردادهای کدنویسی پنل و API در `docs/dev/PANEL_CONVENTIONS.md` است.
 
----
-
-## Security & Verification
-
-- **HMAC Signatures**: Every outgoing webhook contains an `X-Bolgram-Signature` header calculated using SHA-256 and your merchant webhook secret.
-- **Double-Spend Prevention**: The database enforces a unique constraint on all parsed `trx_id` records, preventing duplicate transaction submissions.
-- **Zero Raw Credentials**: The engine never requests or handles your MFS PIN or personal login details. It reads only incoming payment notification SMS records.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## API Integrations
-Bolgram provides standardized endpoints for secure transactional handshakes.
+## مجوز
+MIT. این پروژه بر پایهٔ [SyncPay BD](https://github.com/jahidulislamseo/syncpay-bd) ساخته شده و برای ایران بازنویسی شده است.

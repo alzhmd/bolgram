@@ -1,0 +1,16 @@
+node_modules
+dist
+data
+.git
+.github
+.claude
+app
+website
+tests
+scripts
+docs
+integrations
+*.md
+.env
+.env.*
+.card-key
