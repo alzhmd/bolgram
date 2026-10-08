@@ -1,0 +1,33 @@
+name: Server
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['app/**', 'website/**', '**.md']
+  pull_request:
+    paths-ignore: ['app/**', 'website/**', '**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - name: Tests
+        run: npm test
+        env:
+          DB_PATH: ${{ runner.temp }}/test.db
+          UPLOAD_DIR: ${{ runner.temp }}/uploads
+      - name: Production build
+        run: npm run build

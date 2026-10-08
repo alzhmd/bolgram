@@ -1,5 +1,5 @@
 /**
- * Iranian bank SMS parser (replaces the Bangladeshi MFS rules of upstream Bolgram).
+ * Iranian bank SMS parser.
  * Keeps the upstream `MfsParser.parse()` contract so the rest of the engine is unchanged.
  * Amounts are in Rial. Only deposits (credits) are accepted; OTP/password SMS are rejected.
  */

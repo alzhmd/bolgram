@@ -105,32 +105,7 @@ export class MerchantService {
     };
   }
 
-  public static async getInvoices(merchantId: string, limit: number = 50): Promise<InvoiceEntity[]> {
-    return InvoiceRepository.listByMerchant(merchantId, limit);
-  }
 
-  public static async getTransactions(merchantId: string, limit: number = 50): Promise<TransactionEntity[]> {
-    return TransactionRepository.listRecent(merchantId, limit);
-  }
 
-  public static async getApiKeys(merchantId: string): Promise<ApiKeyEntity[]> {
-    return ApiKeyRepository.listByMerchant(merchantId);
-  }
 
-  public static async generateApiKey(
-    merchantId: string,
-    name: string,
-    environment: 'production' | 'sandbox' = 'production'
-  ): Promise<{ key: string; entity: ApiKeyEntity }> {
-    const prefix = environment === 'production' ? 'live_sk_' : 'sand_sk_';
-    const randomHex = CryptoUtil.generateToken(20);
-    const rawKey = `${prefix}${randomHex}`;
-    const { entity, rawKey: generatedKey } = await ApiKeyRepository.create({
-      merchantId,
-      name,
-      rawApiKey: rawKey,
-      environment,
-    });
-    return { key: generatedKey, entity };
-  }
 }

@@ -75,7 +75,5 @@ Fork of SyncPay (Fastify 5 + TypeScript, `node:sqlite`), panel is vanilla ES mod
 ## Tests and checks
 - Unit/integration: `tests/<feature>.test.ts` — Fastify + `v2Routes` + register a merchant (see `tests/bot.test.ts`, `tests/auth_v2.test.ts`).
   Run one file: `DB_PATH=<your scratch dir>/<feature>.db node --test --import tsx tests/<feature>.test.ts`. Full suite: `npm test` (serial). Types: `npx tsc --noEmit`.
-- Browser: `PORT=<your port> DB_PATH=<scratch>/<feature>-e2e.db BOT_MODE=off node --import tsx src/index.ts &` then
-  `node /tmp/claude-0/-home-user-bolgram/7cd0b2bf-51d2-515b-8c8f-32001877a8ff/scratchpad/pw/smoke.mjs http://127.0.0.1:<port> <outDir> <route,route>`
-  (Playwright from that folder; Chromium at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`). Look at your screenshots.
+- End to end: start the server (`PORT=4011 DB_PATH=/tmp/e2e.db BOT_MODE=off npm run dev`) and run `npm run e2e -- http://127.0.0.1:4011`. Check every changed page in a browser at 1366px and 390px (no console errors, no horizontal scroll).
 - External APIs (Telegram, Bale, SMS.IR, Google) are blocked in this sandbox — test against local fakes.

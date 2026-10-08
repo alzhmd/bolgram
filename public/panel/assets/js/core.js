@@ -1,16 +1,14 @@
 // Shared helpers for the panel: config, formatting, normalisation, API, UI primitives.
 export const CONFIG = {
   SERVICE_NAME: 'بولگرام',
-  // Payment page base URL (placeholder domain — set your real one before launch).
-  PAY_BASE_URL: 'https://pay.bolgram.example',
   SITE_URL: 'https://bolgram.ir',
   SUPPORT_TELEGRAM: 'https://t.me/bolgram_support',
   ANDROID_APK_URL: '',
   IOS_SHORTCUT_URL: '',
 };
-/** Real payment links: the placeholder domain is swapped for the current origin while developing locally. */
+/** Payment pages are served by the same server as the panel. */
 export function payBase() {
-  return /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname) ? location.origin : CONFIG.PAY_BASE_URL;
+  return location.origin;
 }
 
 // ---------- digits, text, money, dates

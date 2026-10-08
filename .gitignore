@@ -1,65 +1,39 @@
-# Dependencies
+# Dependencies & build
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+dist/
+coverage/
+*.log
 
-# Database files
+# Data, secrets
+data/
 *.db
 *.db-shm
 *.db-wal
-
-# Build output
-build/
-
-# Environment & secrets
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+.card-key
 *.pem
 *.key
+*.jks
+*.keystore
 
-# OS files
+# Android app (Flutter)
+app/build/
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/.gradle/
+app/android/local.properties
+*.apk
+*.aab
+
+# OS / editors
 .DS_Store
 Thumbs.db
-
-# Editor
 .vscode/
 .idea/
 *.swp
-*.swo
-
-# Logs
-/logs/
-*.log
-
-# Android build artifacts
-android-agent/build/
-android-agent/.gradle/
-android-agent/local.properties
-*.apk
-!public/downloads/syncpay-forwarder.apk
-!public/downloads/syncpay-forwarder-arm64.apk
-*.aab
-
-# Flutter build
-flutter_agent/build/
-flutter_agent/.dart_tool/
-flutter_agent/.flutter-plugins
-flutter_agent/.flutter-plugins-dependencies
-flutter_agent/pubspec.lock
-zinipay_forwarder/build/
-zinipay_forwarder/.dart_tool/
-zinipay_forwarder/.flutter-plugins
-zinipay_forwarder/.flutter-plugins-dependencies
-
-# Test coverage
-coverage/
-
-# Temp
-*.tmp
-*.bak
-.card-key
 
 # Temporary agent worktrees
 .claude/worktrees/

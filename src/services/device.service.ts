@@ -199,19 +199,6 @@ export class DeviceService {
     db().prepare('UPDATE device_pair_codes SET device_id = ? WHERE code = ?').run(deviceId, this.normalizeCode(code));
   }
 
-  // ---- helpers kept for the legacy merchant routes
-  public static async registerDevice(params: { merchantId: string; deviceName: string; deviceModel?: string; androidVersion?: string; mfsProvider?: string }) {
-    const { id, token } = this.createDevice({ merchantId: params.merchantId, name: params.deviceName, model: params.deviceModel, androidVersion: params.androidVersion });
-    const device = db().prepare('SELECT * FROM devices WHERE id = ?').get(id) as any;
-    return { device: { ...device, device_token_hash: '' } as DeviceEntity, token };
-  }
 
-  public static async listMerchantDevices(merchantId: string): Promise<DeviceEntity[]> {
-    ensureDeviceSchema();
-    return db().prepare('SELECT * FROM devices WHERE merchant_id = ? AND revoked_at IS NULL ORDER BY last_seen DESC').all(merchantId) as any;
-  }
 
-  public static async removeDevice(deviceId: string, merchantId: string): Promise<boolean> {
-    return this.revoke(deviceId, merchantId);
-  }
 }

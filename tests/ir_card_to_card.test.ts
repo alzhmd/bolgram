@@ -3,14 +3,15 @@ import assert from 'node:assert';
 import Fastify, { FastifyInstance } from 'fastify';
 import { deviceRoutes } from '../src/routes/device.routes.js';
 import { InvoiceRepository } from '../src/db/repositories/invoice.repository.js';
-import { merchantRoutes } from '../src/routes/merchant.routes.js';
-import { CryptoUtil } from '../src/utils/crypto.js';
+import { dbService } from '../src/db/database.js';
+import { openDeposits, approveDeposit, StoreError } from '../src/services/store.service.js';
 
 // End-to-end card-to-card flow: unique amount → bank deposit SMS → invoice PAID automatically.
 describe('Iranian card-to-card auto verification', () => {
   let app: FastifyInstance;
-  const DEVICE = 'token_chaldal_pri';
-  const MERCHANT = 'm_chaldal_bd';
+  const tag = Date.now().toString(36);
+  const DEVICE = `tok_c2c_${tag}`;
+  const MERCHANT = `m_c2c_${tag}`;
   const mellatSms = (amount: number, balance: number) =>
     `حساب1848394556\nواریز${amount.toLocaleString('en-US')}\nمانده${balance.toLocaleString('en-US')}\n05/07/12-10:15`;
   const ingest = (sms: string, sender = 'Bank Mellat') =>
@@ -19,8 +20,9 @@ describe('Iranian card-to-card auto verification', () => {
   before(async () => {
     app = Fastify();
     await app.register(deviceRoutes);
-    await app.register(merchantRoutes);
     await app.ready();
+    dbService.insertMerchant({ id: MERCHANT, name: 'فروشگاه آزمایشی', api_key: `live_sk_${tag}`, phone: '09120000000', status: 'ACTIVE', plan: 'FREE', payment_status: 'FREE', password_hash: 'x' } as any);
+    dbService.addDevice({ id: `dev_${tag}`, merchantId: MERCHANT, deviceName: 'گوشی تست', simNumber: '', deviceToken: DEVICE } as any);
   });
   after(async () => app.close());
 
@@ -52,18 +54,13 @@ describe('Iranian card-to-card auto verification', () => {
   });
 
   test('suspicious deposit is queued for review; merchant approves it manually', async () => {
-    const auth = { authorization: `Bearer ${CryptoUtil.signJwt({ id: MERCHANT, role: 'merchant' })}` };
     const inv = await InvoiceRepository.create({ merchantId: MERCHANT, invoiceId: `IRE${Date.now()}`, customerName: 'ه', amount: 4_000_000 });
     await ingest(mellatSms(inv.amount, 77_000_000), '+989350000000');
-    const list = JSON.parse((await app.inject({ method: 'GET', url: '/api/v1/merchant/unmatched', headers: auth })).body).data;
-    const item = list.find((x: any) => Number(x.amount) === inv.amount);
+    const item = openDeposits(MERCHANT, 20).find((x: any) => Number(x.amount) === inv.amount);
     assert.strictEqual(item?.status, 'SUSPICIOUS');
-    const other = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, payload: { invoiceId: inv.invoice_id } });
-    assert.strictEqual(other.statusCode, 401);
-    const ok = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, headers: auth, payload: { invoiceId: inv.invoice_id } });
-    assert.strictEqual(ok.statusCode, 200, ok.body);
+    await assert.rejects(approveDeposit('m_someone_else', item.id, inv.invoice_id), StoreError);
+    await approveDeposit(MERCHANT, item.id, inv.invoice_id);
     assert.strictEqual((await InvoiceRepository.findByInvoiceId(inv.invoice_id))?.status, 'PAID');
-    const twice = await app.inject({ method: 'POST', url: `/api/v1/merchant/unmatched/${item.id}/assign`, headers: auth, payload: { invoiceId: inv.invoice_id } });
-    assert.strictEqual(twice.statusCode, 409);
+    await assert.rejects(approveDeposit(MERCHANT, item.id, inv.invoice_id), StoreError);
   });
 });
