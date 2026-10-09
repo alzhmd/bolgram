@@ -41,6 +41,20 @@ deploy/         Caddyfile و سرویس systemd
 tests/          تست‌ها
 ```
 
+## نصب خودکار با یک دستور
+روی یک سرور Ubuntu یا Debian، با کاربر root:
+```bash
+git clone https://github.com/alzhmd/bolgram.git /opt/bolgram && sudo bash /opt/bolgram/deploy/install.sh
+```
+اسکریپت این کارها را انجام می‌دهد:
+- Docker را اگر نصب نیست نصب می‌کند.
+- کلید Cloudflare را روی سرور پیدا می‌کند و رکوردهای DNS را می‌سازد: `bolgram.ir`، `www` و `pay.bolgram.ir` به IP سرور. کلید را می‌توانید با `CF_API_TOKEN=...` هم بدهید.
+- کلیدهای امنیتی و رمز پنل مالک را تصادفی می‌سازد و رمز را در `/root/bolgram-credentials.txt` می‌گذارد.
+- سایت و پنل را با HTTPS بالا می‌آورد.
+- اگر nginx روی سرور باشد، بولگرام را پشت همان nginx قرار می‌دهد.
+
+دامنه‌ها با `SITE_DOMAIN` و `PAY_DOMAIN` قابل تغییرند.
+
 ## راه‌اندازی روی سرور (پیشنهادی: Docker)
 پیش‌نیاز: یک سرور لینوکس با Docker، و یک دامنه (مثلاً `pay.example.com`) که رکورد A آن به IP سرور اشاره کند.
 
@@ -130,6 +144,20 @@ GitHub Actions (`.github/workflows/android.yml`) با هر push به `main` که
 - **وب‌هوک:** با `X-Bolgram-Signature: t=<unix>,v1=<hmac-sha256(secret, t + "." + body)>` امضا می‌شود.
 - **ووکامرس:** فایل zip افزونه از همان صفحهٔ پنل دانلود می‌شود. سورس آن در `integrations/woocommerce/` است.
 - **مستندات کامل:** `website/public/docs.html`.
+
+## اتصال ربات‌های تلگرام و بله
+کلاینت آمادهٔ پایتون و PHP در `integrations/bots/` است؛ هیچ وابستگی‌ای ندارد.
+```python
+from bolgram import Bolgram
+bg = Bolgram("https://pay.bolgram.ir", "live_sk_...")      # پنل ← «افزونه‌ها و API»
+inv = bg.create_invoice(150_000, order_id="u123-vpn-30d", customer="@ali")
+# دکمهٔ inv["payment_url"] را برای کاربر بفرستید؛ مبلغ قابل پرداخت: inv["amount_toman"]
+if bg.is_paid(inv["invoice_id"]):
+    deliver()   # تحویل سرویس
+```
+برای دریافت خبر پرداخت دو راه هست:
+- **وب‌هوک (فوری):** `webhook_url` را بدهید و امضا را با `Bolgram.verify_webhook` بررسی کنید.
+- **پرس‌وجو:** هر ۱۰ تا ۱۵ ثانیه، تا ۳۰ دقیقه، `is_paid` را صدا بزنید.
 
 ## امنیت
 - **ورود و دسترسی:** ورود، نقش‌ها و دسترسی‌ها سمت سرور بررسی می‌شوند و نشست‌ها با تغییر رمز یا تعلیق فروشگاه باطل می‌شوند.
