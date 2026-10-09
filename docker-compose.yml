@@ -1,4 +1,5 @@
-# docker compose up -d --build   (fill .env first; DOMAIN must point to this server)
+# docker compose up -d --build   (fill .env first; DOMAIN and SITE_DOMAIN must point to this server)
+# One-command setup on a fresh server: sudo bash deploy/install.sh
 services:
   bolgram:
     build: .
@@ -23,8 +24,10 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./website/public:/srv/site:ro
       - caddy-data:/data
 
 volumes:

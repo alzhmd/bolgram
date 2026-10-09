@@ -1,10 +1,29 @@
-# Automatic HTTPS (Let's Encrypt) for the payment domain
-{$DOMAIN} {
-	encode zstd gzip
+# Automatic HTTPS (Let's Encrypt). DOMAIN = panel/checkout/API, SITE_DOMAIN = marketing site.
+(security) {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options nosniff
 		Referrer-Policy strict-origin-when-cross-origin
+		-Server
 	}
+}
+
+{$DOMAIN} {
+	import security
+	encode zstd gzip
 	reverse_proxy bolgram:4000
+}
+
+{$SITE_DOMAIN}, www.{$SITE_DOMAIN} {
+	import security
+	encode zstd gzip
+	@www host www.{$SITE_DOMAIN}
+	redir @www https://{$SITE_DOMAIN}{uri} permanent
+	root * /srv/site
+	try_files {path} {path}.html {path}/index.html
+	file_server
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
 }
