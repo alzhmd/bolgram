@@ -4,6 +4,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import { v2Routes, issueToken } from '../src/routes/v2.routes.js';
 import { dbService } from '../src/db/database.js';
 import { GuardError, registerInvoiceGuard, registerLimitProvider } from '../src/services/events.js';
+import { signup } from './helpers/signup.js';
 
 const d = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 const fa = (s: string) => s.replace(/\d/g, (x) => '۰۱۲۳۴۵۶۷۸۹'[+x]);
@@ -31,7 +32,7 @@ describe('Payment links (v2 links feature)', () => {
     });
     registerLimitProvider((mid, key) => (key === 'links' && mid === A?.id ? linkLimit : null));
     const reg = async (h: string, mob: string) => {
-      const r = await req('POST', '/api/v2/auth/register', { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
+      const r = await signup(app, { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
       assert.strictEqual(r.statusCode, 201, r.body);
       return json(r);
     };

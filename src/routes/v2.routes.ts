@@ -2,8 +2,8 @@ import crypto from 'node:crypto';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { dbService } from '../db/database.js';
 import { CryptoUtil } from '../utils/crypto.js';
-import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, passwordProblem } from '../utils/validate.js';
-import { OtpError, sendOtp, verifyOtp } from '../services/otp.service.js';
+import { handleProblem, handleSuggestions, normalizeEmail, normalizeMobile, passwordProblem, toLatinDigits } from '../utils/validate.js';
+import { OtpError, otpSentFromIp, sendOtp, verifyOtp } from '../services/otp.service.js';
 import { startOfTehranDay, startOfTehranMonth, tehranParts } from '../parsers/ir/jalali.js';
 import { BANKS } from '../parsers/ir/registry.js';
 import { ensureAccessSchema, resolveActor, requirePerm, ROLES, PERMS, type Actor } from '../services/access.js';
@@ -28,6 +28,7 @@ export function ensurePanelSchema() {
   d.exec(`CREATE TABLE IF NOT EXISTS otp_codes (id TEXT PRIMARY KEY, mobile TEXT NOT NULL, purpose TEXT NOT NULL, code_hash TEXT NOT NULL,
           attempts INTEGER NOT NULL DEFAULT 0, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL, consumed_at INTEGER)`);
   d.exec(`CREATE INDEX IF NOT EXISTS ix_otp_mobile ON otp_codes(mobile, purpose, created_at)`);
+  if (!(d.prepare('PRAGMA table_info(otp_codes)').all() as any[]).some((c) => c.name === 'ip')) d.exec(`ALTER TABLE otp_codes ADD COLUMN ip TEXT`);
   d.exec(`CREATE TABLE IF NOT EXISTS auth_failures (key TEXT PRIMARY KEY, count INTEGER NOT NULL, locked_until INTEGER, updated_at INTEGER NOT NULL)`);
   const icols = new Set((d.prepare('PRAGMA table_info(invoices)').all() as any[]).map((c) => c.name));
   for (const [n, t] of [['channel', 'TEXT'], ['note', 'TEXT']]) if (!icols.has(n)) d.exec(`ALTER TABLE invoices ADD COLUMN ${n} ${t}`);
@@ -56,6 +57,9 @@ function clearFail(key: string) {
 }
 
 // ------------------------------------------------------------- helpers
+
+/** Sign-up codes one IP may request per hour (each number is separately capped by the OTP service). */
+const REGISTER_CODES_PER_IP_HOUR = 10;
 
 const PUBLIC = new Set([
   '/api/v2/auth/register',
@@ -195,6 +199,32 @@ export async function v2Routes(app: FastifyInstance) {
     if (email && db().prepare('SELECT 1 FROM merchants WHERE lower(email) = ?').get(email)) {
       return reply.status(409).send({ success: false, error: 'validation', errors: { email: 'این ایمیل قبلاً استفاده شده است' } });
     }
+    // Mobile ownership is proven before the account exists: the first valid submit texts a code,
+    // the same form sent again with that code creates the account (REQUIRE_MOBILE_VERIFY=false only for setups without SMS).
+    const verifyMobile = process.env.REQUIRE_MOBILE_VERIFY !== 'false';
+    if (verifyMobile) {
+      const code = toLatinDigits(String(b.code ?? '')).trim();
+      if (!code) {
+        if (otpSentFromIp(req.ip, 'register') >= REGISTER_CODES_PER_IP_HOUR) {
+          return reply.status(429).send({ success: false, error: 'otp_limit', message: 'تعداد درخواست کد زیاد بوده است. یک ساعت بعد دوباره تلاش کنید', retry_after: 3600 });
+        }
+        try {
+          const r = await sendOtp(mobile!, 'register', true, req.ip);
+          return reply.status(202).send({ success: true, otp_required: true, mobile, resend_in: r.resendIn, dev_code: r.devCode });
+        } catch (e) {
+          if (e instanceof OtpError) return reply.status(e.code === 'otp_wait' || e.code === 'otp_limit' ? 429 : 503).send({ success: false, error: e.code, message: e.message, retry_after: e.retryAfter });
+          throw e;
+        }
+      }
+      try {
+        if (!/^\d{5}$/.test(code) || !verifyOtp(mobile!, 'register', code)) {
+          return reply.status(400).send({ success: false, error: 'otp_invalid', message: 'کد درست نیست', errors: { code: 'کد درست نیست' } });
+        }
+      } catch (e) {
+        if (e instanceof OtpError) return reply.status(400).send({ success: false, error: e.code, message: e.message, errors: { code: e.message } });
+        throw e;
+      }
+    }
     const id = 'm_' + crypto.randomBytes(9).toString('hex');
     const apiKey = 'live_sk_' + crypto.randomBytes(24).toString('hex');
     dbService.insertMerchant({
@@ -208,7 +238,7 @@ export async function v2Routes(app: FastifyInstance) {
       payment_status: 'FREE',
       password_hash: CryptoUtil.hashPassword(b.password),
     });
-    db().prepare('UPDATE merchants SET handle = ?, mobile_verified = 0, token_version = 0 WHERE id = ?').run(handle, id);
+    db().prepare('UPDATE merchants SET handle = ?, mobile_verified = ?, token_version = 0 WHERE id = ?').run(handle, verifyMobile ? 1 : 0, id);
     const ref = typeof b.ref === 'string' ? b.ref.trim().toLowerCase().slice(0, 40) : '';
     const referrer = ref ? (db().prepare('SELECT id FROM merchants WHERE handle = ? AND id != ?').get(ref, id) as any) : null;
     if (referrer) db().prepare('UPDATE merchants SET referred_by = ? WHERE id = ?').run(referrer.id, id);
@@ -217,7 +247,7 @@ export async function v2Routes(app: FastifyInstance) {
       success: true,
       token: issueToken(m, true),
       merchant: publicMe(m),
-      verify_required: process.env.REQUIRE_MOBILE_VERIFY !== 'false',
+      verify_required: verifyMobile,
     });
   });
 

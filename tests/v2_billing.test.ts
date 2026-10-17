@@ -8,6 +8,7 @@ import { CryptoUtil } from '../src/utils/crypto.js';
 import { addCard } from '../src/services/store.service.js';
 import { InvoiceRepository } from '../src/db/repositories/invoice.repository.js';
 import { saveSettings, balanceOf, post, currentPlan } from '../src/services/billing.service.js';
+import { signup } from './helpers/signup.js';
 
 const d = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 const luhnCard = (seed: number) => {
@@ -40,7 +41,7 @@ describe('Billing: fee wallet, plans, referral (v2 billing feature)', () => {
     await app.register(v2Routes);
     await app.ready();
     const reg = async (h: string, mob: string, ref?: string) => {
-      const r = await req('POST', '/api/v2/auth/register', { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true, ref });
+      const r = await signup(app, { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true, ref });
       assert.strictEqual(r.statusCode, 201, r.body);
       const j = json(r);
       auth[j.merchant.id] = { authorization: `Bearer ${j.token}` };

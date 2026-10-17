@@ -75,6 +75,11 @@ export function renderRegister(root, { go, query }) {
     <div class="err" id="terms-err" role="alert"></div>
     <button class="btn btn-primary btn-block" style="margin-top:12px" type="submit">ساخت حساب</button>
   </form>
+  <div id="reg-code" hidden>
+    <p class="lead">کد ۵ رقمی به <span class="ltr num" id="reg-mobile"></span> پیامک شد. حساب بعد از وارد کردن کد ساخته می‌شود.</p>
+    <div class="form-alert"></div><div id="otp"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px"><button class="btn btn-ghost btn-sm" id="resend" type="button">ارسال مجدد کد</button><button class="btn btn-ghost btn-sm" id="reg-back" type="button">ویرایش اطلاعات</button></div>
+  </div>
   <p class="auth-foot">حساب دارید؟ <a href="#/login">ورود</a></p>
   <p class="hint" style="text-align:center">بعد از ثبت‌نام در پنل این مسیر را می‌روید: اشتراک ← کارت بانکی ← اتصال SMS ← لینک فروش</p>`);
   const f = $('#reg', root);
@@ -134,15 +139,15 @@ export function renderRegister(root, { go, query }) {
     const btn = f.querySelector('[type="submit"]');
     setBusy(btn, true, 'در حال ساخت حساب…');
     try {
-      const r = await api('/api/v2/auth/register', {
-        auth: false, method: 'POST',
-        body: { handle: $('#handle', f).value.trim().toLowerCase(), mobile: normMobile($('#mobile', f).value), email: normEmail($('#email', f).value) || undefined, password: pw.value, terms: true, ...(ref ? { ref } : {}) },
-      });
-      session.set(r.token, true);
-      localStorage.setItem('bg_quickstart', '1');
-      go(r.verify_required && !r.merchant.mobile_verified ? '/verify' : '/dashboard');
+      values = { handle: $('#handle', f).value.trim().toLowerCase(), mobile: normMobile($('#mobile', f).value), email: normEmail($('#email', f).value) || undefined, password: pw.value, terms: true, ...(ref ? { ref } : {}) };
+      const r = await api('/api/v2/auth/register', { auth: false, method: 'POST', body: values });
+      setBusy(btn, false);
+      if (r.otp_required) return showCodeStep(r);
+      finish(r);
     } catch (err) {
       setBusy(btn, false);
+      // a code for this form was texted moments ago: go straight to the code step
+      if (err.body?.error === 'otp_wait') return showCodeStep({ resend_in: err.body.retry_after });
       for (const [k, msg] of Object.entries(err.body?.errors || {})) setErr(f, k, msg);
       if (err.body?.suggestions) sugg.innerHTML = err.body.suggestions.map((s) => `<button type="button" class="chip ltr" data-s="${esc(s)}">${esc(s)}</button>`).join('');
       networkAlert(f, err, submit);
@@ -151,6 +156,49 @@ export function renderRegister(root, { go, query }) {
     }
   };
   f.addEventListener('submit', submit);
+
+  // Step 2: the account is created only when the texted code is confirmed.
+  let values = null;
+  const codeBox = $('#reg-code', root), codeAlert = $('.form-alert', codeBox), resend = $('#resend', codeBox);
+  const finish = (r) => {
+    session.set(r.token, true);
+    localStorage.setItem('bg_quickstart', '1');
+    go(r.verify_required && !r.merchant.mobile_verified ? '/verify' : '/dashboard');
+  };
+  const showCodeStep = (r) => {
+    f.hidden = true;
+    codeBox.hidden = false;
+    $('#reg-mobile', codeBox).textContent = toFa(values.mobile);
+    codeAlert.innerHTML = r.dev_code ? `<div class="alert alert-warn">حالت توسعه: کد ${toFa(r.dev_code)}</div>` : '';
+    resendTimer(resend, r.resend_in);
+    otp.clear();
+  };
+  const backToForm = (errors) => {
+    codeBox.hidden = true;
+    f.hidden = false;
+    for (const [k, msg] of Object.entries(errors || {})) setErr(f, k, msg);
+    focusFirstInvalid(f);
+  };
+  const otp = otpBoxes($('#otp', codeBox), 5, async (code) => {
+    try {
+      finish(await api('/api/v2/auth/register', { auth: false, method: 'POST', body: { ...values, code } }));
+    } catch (err) {
+      const fieldErrors = Object.fromEntries(Object.entries(err.body?.errors || {}).filter(([k]) => k !== 'code'));
+      if (Object.keys(fieldErrors).length) return backToForm(fieldErrors);
+      codeAlert.innerHTML = `<div class="alert alert-err">${esc(err.body?.message || 'کد درست نیست')}</div>`;
+      otp.clear();
+    }
+  });
+  resend.addEventListener('click', async () => {
+    try {
+      const r = await api('/api/v2/auth/register', { auth: false, method: 'POST', body: values });
+      if (r.otp_required) showCodeStep(r);
+    } catch (err) {
+      if (err.body?.retry_after) resendTimer(resend, err.body.retry_after);
+      codeAlert.innerHTML = `<div class="alert alert-err">${esc(err.body?.message || err.message)}</div>`;
+    }
+  });
+  $('#reg-back', codeBox).addEventListener('click', () => backToForm());
 }
 
 // ------------------------------------------------------------------ login

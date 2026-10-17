@@ -7,6 +7,7 @@ import { dbService } from '../src/db/database.js';
 import { InvoiceRepository } from '../src/db/repositories/invoice.repository.js';
 import { events, registerLimitProvider } from '../src/services/events.js';
 import { runDeviceMonitor } from '../src/routes/v2/devices.routes.js';
+import { signup } from './helpers/signup.js';
 
 const d = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 
@@ -34,7 +35,7 @@ describe('Devices (pairing, shortcut ingest, revoke, monitor)', () => {
     await app.ready();
     registerLimitProvider((mid, key) => (key === 'devices' && mid === A?.id ? deviceLimit : null));
     const reg = async (h: string, mob: string) => {
-      const r = await req('POST', '/api/v2/auth/register', { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
+      const r = await signup(app, { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
       assert.strictEqual(r.statusCode, 201, r.body);
       return json(r);
     };

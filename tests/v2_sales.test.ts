@@ -6,6 +6,7 @@ import { v2Routes } from '../src/routes/v2.routes.js';
 import { dbService } from '../src/db/database.js';
 import { CryptoUtil } from '../src/utils/crypto.js';
 import { events } from '../src/services/events.js';
+import { signup } from './helpers/signup.js';
 
 const db = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 const sqlTime = (d: Date) => d.toISOString().slice(0, 19).replace('T', ' ');
@@ -29,7 +30,7 @@ describe('Sales: invoices, held deposits, reports', () => {
   };
   async function register(prefix: string) {
     const n = `${Date.now() % 1e7}${Math.floor(Math.random() * 90 + 10)}`.slice(-7);
-    const res = await app.inject({ method: 'POST', url: '/api/v2/auth/register', payload: { handle: `${prefix}${n}`, mobile: `0915${n}`, password: 'Strong-pass-77', terms: true } });
+    const res = await signup(app, { handle: `${prefix}${n}`, mobile: `0915${n}`, password: 'Strong-pass-77', terms: true });
     const body = JSON.parse(res.body);
     assert.ok(body.token, res.body);
     return { id: body.merchant.id as string, token: body.token as string };

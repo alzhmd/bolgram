@@ -6,6 +6,7 @@ import { v2Routes } from '../src/routes/v2.routes.js';
 import { dbService } from '../src/db/database.js';
 import { BotApi } from '../src/bot/api.js';
 import { handleUpdate, notifyPayment, registerBot, unregisterBots } from '../src/bot/bot.service.js';
+import { signup } from './helpers/signup.js';
 
 /** Fake Bot API: records every call; sendRichMessage can be switched off to test the text fallback. */
 function fakeBotApi() {
@@ -79,7 +80,7 @@ describe('Merchant bot (Telegram rich messages, Bale text fallback)', () => {
     await app.ready();
     const handle = `bot${Date.now() % 1e8}`;
     const mobile = `0913${String(Date.now() % 1e7).padStart(7, '0')}`;
-    const res = await app.inject({ method: 'POST', url: '/api/v2/auth/register', payload: { handle, mobile, password: 'Strong-pass-77', terms: true } });
+    const res = await signup(app, { handle, mobile, password: 'Strong-pass-77', terms: true });
     const body = JSON.parse(res.body);
     token = body.token;
     merchantId = body.merchant.id;

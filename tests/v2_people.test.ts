@@ -7,6 +7,7 @@ import { dbService } from '../src/db/database.js';
 import { CryptoUtil } from '../src/utils/crypto.js';
 import { purgeOldNotifications } from '../src/routes/v2/people.routes.js';
 import { events, registerLimitProvider } from '../src/services/events.js';
+import { signup } from './helpers/signup.js';
 
 const d = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 
@@ -41,7 +42,7 @@ describe('People: team + notifications', () => {
     await app.ready();
     registerLimitProvider((mid, key) => (key === 'team' && mid === A?.id ? teamLimit : null));
     const reg = async (h: string, mob: string) => {
-      const r = await req('POST', '/api/v2/auth/register', { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
+      const r = await signup(app, { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
       assert.strictEqual(r.statusCode, 201, r.body);
       return json(r);
     };

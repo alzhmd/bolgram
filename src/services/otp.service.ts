@@ -52,7 +52,7 @@ async function sendViaSmsIr(mobile: string, code: string): Promise<boolean> {
 }
 
 /** Sends a code unless one was sent in the last 2 minutes. `deliver=false` keeps timing identical without sending (unknown numbers). */
-export async function sendOtp(mobile: string, purpose: string, deliver = true): Promise<{ resendIn: number; devCode?: string }> {
+export async function sendOtp(mobile: string, purpose: string, deliver = true, ip?: string): Promise<{ resendIn: number; devCode?: string }> {
   const last = db()
     .prepare(`SELECT created_at, (SELECT count(*) FROM otp_codes WHERE mobile = ? AND purpose = ? AND created_at > ?) AS hour FROM otp_codes WHERE mobile = ? AND purpose = ? ORDER BY created_at DESC LIMIT 1`)
     .get(mobile, purpose, Date.now() - 3600_000, mobile, purpose) as any;
@@ -63,11 +63,17 @@ export async function sendOtp(mobile: string, purpose: string, deliver = true): 
   }
   const code = String(crypto.randomInt(10000, 100000));
   db()
-    .prepare(`INSERT INTO otp_codes (id, mobile, purpose, code_hash, attempts, expires_at, created_at) VALUES (?, ?, ?, ?, 0, ?, ?)`)
-    .run(crypto.randomUUID(), mobile, purpose, hash(mobile, purpose, code), Date.now() + OTP_TTL_SECONDS * 1000, Date.now());
+    .prepare(`INSERT INTO otp_codes (id, mobile, purpose, code_hash, attempts, expires_at, created_at, ip) VALUES (?, ?, ?, ?, 0, ?, ?, ?)`)
+    .run(crypto.randomUUID(), mobile, purpose, hash(mobile, purpose, code), Date.now() + OTP_TTL_SECONDS * 1000, Date.now(), ip ?? null);
   const simulated = deliver ? await sendViaSmsIr(mobile, code) : false;
   const devCode = simulated && process.env.NODE_ENV !== 'production' ? code : undefined;
   return { resendIn: OTP_RESEND_SECONDS, devCode };
+}
+
+/** Codes of one purpose requested from an IP in the last hour (caps SMS spend from a single source). */
+export function otpSentFromIp(ip: string, purpose: string): number {
+  const r = db().prepare(`SELECT count(*) AS n FROM otp_codes WHERE ip = ? AND purpose = ? AND created_at > ?`).get(ip, purpose, Date.now() - 3600_000) as any;
+  return Number(r?.n ?? 0);
 }
 
 export function verifyOtp(mobile: string, purpose: string, code: string): boolean {

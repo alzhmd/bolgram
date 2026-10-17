@@ -6,6 +6,7 @@ import { dbService } from '../src/db/database.js';
 import { CryptoUtil } from '../src/utils/crypto.js';
 import { addCard } from '../src/services/store.service.js';
 import { saveSettings } from '../src/services/billing.service.js';
+import { signup } from './helpers/signup.js';
 
 const d = () => (dbService as any).db as import('node:sqlite').DatabaseSync;
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
@@ -37,7 +38,7 @@ describe('Owner admin API', () => {
     await app.register(v2Routes);
     await app.ready();
     const reg = async (h: string, mob: string) => {
-      const r = await req('POST', '/api/v2/auth/register', { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true }, {});
+      const r = await signup(app, { handle: h, mobile: mob, password: 'Strong-pass-77', terms: true });
       assert.strictEqual(r.statusCode, 201, r.body);
       return json(r);
     };

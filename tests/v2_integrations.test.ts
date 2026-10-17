@@ -6,6 +6,7 @@ import zlib from 'node:zlib';
 import os from 'node:os';
 import path from 'node:path';
 import Fastify, { FastifyInstance } from 'fastify';
+import { signup } from './helpers/signup.js';
 
 process.env.UPLOAD_DIR = path.join(process.env.TMPDIR || os.tmpdir(), `bolgram-int-uploads-${process.pid}`);
 const { v2Routes } = await import('../src/routes/v2.routes.js');
@@ -53,7 +54,7 @@ describe('Integrations: webhooks, API keys, plugins, settings, checkout brand', 
     await app.register(paymentRoutes);
     await app.ready();
     mobile = `0913${String(Date.now() % 1e7).padStart(7, '0')}`;
-    const reg = await app.inject({ method: 'POST', url: '/api/v2/auth/register', payload: { handle, mobile, password: PW, terms: true } });
+    const reg = await signup(app, { handle, mobile, password: PW, terms: true });
     assert.strictEqual(reg.statusCode, 201, reg.body);
     token = JSON.parse(reg.body).token;
     mid = JSON.parse(reg.body).merchant.id;

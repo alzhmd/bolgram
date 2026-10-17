@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import Fastify, { FastifyInstance } from 'fastify';
 import { v2Routes } from '../src/routes/v2.routes.js';
 import { dbService } from '../src/db/database.js';
+import { signup } from './helpers/signup.js';
 
 describe('Panel auth v2 (handle, mobile, lockout, SMS code reset)', () => {
   let app: FastifyInstance;
@@ -32,7 +33,7 @@ describe('Panel auth v2 (handle, mobile, lockout, SMS code reset)', () => {
     const weak = await post('/api/v2/auth/register', { handle, mobile, password: '12345678', terms: true });
     assert.strictEqual(weak.statusCode, 422);
     const faMobile = mobile.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[+d]).replace(/^۰/, '+۹۸ ');
-    const res = await post('/api/v2/auth/register', { handle: handle.toUpperCase(), mobile: faMobile, email: '  Test@Example.COM ', password: 'Strong-pass-77', terms: true });
+    const res = await signup(app, { handle: handle.toUpperCase(), mobile: faMobile, email: '  Test@Example.COM ', password: 'Strong-pass-77', terms: true });
     assert.strictEqual(res.statusCode, 201, res.body);
     const body = JSON.parse(res.body);
     assert.strictEqual(body.merchant.handle, handle);
@@ -44,6 +45,36 @@ describe('Panel auth v2 (handle, mobile, lockout, SMS code reset)', () => {
     assert.ok(taken.suggestions.length > 0);
     const dupMobile = await post('/api/v2/auth/register', { handle: handle + 'x', mobile, password: 'Strong-pass-77', terms: true });
     assert.strictEqual(dupMobile.statusCode, 409);
+  });
+
+  test('sign-up needs the texted code: nothing exists before it, wrong code fails, one IP is capped', async () => {
+    const rnd = () => Math.floor(Math.random() * 254) + 1;
+    const addr = () => `10.${rnd()}.${rnd()}.${rnd()}`;
+    const h = `code${Date.now() % 1e8}`;
+    const form = { handle: h, mobile: `0935${String(Date.now() % 1e7).padStart(7, '0')}`, password: 'Strong-pass-77', terms: true };
+    const from = addr();
+    const at = (payload: any, remoteAddress = from) => app.inject({ method: 'POST', url: '/api/v2/auth/register', payload, remoteAddress });
+    const first = await at(form);
+    assert.strictEqual(first.statusCode, 202, first.body);
+    const sent = JSON.parse(first.body);
+    assert.strictEqual(sent.otp_required, true);
+    assert.strictEqual(sent.token, undefined);
+    assert.strictEqual(JSON.parse((await app.inject({ method: 'GET', url: `/api/v2/auth/handle-check?handle=${h}` })).body).status, 'free');
+    assert.strictEqual((await at(form)).statusCode, 429);
+    const wrong = String((Number(sent.dev_code) + 1) % 100000).padStart(5, '0');
+    const bad = await at({ ...form, code: wrong });
+    assert.strictEqual(bad.statusCode, 400);
+    assert.strictEqual(JSON.parse(bad.body).error, 'otp_invalid');
+    const ok = await at({ ...form, code: sent.dev_code });
+    assert.strictEqual(ok.statusCode, 201, ok.body);
+    assert.strictEqual(JSON.parse(ok.body).merchant.mobile_verified, true);
+    assert.strictEqual((await at({ ...form, code: sent.dev_code })).statusCode, 409);
+
+    const shared = addr();
+    const stamp = String(Date.now() % 1e5).padStart(5, '0');
+    const codes = [];
+    for (let i = 0; i < 11; i++) codes.push((await at({ ...form, handle: `${h}c${i}`, mobile: `0936${stamp}${String(i).padStart(2, '0')}` }, shared)).statusCode);
+    assert.deepStrictEqual(codes, [...Array(10).fill(202), 429]);
   });
 
   test('login: generic error, then lockout with retry_after', async () => {
