@@ -37,3 +37,7 @@ Thumbs.db
 
 # Temporary agent worktrees
 .claude/worktrees/
+
+# Python bytecode
+__pycache__/
+*.pyc
